@@ -1,0 +1,662 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Outfit:wght@400;500;600&display=swap");
+
+:root {
+  --ink: #1c241c;
+  --muted: #5d6a5d;
+  --paper: #f3efe6;
+  --panel: rgba(255, 252, 246, 0.88);
+  --line: rgba(28, 36, 28, 0.12);
+  --leaf: #2f5d3a;
+  --leaf-deep: #1f3f28;
+  --ember: #c45c26;
+  --ember-soft: #e8a06a;
+  --shadow: 0 18px 50px rgba(28, 36, 28, 0.14);
+  --radius: 18px;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Outfit", system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(232, 160, 106, 0.28), transparent 34%),
+    radial-gradient(circle at 85% 15%, rgba(47, 93, 58, 0.18), transparent 28%),
+    linear-gradient(160deg, #efe8d8 0%, #d9e2d4 42%, #c9d4c4 100%);
+  background-attachment: fixed;
+}
+
+body.is-gated {
+  overflow: hidden;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(14px);
+  background: rgba(243, 239, 230, 0.72);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-header__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.9rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.site-nav a,
+.linkish {
+  color: var(--muted);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.site-nav a.is-active,
+.site-nav a:hover,
+.linkish:hover {
+  color: var(--leaf-deep);
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+.hero {
+  position: relative;
+  min-height: min(72vh, 640px);
+  margin: -1.5rem -1.25rem 2rem;
+  display: grid;
+  align-items: end;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hero__media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(180deg, rgba(28, 36, 28, 0.15), rgba(28, 36, 28, 0.72)),
+    url("../data/images/recipes/chocolate-cake.svg") center/cover no-repeat;
+  transform: scale(1.04);
+  animation: heroDrift 18s ease-in-out infinite alternate;
+}
+
+.hero__content {
+  padding: 2.5rem 1.25rem 2.75rem;
+  color: #f7f3ea;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.hero__eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin: 0 0 0.75rem;
+}
+
+.hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 8vw, 5.5rem);
+  line-height: 0.95;
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.03em;
+  animation: riseIn 0.8s ease both;
+}
+
+.hero__copy {
+  max-width: 28rem;
+  margin: 0 0 1.25rem;
+  font-size: 1.05rem;
+  opacity: 0.92;
+  animation: riseIn 0.9s ease 0.08s both;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip {
+  border: 1px solid var(--line);
+  background: rgba(255, 252, 246, 0.7);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.chip.is-active,
+.chip:hover {
+  background: var(--leaf);
+  border-color: var(--leaf);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.15rem;
+}
+
+.recipe-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  animation: riseIn 0.7s ease both;
+}
+
+.recipe-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 55px rgba(28, 36, 28, 0.18);
+}
+
+.recipe-card__media {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  width: 100%;
+  background: #d7cbb8;
+}
+
+.recipe-card__body {
+  padding: 1rem 1.05rem 1.15rem;
+}
+
+.recipe-card__category {
+  color: var(--ember);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.35rem;
+}
+
+.recipe-card__title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  margin: 0;
+}
+
+.recipe-hero {
+  position: relative;
+  min-height: 46vh;
+  margin: -1.5rem -1.25rem 1.75rem;
+  display: grid;
+  align-items: end;
+  overflow: hidden;
+}
+
+.recipe-hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+
+.recipe-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(28, 36, 28, 0.1), rgba(28, 36, 28, 0.78));
+}
+
+.recipe-hero__content {
+  color: #f7f3ea;
+  padding: 2rem 1.25rem;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.recipe-hero__content h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  margin: 0.2rem 0 0;
+}
+
+.group {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+  animation: riseIn 0.65s ease both;
+}
+
+.group h2 {
+  font-family: var(--font-display);
+  margin: 0 0 1rem;
+  font-size: 1.6rem;
+}
+
+.group__columns {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 800px) {
+  .group__columns {
+    grid-template-columns: 1fr 1.1fr;
+  }
+}
+
+.ingredient-list,
+.step-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ingredient-item {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.ingredient-item img {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #e7dfd0;
+}
+
+.step-list {
+  counter-reset: step;
+}
+
+.step-list li {
+  position: relative;
+  padding-left: 2.4rem;
+  line-height: 1.5;
+}
+
+.step-list li::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--leaf);
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+}
+
+.panel + .panel {
+  margin-top: 1rem;
+}
+
+.panel h1,
+.panel h2 {
+  font-family: var(--font-display);
+  margin-top: 0;
+}
+
+.stack {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.field span {
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.7rem 0.85rem;
+  background: #fffdf8;
+}
+
+.field textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.row {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 700px) {
+  .row--2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .row--3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.7rem 1.15rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn--primary {
+  background: var(--leaf);
+  color: #fff;
+}
+
+.btn--primary:hover {
+  background: var(--leaf-deep);
+}
+
+.btn--ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.btn--danger {
+  background: #8f2f2f;
+  color: #fff;
+}
+
+.btn--small {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.form-error,
+.status {
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+}
+
+.form-error,
+.status--error {
+  background: #f8e4e0;
+  color: #7a2e22;
+}
+
+.status--ok {
+  background: #e2f0e4;
+  color: #1f4a2a;
+}
+
+.status--info {
+  background: #ebe7dc;
+  color: var(--muted);
+}
+
+.group-editor {
+  border: 1px dashed rgba(47, 93, 58, 0.35);
+  border-radius: 16px;
+  padding: 1rem;
+  background: rgba(255, 252, 246, 0.55);
+  display: grid;
+  gap: 0.85rem;
+}
+
+.line-row {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 800px) {
+  .line-row.ingredients {
+    grid-template-columns: 1.4fr 0.9fr 0.7fr auto;
+  }
+  .line-row.steps {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.85rem;
+}
+
+.catalog-card {
+  background: #fffdf8;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.catalog-card img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: #e7dfd0;
+}
+
+.catalog-card__body {
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.gate {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background:
+    linear-gradient(160deg, rgba(31, 63, 40, 0.72), rgba(28, 36, 28, 0.78)),
+    url("../data/images/recipes/chocolate-cake.svg") center/cover;
+}
+
+.gate__panel {
+  width: min(100%, 440px);
+  background: rgba(255, 252, 246, 0.95);
+  border-radius: 24px;
+  padding: 1.75rem;
+  box-shadow: var(--shadow);
+  animation: riseIn 0.55s ease both;
+}
+
+.gate__eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.75rem;
+  color: var(--ember);
+}
+
+.gate__title {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 8vw, 3.4rem);
+  margin: 0.35rem 0 0.5rem;
+  letter-spacing: -0.03em;
+}
+
+.gate__copy {
+  margin: 0 0 1.2rem;
+  color: var(--muted);
+}
+
+.gate__actions {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.gate__cook {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.tabs button.is-active {
+  background: var(--leaf);
+  color: #fff;
+  border-color: var(--leaf);
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroDrift {
+  from {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.08) translate3d(-1.5%, -1%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

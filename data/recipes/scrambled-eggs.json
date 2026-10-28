@@ -1,0 +1,25 @@
+{
+  "id": "scrambled-eggs",
+  "title": "Soft Scrambled Eggs",
+  "categoryId": "breakfast",
+  "image": "data/images/recipes/scrambled-eggs.svg",
+  "groups": [
+    {
+      "id": "eggs",
+      "name": "Eggs",
+      "ingredients": [
+        { "ingredientId": "eggs", "measureId": "piece", "quantity": 3 },
+        { "ingredientId": "butter", "measureId": "tbsp", "quantity": 1 },
+        { "ingredientId": "milk", "measureId": "tbsp", "quantity": 1 },
+        { "ingredientId": "salt", "measureId": "pinch", "quantity": 1 }
+      ],
+      "steps": [
+        { "description": "Crack eggs into a bowl with milk and a pinch of salt. Beat lightly." },
+        { "description": "Melt butter in a nonstick pan over low heat." },
+        { "description": "Pour in the eggs. Stir gently and constantly until soft curds form." },
+        { "description": "Take off the heat while still slightly glossy. Serve right away." }
+      ]
+    }
+  ],
+  "updatedAt": "2026-10-28T00:00:00.000Z"
+}

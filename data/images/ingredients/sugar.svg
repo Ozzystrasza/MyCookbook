@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" role="img" aria-label="Sugar">
+  <rect width="240" height="240" fill="#F2E9DC"/>
+  <circle cx="120" cy="120" r="58" fill="#FFFCF7" stroke="#D2C4AE" stroke-width="4"/>
+  <text x="120" y="128" text-anchor="middle" font-family="Georgia, serif" font-size="22" fill="#6B5A3E">Sugar</text>
+</svg>

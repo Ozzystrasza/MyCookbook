@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500" role="img" aria-label="Chocolate Cake">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3D2318"/>
+      <stop offset="100%" stop-color="#7A4A32"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <ellipse cx="400" cy="320" rx="180" ry="40" fill="#2A1710" opacity="0.45"/>
+  <rect x="250" y="210" width="300" height="110" rx="12" fill="#5C3A2E"/>
+  <rect x="250" y="190" width="300" height="40" rx="10" fill="#3E241C"/>
+  <text x="400" y="90" text-anchor="middle" font-family="Georgia, serif" font-size="42" fill="#F3E6D8">Chocolate Cake</text>
+</svg>

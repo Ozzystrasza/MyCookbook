@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500" role="img" aria-label="Scrambled Eggs">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F0C96A"/>
+      <stop offset="100%" stop-color="#D98A3A"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg2)"/>
+  <ellipse cx="400" cy="280" rx="160" ry="90" fill="#F7E7A1" stroke="#E0B84D" stroke-width="6"/>
+  <text x="400" y="90" text-anchor="middle" font-family="Georgia, serif" font-size="40" fill="#4A2F14">Soft Scrambled Eggs</text>
+</svg>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2f5d3a" />
+    <title>Manage · My Cookbook</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <div id="auth-gate"></div>
+    <header class="site-header" data-site-header></header>
+    <main class="page">
+      <section class="panel">
+        <h1>Manage catalogs</h1>
+        <p class="hint">Categories, measures, and reusable ingredients with pictures.</p>
+        <p class="status" data-status hidden></p>
+
+        <div class="tabs" data-tabs>
+          <button type="button" class="btn btn--ghost is-active" data-tab="categories">Categories</button>
+          <button type="button" class="btn btn--ghost" data-tab="measures">Measures</button>
+          <button type="button" class="btn btn--ghost" data-tab="ingredients">Ingredients</button>
+        </div>
+
+        <div data-panel-categories>
+          <form id="category-form" class="stack">
+            <div class="row row--2">
+              <label class="field">
+                <span>Id (optional on create)</span>
+                <input id="category-id" placeholder="desserts" />
+              </label>
+              <label class="field">
+                <span>Name</span>
+                <input id="category-name" required placeholder="Desserts" />
+              </label>
+            </div>
+            <div class="actions">
+              <button type="submit" class="btn btn--primary">Add category</button>
+              <button type="button" class="btn btn--ghost" data-reset-category>Reset</button>
+            </div>
+          </form>
+          <div class="catalog-grid" data-category-list style="margin-top:1rem"></div>
+        </div>
+
+        <div data-panel-measures hidden>
+          <form id="measure-form" class="stack">
+            <div class="row row--3">
+              <label class="field">
+                <span>Id (optional on create)</span>
+                <input id="measure-id" placeholder="tbsp" />
+              </label>
+              <label class="field">
+                <span>Name</span>
+                <input id="measure-name" required placeholder="tablespoon" />
+              </label>
+              <label class="field">
+                <span>Abbreviation</span>
+                <input id="measure-abbrev" placeholder="tbsp" />
+              </label>
+            </div>
+            <div class="actions">
+              <button type="submit" class="btn btn--primary">Add measure</button>
+              <button type="button" class="btn btn--ghost" data-reset-measure>Reset</button>
+            </div>
+          </form>
+          <div class="catalog-grid" data-measure-list style="margin-top:1rem"></div>
+        </div>
+
+        <div data-panel-ingredients hidden>
+          <form id="ingredient-form" class="stack">
+            <div class="row row--2">
+              <label class="field">
+                <span>Id (optional on create)</span>
+                <input id="ingredient-id" placeholder="flour" />
+              </label>
+              <label class="field">
+                <span>Name</span>
+                <input id="ingredient-name" required placeholder="All-purpose flour" />
+              </label>
+            </div>
+            <label class="field">
+              <span>Picture</span>
+              <input id="ingredient-image" type="file" accept="image/*" />
+            </label>
+            <p class="hint" data-ingredient-image-hint></p>
+            <div class="actions">
+              <button type="submit" class="btn btn--primary">Add ingredient</button>
+              <button type="button" class="btn btn--ghost" data-reset-ingredient>Reset</button>
+            </div>
+          </form>
+          <div class="catalog-grid" data-ingredient-list style="margin-top:1rem"></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/github.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/manage.js"></script>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+[
+  {
+    "id": "chocolate-cake",
+    "title": "Chocolate Cake",
+    "categoryId": "desserts",
+    "image": "data/images/recipes/chocolate-cake.svg"
+  },
+  {
+    "id": "scrambled-eggs",
+    "title": "Soft Scrambled Eggs",
+    "categoryId": "breakfast",
+    "image": "data/images/recipes/scrambled-eggs.svg"
+  }
+]

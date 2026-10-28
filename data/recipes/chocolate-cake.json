@@ -1,0 +1,41 @@
+{
+  "id": "chocolate-cake",
+  "title": "Chocolate Cake",
+  "categoryId": "desserts",
+  "image": "data/images/recipes/chocolate-cake.svg",
+  "groups": [
+    {
+      "id": "batter",
+      "name": "Batter",
+      "ingredients": [
+        { "ingredientId": "flour", "measureId": "cup", "quantity": 2 },
+        { "ingredientId": "sugar", "measureId": "cup", "quantity": 1.5 },
+        { "ingredientId": "eggs", "measureId": "piece", "quantity": 3 },
+        { "ingredientId": "butter", "measureId": "g", "quantity": 120 },
+        { "ingredientId": "milk", "measureId": "cup", "quantity": 1 },
+        { "ingredientId": "chocolate", "measureId": "g", "quantity": 100 }
+      ],
+      "steps": [
+        { "description": "Preheat the oven to 180°C (350°F) and grease a round cake pan." },
+        { "description": "Melt the chocolate and butter together, then let cool slightly." },
+        { "description": "Whisk sugar and eggs until pale, then mix in the chocolate butter." },
+        { "description": "Fold in flour and milk until just combined. Pour into the pan." },
+        { "description": "Bake 30–35 minutes until a toothpick comes out clean. Cool before slicing." }
+      ]
+    },
+    {
+      "id": "frosting",
+      "name": "Frosting",
+      "ingredients": [
+        { "ingredientId": "chocolate", "measureId": "g", "quantity": 80 },
+        { "ingredientId": "butter", "measureId": "g", "quantity": 40 },
+        { "ingredientId": "milk", "measureId": "tbsp", "quantity": 2 }
+      ],
+      "steps": [
+        { "description": "Gently melt chocolate and butter with the milk until smooth." },
+        { "description": "Spread over the cooled cake and let set before serving." }
+      ]
+    }
+  ],
+  "updatedAt": "2026-10-28T00:00:00.000Z"
+}

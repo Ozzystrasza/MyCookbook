@@ -1,0 +1,12 @@
+[
+  { "id": "tsp", "name": "teaspoon", "abbrev": "tsp" },
+  { "id": "tbsp", "name": "tablespoon", "abbrev": "tbsp" },
+  { "id": "cup", "name": "cup", "abbrev": "cup" },
+  { "id": "g", "name": "gram", "abbrev": "g" },
+  { "id": "kg", "name": "kilogram", "abbrev": "kg" },
+  { "id": "ml", "name": "milliliter", "abbrev": "ml" },
+  { "id": "l", "name": "liter", "abbrev": "l" },
+  { "id": "piece", "name": "piece", "abbrev": "pc" },
+  { "id": "pinch", "name": "pinch", "abbrev": "pinch" },
+  { "id": "to-taste", "name": "to taste", "abbrev": "to taste" }
+]

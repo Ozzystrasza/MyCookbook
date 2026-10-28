@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2f5d3a" />
+    <title>Edit recipe · My Cookbook</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <div id="auth-gate"></div>
+    <header class="site-header" data-site-header></header>
+    <main class="page">
+      <section class="panel">
+        <h1 id="page-title">New recipe</h1>
+        <p class="hint">Saves directly to your public GitHub repo. Visitors cannot see this page unless they have your token.</p>
+        <p class="status" data-status hidden></p>
+        <form id="recipe-form" class="stack">
+          <div class="row row--2">
+            <label class="field">
+              <span>Title</span>
+              <input id="title" name="title" required />
+            </label>
+            <label class="field">
+              <span>Category</span>
+              <select id="categoryId" name="categoryId" required></select>
+            </label>
+          </div>
+          <label class="field">
+            <span>Recipe image</span>
+            <input id="image" type="file" accept="image/*" />
+          </label>
+          <p class="hint" data-current-image></p>
+
+          <div class="toolbar">
+            <h2 style="margin:0;font-family:var(--font-display)">Groups</h2>
+            <button type="button" class="btn btn--ghost" data-add-group>Add group</button>
+          </div>
+          <div class="stack" data-groups-editor></div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn--primary">Save recipe</button>
+            <button type="button" class="btn btn--danger" data-delete hidden>Delete recipe</button>
+            <a class="btn btn--ghost" href="index.html">Cancel</a>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/github.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/edit-recipe.js"></script>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "My Cookbook",
+  "short_name": "Cookbook",
+  "description": "Personal recipe book",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#d9e2d4",
+  "theme_color": "#2f5d3a",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

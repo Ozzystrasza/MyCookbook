@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" role="img" aria-label="Butter">
+  <rect width="240" height="240" fill="#F6E7B8"/>
+  <rect x="70" y="90" width="100" height="55" rx="8" fill="#F5D76E" stroke="#D4B84A" stroke-width="4"/>
+  <text x="120" y="185" text-anchor="middle" font-family="Georgia, serif" font-size="20" fill="#6B5A3E">Butter</text>
+</svg>

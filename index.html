@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2f5d3a" />
+    <title>My Cookbook</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <div id="auth-gate"></div>
+    <header class="site-header" data-site-header></header>
+    <main class="page">
+      <section class="hero" aria-label="My Cookbook">
+        <div class="hero__media" aria-hidden="true"></div>
+        <div class="hero__content">
+          <p class="hero__eyebrow">Personal recipe book</p>
+          <h1 class="hero__title">My Cookbook</h1>
+          <p class="hero__copy">A quiet place for the dishes you cook again and again.</p>
+          <div class="actions" data-cook-only hidden>
+            <a class="btn btn--primary" href="edit.html">New recipe</a>
+            <a class="btn btn--ghost" href="manage.html">Manage catalogs</a>
+          </div>
+        </div>
+      </section>
+
+      <div class="toolbar">
+        <div class="filters" data-filters></div>
+      </div>
+      <section class="recipe-grid" data-recipe-grid aria-live="polite"></section>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/github.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/home.js"></script>
+  </body>
+</html>

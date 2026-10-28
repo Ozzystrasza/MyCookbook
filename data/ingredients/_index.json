@@ -1,0 +1,37 @@
+[
+  {
+    "id": "flour",
+    "name": "All-purpose flour",
+    "image": "data/images/ingredients/flour.svg"
+  },
+  {
+    "id": "sugar",
+    "name": "Granulated sugar",
+    "image": "data/images/ingredients/sugar.svg"
+  },
+  {
+    "id": "eggs",
+    "name": "Eggs",
+    "image": "data/images/ingredients/eggs.svg"
+  },
+  {
+    "id": "butter",
+    "name": "Butter",
+    "image": "data/images/ingredients/butter.svg"
+  },
+  {
+    "id": "milk",
+    "name": "Milk",
+    "image": "data/images/ingredients/milk.svg"
+  },
+  {
+    "id": "chocolate",
+    "name": "Dark chocolate",
+    "image": "data/images/ingredients/chocolate.svg"
+  },
+  {
+    "id": "salt",
+    "name": "Salt",
+    "image": "data/images/ingredients/salt.svg"
+  }
+]

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="My Cookbook">
+  <rect width="512" height="512" rx="96" fill="#2f5d3a"/>
+  <path d="M146 120h84c48 0 78 28 78 72s-30 72-78 72h-36v128h-48V120zm48 96h28c20 0 32-10 32-24s-12-24-32-24h-28v48z" fill="#f3efe6"/>
+  <path d="M320 120c62 0 106 42 106 118s-44 118-106 118h-40V120h40zm-2 188c36 0 58-26 58-70s-22-70-58-70h-8v140h8z" fill="#f3efe6"/>
+</svg>

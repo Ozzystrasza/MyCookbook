@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" role="img" aria-label="Eggs">
+  <rect width="240" height="240" fill="#F3E6C8"/>
+  <ellipse cx="120" cy="125" rx="42" ry="54" fill="#FFF8E7" stroke="#E0C98A" stroke-width="4"/>
+  <text x="120" y="200" text-anchor="middle" font-family="Georgia, serif" font-size="20" fill="#6B5A3E">Eggs</text>
+</svg>
