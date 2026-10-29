@@ -60,10 +60,10 @@
         <div class="gate__panel">
           <p class="gate__eyebrow">Welcome</p>
           <h1 id="gate-title" class="gate__title">My Cookbook</h1>
-          <p class="gate__copy">Choose how you want to open the book.</p>
-          <div class="gate__actions">
-            <button type="button" class="btn btn--primary" data-gate="visitor">Just browsing</button>
-            <button type="button" class="btn btn--ghost" data-gate="cook-toggle">I'm the cook</button>
+          <p class="gate__copy" data-gate-copy>Choose how you want to open the book.</p>
+          <div class="gate__actions" data-gate-actions>
+            <button type="button" class="btn btn--primary" data-gate="cook">Open Book</button>
+            <button type="button" class="btn btn--ghost" data-gate="visitor">Peek Inside</button>
           </div>
           <form class="gate__cook" data-gate-cook hidden>
             <label class="field">
@@ -73,13 +73,31 @@
             <p class="hint">Use a fine-scoped token with Contents read/write on the MyCookbook repo only. Stored only in this browser.</p>
             <p class="form-error" data-gate-error hidden></p>
             <button type="submit" class="btn btn--primary">Unlock editor</button>
+            <button type="button" class="linkish" data-gate-back>Back</button>
           </form>
         </div>
       </div>
     `;
 
     const cookForm = container.querySelector("[data-gate-cook]");
+    const actions = container.querySelector("[data-gate-actions]");
+    const copy = container.querySelector("[data-gate-copy]");
     const errorEl = container.querySelector("[data-gate-error]");
+
+    function showChoiceStep() {
+      cookForm.hidden = true;
+      cookForm.reset();
+      errorEl.hidden = true;
+      actions.hidden = false;
+      copy.hidden = false;
+    }
+
+    function showTokenStep() {
+      actions.hidden = true;
+      copy.hidden = true;
+      cookForm.hidden = false;
+      cookForm.querySelector('input[name="token"]').focus();
+    }
 
     container.querySelector('[data-gate="visitor"]').addEventListener("click", () => {
       setVisitor();
@@ -88,9 +106,8 @@
       window.dispatchEvent(new CustomEvent("cookbook:ready"));
     });
 
-    container.querySelector('[data-gate="cook-toggle"]').addEventListener("click", () => {
-      cookForm.hidden = !cookForm.hidden;
-    });
+    container.querySelector('[data-gate="cook"]').addEventListener("click", showTokenStep);
+    container.querySelector("[data-gate-back]").addEventListener("click", showChoiceStep);
 
     cookForm.addEventListener("submit", async (event) => {
       event.preventDefault();

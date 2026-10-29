@@ -606,9 +606,13 @@ textarea {
 }
 
 .gate__cook {
-  margin-top: 1rem;
+  margin-top: 0.35rem;
   display: grid;
   gap: 0.75rem;
+}
+
+.gate__cook .linkish {
+  justify-self: start;
 }
 
 .empty {
