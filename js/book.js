@@ -570,7 +570,9 @@
   }
 
   async function start({ recipes, categories }) {
-    state.recipes = recipes || [];
+    state.recipes = (recipes || []).slice().sort((a, b) =>
+      String(a.title || "").localeCompare(String(b.title || ""), undefined, { sensitivity: "base" })
+    );
     state.categories = categories || [];
     try {
       const saved = localStorage.getItem(VIEW_KEY);

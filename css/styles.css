@@ -681,16 +681,12 @@ body.is-reading .site-header {
   border: 1px solid rgba(28, 36, 28, 0.16);
   border-left: 0;
   background: #c4b59a;
-  transition: opacity 0.22s ease, transform 0.22s ease;
+  transition: opacity 0.22s ease;
 }
 
-.book__spread.is-flipping {
-  opacity: 0.55;
-  transform: translateX(-8px);
-}
-
+.book__spread.is-flipping,
 .book__spread.is-flipping-forward {
-  transform: translateX(8px);
+  opacity: 0.55;
 }
 
 .book__spine {
