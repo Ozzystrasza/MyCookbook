@@ -571,8 +571,12 @@ textarea {
     url("../data/images/recipes/chocolate-cake.svg") center/cover;
 }
 
+.gate [hidden] {
+  display: none !important;
+}
+
 .gate__panel {
-  width: min(100%, 440px);
+  width: min(100%, 360px);
   background: rgba(255, 252, 246, 0.95);
   border-radius: 24px;
   padding: 1.75rem;
@@ -580,24 +584,17 @@ textarea {
   animation: riseIn 0.55s ease both;
 }
 
-.gate__eyebrow {
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 0.75rem;
-  color: var(--ember);
-}
-
 .gate__title {
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 8vw, 3.4rem);
-  margin: 0.35rem 0 0.5rem;
+  font-size: clamp(2.2rem, 7vw, 3rem);
+  margin: 0 0 1.25rem;
   letter-spacing: -0.03em;
+  text-align: center;
 }
 
-.gate__copy {
-  margin: 0 0 1.2rem;
-  color: var(--muted);
+.gate__title--sm {
+  font-size: clamp(1.6rem, 5vw, 2rem);
+  margin-bottom: 1rem;
 }
 
 .gate__actions {
@@ -606,7 +603,6 @@ textarea {
 }
 
 .gate__cook {
-  margin-top: 0.35rem;
   display: grid;
   gap: 0.75rem;
 }

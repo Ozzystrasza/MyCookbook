@@ -57,45 +57,46 @@
   function renderGate(container) {
     container.innerHTML = `
       <div class="gate" role="dialog" aria-labelledby="gate-title">
-        <div class="gate__panel">
-          <p class="gate__eyebrow">Welcome</p>
+        <div class="gate__panel" data-gate-step="choice">
           <h1 id="gate-title" class="gate__title">My Cookbook</h1>
-          <p class="gate__copy" data-gate-copy>Choose how you want to open the book.</p>
-          <div class="gate__actions" data-gate-actions>
+          <div class="gate__actions">
             <button type="button" class="btn btn--primary" data-gate="cook">Open Book</button>
             <button type="button" class="btn btn--ghost" data-gate="visitor">Peek Inside</button>
           </div>
-          <form class="gate__cook" data-gate-cook hidden>
+        </div>
+        <div class="gate__panel" data-gate-step="token" hidden>
+          <h1 id="gate-token-title" class="gate__title gate__title--sm">Open Book</h1>
+          <form class="gate__cook" data-gate-cook>
             <label class="field">
               <span>GitHub personal access token</span>
               <input type="password" name="token" autocomplete="off" placeholder="ghp_…" required />
             </label>
             <p class="hint">Use a fine-scoped token with Contents read/write on the MyCookbook repo only. Stored only in this browser.</p>
             <p class="form-error" data-gate-error hidden></p>
-            <button type="submit" class="btn btn--primary">Unlock editor</button>
+            <button type="submit" class="btn btn--primary">Open</button>
             <button type="button" class="linkish" data-gate-back>Back</button>
           </form>
         </div>
       </div>
     `;
 
+    const choiceStep = container.querySelector('[data-gate-step="choice"]');
+    const tokenStep = container.querySelector('[data-gate-step="token"]');
     const cookForm = container.querySelector("[data-gate-cook]");
-    const actions = container.querySelector("[data-gate-actions]");
-    const copy = container.querySelector("[data-gate-copy]");
     const errorEl = container.querySelector("[data-gate-error]");
 
     function showChoiceStep() {
-      cookForm.hidden = true;
       cookForm.reset();
       errorEl.hidden = true;
-      actions.hidden = false;
-      copy.hidden = false;
+      tokenStep.hidden = true;
+      choiceStep.hidden = false;
+      container.querySelector(".gate").setAttribute("aria-labelledby", "gate-title");
     }
 
     function showTokenStep() {
-      actions.hidden = true;
-      copy.hidden = true;
-      cookForm.hidden = false;
+      choiceStep.hidden = true;
+      tokenStep.hidden = false;
+      container.querySelector(".gate").setAttribute("aria-labelledby", "gate-token-title");
       cookForm.querySelector('input[name="token"]').focus();
     }
 
@@ -126,7 +127,7 @@
         errorEl.hidden = false;
       } finally {
         submit.disabled = false;
-        submit.textContent = "Unlock editor";
+        submit.textContent = "Open";
       }
     });
   }
