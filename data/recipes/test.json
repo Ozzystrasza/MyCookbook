@@ -1,0 +1,15 @@
+{
+  "id": "test",
+  "title": "test",
+  "categoryId": "desserts",
+  "image": "",
+  "groups": [
+    {
+      "id": "aaaa",
+      "name": "aaaa",
+      "ingredients": [],
+      "steps": []
+    }
+  ],
+  "updatedAt": "2026-10-29T19:07:03.994Z"
+}
