@@ -113,60 +113,6 @@ textarea {
   padding: 1.5rem 1.25rem 4rem;
 }
 
-.hero {
-  position: relative;
-  min-height: min(72vh, 640px);
-  margin: -1.5rem -1.25rem 2rem;
-  display: grid;
-  align-items: end;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.hero__media {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  background:
-    linear-gradient(180deg, rgba(28, 36, 28, 0.15), rgba(28, 36, 28, 0.72)),
-    url("../data/images/recipes/chocolate-cake.svg") center/cover no-repeat;
-  transform: scale(1.04);
-  animation: heroDrift 18s ease-in-out infinite alternate;
-}
-
-.hero__content {
-  padding: 2.5rem 1.25rem 2.75rem;
-  color: #f7f3ea;
-  max-width: 1100px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.hero__eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  font-size: 0.75rem;
-  opacity: 0.8;
-  margin: 0 0 0.75rem;
-}
-
-.hero__title {
-  font-family: var(--font-display);
-  font-size: clamp(3rem, 8vw, 5.5rem);
-  line-height: 0.95;
-  margin: 0 0 0.75rem;
-  letter-spacing: -0.03em;
-  animation: riseIn 0.8s ease both;
-}
-
-.hero__copy {
-  max-width: 28rem;
-  margin: 0 0 1.25rem;
-  font-size: 1.05rem;
-  opacity: 0.92;
-  animation: riseIn 0.9s ease 0.08s both;
-}
-
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -246,46 +192,6 @@ textarea {
   font-family: var(--font-display);
   font-size: 1.35rem;
   margin: 0;
-}
-
-.recipe-hero {
-  position: relative;
-  min-height: 46vh;
-  margin: -1.5rem -1.25rem 1.75rem;
-  display: grid;
-  align-items: end;
-  overflow: hidden;
-}
-
-.recipe-hero img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: -2;
-}
-
-.recipe-hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(180deg, rgba(28, 36, 28, 0.1), rgba(28, 36, 28, 0.78));
-}
-
-.recipe-hero__content {
-  color: #f7f3ea;
-  padding: 2rem 1.25rem;
-  max-width: 1100px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.recipe-hero__content h1 {
-  font-family: var(--font-display);
-  font-size: clamp(2.4rem, 6vw, 4rem);
-  margin: 0.2rem 0 0;
 }
 
 .group {
@@ -568,7 +474,7 @@ textarea {
   padding: 1.25rem;
   background:
     linear-gradient(160deg, rgba(31, 63, 40, 0.72), rgba(28, 36, 28, 0.78)),
-    url("../data/images/recipes/chocolate-cake.svg") center/cover;
+    url("../data/images/gate/closed-cookbook.svg") center/cover;
 }
 
 .gate [hidden] {
@@ -658,15 +564,6 @@ textarea {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes heroDrift {
-  from {
-    transform: scale(1.04) translate3d(0, 0, 0);
-  }
-  to {
-    transform: scale(1.08) translate3d(-1.5%, -1%, 0);
   }
 }
 
