@@ -576,12 +576,34 @@ textarea {
 }
 
 .gate__panel {
+  position: relative;
   width: min(100%, 360px);
   background: rgba(255, 252, 246, 0.95);
   border-radius: 24px;
   padding: 1.75rem;
   box-shadow: var(--shadow);
   animation: riseIn 0.55s ease both;
+}
+
+.gate__back {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.gate__back:hover {
+  background: rgba(31, 63, 40, 0.08);
+  color: var(--leaf-deep);
 }
 
 .gate__title {
@@ -594,7 +616,7 @@ textarea {
 
 .gate__title--sm {
   font-size: clamp(1.6rem, 5vw, 2rem);
-  margin-bottom: 1rem;
+  margin: 0.25rem 1.75rem 1rem;
 }
 
 .gate__actions {
@@ -605,10 +627,6 @@ textarea {
 .gate__cook {
   display: grid;
   gap: 0.75rem;
-}
-
-.gate__cook .linkish {
-  justify-self: start;
 }
 
 .empty {

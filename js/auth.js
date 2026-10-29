@@ -65,16 +65,25 @@
           </div>
         </div>
         <div class="gate__panel" data-gate-step="token" hidden>
+          <button type="button" class="gate__back" data-gate-back aria-label="Back">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M12.5 4.5L7 10l5.5 5.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
           <h1 id="gate-token-title" class="gate__title gate__title--sm">Open Book</h1>
           <form class="gate__cook" data-gate-cook>
-            <label class="field">
-              <span>GitHub personal access token</span>
-              <input type="password" name="token" autocomplete="off" placeholder="ghp_…" required />
-            </label>
-            <p class="hint">Use a fine-scoped token with Contents read/write on the MyCookbook repo only. Stored only in this browser.</p>
+            <div class="field">
+              <input
+                type="password"
+                name="token"
+                autocomplete="off"
+                placeholder="Password"
+                aria-label="Password"
+                required
+              />
+            </div>
             <p class="form-error" data-gate-error hidden></p>
             <button type="submit" class="btn btn--primary">Open</button>
-            <button type="button" class="linkish" data-gate-back>Back</button>
           </form>
         </div>
       </div>
