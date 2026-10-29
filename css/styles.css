@@ -491,10 +491,8 @@ textarea {
   animation: riseIn 0.55s ease both;
 }
 
+.icon-btn,
 .gate__back {
-  position: absolute;
-  top: 0.85rem;
-  left: 0.85rem;
   display: grid;
   place-items: center;
   width: 2.25rem;
@@ -507,9 +505,16 @@ textarea {
   cursor: pointer;
 }
 
+.icon-btn:hover,
 .gate__back:hover {
   background: rgba(31, 63, 40, 0.08);
   color: var(--leaf-deep);
+}
+
+.gate__back {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
 }
 
 .gate__title {
@@ -574,8 +579,7 @@ body.is-reading .site-header {
 
 .page--book {
   max-width: 1200px;
-  padding-top: 1rem;
-  padding-bottom: 2rem;
+  padding: 1rem 2.75rem 2rem;
 }
 
 .book {
@@ -636,37 +640,27 @@ body.is-reading .site-header {
 
 .book__stage {
   position: relative;
+  perspective: 1800px;
+  overflow: visible;
 }
 
 .book__nav {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 2.75rem;
-  height: 2.75rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: rgba(255, 252, 246, 0.9);
-  color: var(--ink);
-  font-size: 1.6rem;
-  line-height: 1;
-  cursor: pointer;
-  z-index: 2;
-  opacity: 0.92;
+  z-index: 5;
+  background: rgba(255, 252, 246, 0.88);
+  box-shadow: 0 2px 10px rgba(28, 36, 28, 0.08);
 }
 
 .book__nav--prev {
-  left: 0.35rem;
+  left: -2.35rem;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .book__nav--next {
-  right: 0.35rem;
-}
-
-.book__nav:hover {
-  background: #fff;
-  color: var(--leaf-deep);
-  opacity: 1;
+  right: -2.35rem;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .book__nav[hidden] {
@@ -675,27 +669,26 @@ body.is-reading .site-header {
 
 .book__spread {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 2.35rem 10px 1fr;
   min-height: min(70vh, 640px);
   border-radius: 18px;
   overflow: hidden;
   box-shadow: var(--shadow);
   border: 1px solid rgba(28, 36, 28, 0.16);
   background: #c4b59a;
-  transition: opacity 0.22s ease, transform 0.22s ease;
-}
-
-.book__spread.is-flipping {
-  opacity: 0.55;
-  transform: translateX(-8px);
-}
-
-.book__spread.is-flipping-forward {
-  transform: translateX(8px);
+  transform-style: preserve-3d;
 }
 
 .book__spine {
-  display: none;
+  display: block;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(28, 36, 28, 0.18),
+      rgba(255, 252, 246, 0.35) 45%,
+      rgba(28, 36, 28, 0.22)
+    );
+  box-shadow: inset 0 0 12px rgba(28, 36, 28, 0.18);
 }
 
 .book__page {
@@ -703,6 +696,7 @@ body.is-reading .site-header {
   min-height: min(70vh, 640px);
   padding: 1.15rem 1.1rem 1.35rem;
   overflow: hidden;
+  transform-origin: left center;
   background:
     linear-gradient(90deg, rgba(28, 36, 28, 0.04), transparent 12px),
     repeating-linear-gradient(
@@ -712,10 +706,21 @@ body.is-reading .site-header {
     ),
     linear-gradient(180deg, #f7f2e6 0%, #efe6d4 100%);
   color: var(--ink);
+  backface-visibility: hidden;
+}
+
+.book__page--left {
+  padding: 0.75rem 0.35rem;
+  border-radius: 14px 0 0 14px;
+  background:
+    linear-gradient(270deg, rgba(28, 36, 28, 0.08), transparent 40%),
+    linear-gradient(180deg, #f3ebe0 0%, #e8dfd0 100%);
 }
 
 .book__page--right {
-  display: none;
+  display: block;
+  border-radius: 0 16px 16px 0;
+  transform-origin: left center;
 }
 
 .book__page.is-scrollable {
@@ -727,6 +732,37 @@ body.is-reading .site-header {
   background:
     linear-gradient(90deg, rgba(28, 36, 28, 0.03), transparent 12px),
     linear-gradient(180deg, #f3ebe0 0%, #e8dfd0 100%);
+}
+
+.book__spread.is-flipping-next .book__page--right.is-turning {
+  z-index: 3;
+  animation: pageTurnNext 0.38s ease forwards;
+  box-shadow: -8px 0 24px rgba(28, 36, 28, 0.18);
+}
+
+.book__spread.is-flipping-prev .book__page--left.is-turning {
+  z-index: 3;
+  transform-origin: right center;
+  animation: pageTurnPrev 0.38s ease forwards;
+  box-shadow: 8px 0 24px rgba(28, 36, 28, 0.18);
+}
+
+@keyframes pageTurnNext {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(-85deg);
+  }
+}
+
+@keyframes pageTurnPrev {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(85deg);
+  }
 }
 
 .book-preview {
@@ -891,22 +927,58 @@ body.is-reading .site-header {
   pointer-events: none;
 }
 
+@media (max-width: 799px) {
+  .page--book {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .book__nav--prev,
+  .book__nav--next {
+    top: auto;
+    bottom: 14%;
+    transform: none;
+  }
+
+  .book__nav--prev {
+    left: 0.55rem;
+  }
+
+  .book__nav--next {
+    right: 0.55rem;
+  }
+
+  .book__spread.is-flipping-prev .book__page--left.is-turning {
+    /* On phone the left leaf is only a peek; turn the active right page instead */
+    animation: none;
+  }
+
+  .book__spread.is-flipping-prev .book__page--right.is-turning,
+  .book__spread.is-flipping-next .book__page--right.is-turning {
+    z-index: 3;
+    transform-origin: left center;
+    animation: pageTurnNext 0.38s ease forwards;
+    box-shadow: -8px 0 24px rgba(28, 36, 28, 0.18);
+  }
+
+  .book__spread.is-flipping-prev .book__page--right.is-turning {
+    animation: pageTurnPrevFromRight 0.38s ease forwards;
+  }
+}
+
+@keyframes pageTurnPrevFromRight {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(55deg);
+  }
+}
+
 @media (min-width: 800px) {
   .book__spread {
     grid-template-columns: 1fr 14px 1fr;
     min-height: min(72vh, 680px);
-  }
-
-  .book__spine {
-    display: block;
-    background:
-      linear-gradient(
-        90deg,
-        rgba(28, 36, 28, 0.18),
-        rgba(255, 252, 246, 0.35) 45%,
-        rgba(28, 36, 28, 0.22)
-      );
-    box-shadow: inset 0 0 12px rgba(28, 36, 28, 0.18);
   }
 
   .book__page {
@@ -924,10 +996,10 @@ body.is-reading .site-header {
       ),
       linear-gradient(180deg, #f7f2e6 0%, #efe6d4 100%);
     border-radius: 16px 0 0 16px;
+    transform-origin: right center;
   }
 
   .book__page--right {
-    display: block;
     background:
       linear-gradient(270deg, rgba(28, 36, 28, 0.05), transparent 18px),
       repeating-linear-gradient(
@@ -937,6 +1009,7 @@ body.is-reading .site-header {
       ),
       linear-gradient(180deg, #f7f2e6 0%, #efe6d4 100%);
     border-radius: 0 16px 16px 0;
+    transform-origin: left center;
   }
 
   .book__page.is-scrollable {

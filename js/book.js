@@ -1,6 +1,8 @@
 (function () {
   const VIEW_KEY = "mycookbook_view_mode";
   const DESKTOP_MQ = "(min-width: 800px)";
+  const FLIP_MS = 380;
+  const BLANK_PAGE = `<div class="book-read book-read--blank" aria-hidden="true"></div>`;
 
   const state = {
     recipes: [],
@@ -15,6 +17,7 @@
     readingPages: [],
     listPages: [],
     readingRecipe: null,
+    flipping: false,
   };
 
   let flipTimer = null;
@@ -48,26 +51,38 @@
     return isDesktop() ? 2 : 1;
   }
 
+  function padEvenPages(pages) {
+    const list = pages.slice();
+    if (!list.length) list.push(BLANK_PAGE);
+    if (list.length % 2 === 1) list.push(BLANK_PAGE);
+    return list;
+  }
+
   function clampBrowseIndex() {
     const step = pagesPerSpread();
     if (state.mode === "reading") {
+      if (!isDesktop()) {
+        state.readingPageIndex = 0;
+        return;
+      }
       const max = Math.max(0, state.readingPages.length - step);
-      state.readingPageIndex = Math.min(Math.max(0, state.readingPageIndex), max);
-      state.readingPageIndex = state.readingPageIndex - (state.readingPageIndex % step);
+      let idx = Math.min(Math.max(0, state.readingPageIndex), max);
+      idx -= idx % step;
+      state.readingPageIndex = idx;
       return;
     }
     if (state.viewMode === "list" && isDesktop()) {
       const max = Math.max(0, state.listPages.length - step);
-      state.browseIndex = Math.min(Math.max(0, state.browseIndex), max);
-      state.browseIndex = state.browseIndex - (state.browseIndex % step);
+      let idx = Math.min(Math.max(0, state.browseIndex), max);
+      idx -= idx % step;
+      state.browseIndex = idx;
       return;
     }
     if (state.viewMode === "book") {
       const max = Math.max(0, state.recipes.length - 1);
-      state.browseIndex = Math.min(Math.max(0, state.browseIndex), max);
-      if (isDesktop()) {
-        state.browseIndex = state.browseIndex - (state.browseIndex % 2);
-      }
+      let idx = Math.min(Math.max(0, state.browseIndex), max);
+      if (isDesktop()) idx -= idx % 2;
+      state.browseIndex = idx;
       return;
     }
     state.browseIndex = 0;
@@ -164,7 +179,9 @@
         blocks.push(`<p>No steps yet.</p>`);
       } else {
         steps.forEach((step, index) => {
-          blocks.push(`<p class="book-read__step"><strong>${index + 1}.</strong> ${escapeHtml(step.description)}</p>`);
+          blocks.push(
+            `<p class="book-read__step"><strong>${index + 1}.</strong> ${escapeHtml(step.description)}</p>`
+          );
         });
       }
     });
@@ -221,28 +238,32 @@
   }
 
   function packBlocks(blocks, pageEl) {
-    return packHtmlUnits(blocks, pageEl, "book-read");
+    return padEvenPages(packHtmlUnits(blocks, pageEl, "book-read"));
   }
 
   function packListPages(pageEl) {
     if (!state.recipes.length) {
-      state.listPages = [`<div class="empty">No recipes yet.</div>`];
+      state.listPages = padEvenPages([`<div class="empty">No recipes yet.</div>`]);
       return;
     }
-    state.listPages = packHtmlUnits(
-      state.recipes.map((recipe) => listRowHtml(recipe)),
-      pageEl,
-      "book-list"
+    state.listPages = padEvenPages(
+      packHtmlUnits(
+        state.recipes.map((recipe) => listRowHtml(recipe)),
+        pageEl,
+        "book-list"
+      )
     );
   }
 
   function setPage(el, html, { scrollable = false, blank = false } = {}) {
+    if (!el) return;
     el.classList.toggle("is-scrollable", scrollable);
     el.classList.toggle("is-blank", blank);
     el.innerHTML = html || "";
   }
 
   function bindOpenHandlers(root) {
+    if (!root) return;
     root.querySelectorAll("[data-open-recipe]").forEach((btn) => {
       btn.addEventListener("click", () => {
         openRecipe(btn.getAttribute("data-open-recipe"));
@@ -256,11 +277,12 @@
     const prev = qs("[data-prev]");
     const next = qs("[data-next]");
     const edit = qs("[data-edit]");
+    const reading = state.mode === "reading";
 
-    document.body.classList.toggle("is-reading", state.mode === "reading");
+    document.body.classList.toggle("is-reading", reading);
 
-    if (modes) modes.hidden = state.mode === "reading";
-    if (readingBar) readingBar.hidden = state.mode !== "reading";
+    if (modes) modes.hidden = reading;
+    if (readingBar) readingBar.hidden = !reading;
 
     qsAllModeButtons().forEach((btn) => {
       const active = btn.getAttribute("data-view") === state.viewMode;
@@ -268,46 +290,46 @@
     });
 
     const showNav =
-      (state.mode === "reading" && isDesktop() && state.readingPages.length > pagesPerSpread()) ||
-      (state.mode === "browse" && state.viewMode === "book") ||
-      (state.mode === "browse" && state.viewMode === "list" && isDesktop() && state.listPages.length > pagesPerSpread());
+      (reading && isDesktop() && state.readingPages.length > pagesPerSpread()) ||
+      (!reading && state.viewMode === "book" && state.recipes.length > pagesPerSpread()) ||
+      (!reading &&
+        state.viewMode === "list" &&
+        isDesktop() &&
+        state.listPages.length > pagesPerSpread());
 
-    const showPrev = showNav && canFlipPrev();
-    const showNext = showNav && canFlipNext();
-    if (prev) prev.hidden = !showPrev;
-    if (next) next.hidden = !showNext;
+    if (prev) prev.hidden = !(showNav && canFlipPrev());
+    if (next) next.hidden = !(showNav && canFlipNext());
 
     window.CookbookAuth.applyCookUi(document);
     if (edit) {
-      const cook = window.CookbookAuth.isCook();
-      if (state.mode === "reading" && state.readingId && cook) {
-        edit.hidden = false;
-        edit.href = `edit.html?id=${encodeURIComponent(state.readingId)}`;
-      } else {
-        edit.hidden = true;
-      }
+      const showEdit = reading && state.readingId && window.CookbookAuth.isCook();
+      edit.hidden = !showEdit;
+      if (showEdit) edit.href = `edit.html?id=${encodeURIComponent(state.readingId)}`;
     }
   }
 
   function qsAllModeButtons() {
-    return [...document.querySelectorAll("[data-view]")];
+    return [...document.querySelectorAll("[data-book-modes] [data-view]")];
   }
 
   function renderBrowseBook() {
     const left = qs('[data-page="left"]');
     const right = qs('[data-page="right"]');
-    const leftRecipe = state.recipes[state.browseIndex];
-    setPage(left, leftRecipe ? previewHtml(leftRecipe) : `<div class="empty">No recipes yet.</div>`, {
-      scrollable: false,
-      blank: !leftRecipe,
-    });
+
     if (isDesktop()) {
+      const leftRecipe = state.recipes[state.browseIndex];
       const rightRecipe = state.recipes[state.browseIndex + 1];
-      setPage(right, rightRecipe ? previewHtml(rightRecipe) : "", {
-        blank: !rightRecipe,
-      });
+      setPage(left, leftRecipe ? previewHtml(leftRecipe) : "", { blank: !leftRecipe });
+      setPage(right, rightRecipe ? previewHtml(rightRecipe) : "", { blank: !rightRecipe });
+      if (!leftRecipe && !rightRecipe) {
+        setPage(left, `<div class="empty">No recipes yet.</div>`);
+      }
     } else {
-      setPage(right, "");
+      const recipe = state.recipes[state.browseIndex];
+      setPage(left, "", { blank: true });
+      setPage(right, recipe ? previewHtml(recipe) : `<div class="empty">No recipes yet.</div>`, {
+        blank: !recipe,
+      });
     }
     bindOpenHandlers(qs("[data-spread]"));
   }
@@ -317,9 +339,9 @@
     const right = qs('[data-page="right"]');
 
     if (!isDesktop()) {
-      setPage(left, listRowsHtml(state.recipes), { scrollable: true });
-      setPage(right, "");
-      bindOpenHandlers(left);
+      setPage(left, "", { blank: true });
+      setPage(right, listRowsHtml(state.recipes), { scrollable: true });
+      bindOpenHandlers(right);
       return;
     }
 
@@ -336,22 +358,23 @@
     const left = qs('[data-page="left"]');
     const right = qs('[data-page="right"]');
     const blocks = buildReadingBlocks(state.readingRecipe);
-    setPage(left, `<div class="book-read">${blocks.join("")}</div>`, { scrollable: true });
-    setPage(right, "");
+    setPage(left, "", { blank: true });
+    setPage(right, `<div class="book-read">${blocks.join("")}</div>`, { scrollable: true });
   }
 
   function renderReadingDesktop() {
     const left = qs('[data-page="left"]');
     const right = qs('[data-page="right"]');
     if (!state.readingPages.length) {
+      const measureTarget = right?.clientWidth > 40 ? right : left;
       const blocks = buildReadingBlocks(state.readingRecipe);
-      state.readingPages = packBlocks(blocks, left);
+      state.readingPages = packBlocks(blocks, measureTarget);
       clampBrowseIndex();
     }
     const leftHtml = state.readingPages[state.readingPageIndex] || "";
     const rightHtml = state.readingPages[state.readingPageIndex + 1] || "";
-    setPage(left, leftHtml, { blank: !leftHtml });
-    setPage(right, rightHtml, { blank: !rightHtml });
+    setPage(left, leftHtml, { blank: !leftHtml || leftHtml === BLANK_PAGE });
+    setPage(right, rightHtml, { blank: !rightHtml || rightHtml === BLANK_PAGE });
   }
 
   function render() {
@@ -373,26 +396,42 @@
       then();
       return;
     }
-    spread.classList.remove("is-flipping", "is-flipping-forward");
+
+    state.flipping = true;
+    // Desktop: next turns right leaf toward spine; prev turns left leaf.
+    // Phone: only the right leaf is readable, so it always turns.
+    const turning = !isDesktop()
+      ? qs('[data-page="right"]')
+      : direction === "next"
+        ? qs('[data-page="right"]')
+        : qs('[data-page="left"]');
+
+    spread.classList.remove("is-flipping", "is-flipping-next", "is-flipping-prev");
+    qs('[data-page="left"]')?.classList.remove("is-turning");
+    qs('[data-page="right"]')?.classList.remove("is-turning");
     void spread.offsetWidth;
-    spread.classList.add("is-flipping");
-    if (direction === "next") spread.classList.add("is-flipping-forward");
+
+    spread.classList.add("is-flipping", direction === "next" ? "is-flipping-next" : "is-flipping-prev");
+    turning?.classList.add("is-turning");
+
     clearTimeout(flipTimer);
     flipTimer = setTimeout(() => {
       then();
-      spread.classList.remove("is-flipping", "is-flipping-forward");
-    }, 160);
+      spread.classList.remove("is-flipping", "is-flipping-next", "is-flipping-prev");
+      qs('[data-page="left"]')?.classList.remove("is-turning");
+      qs('[data-page="right"]')?.classList.remove("is-turning");
+      state.flipping = false;
+    }, FLIP_MS);
   }
 
   function flip(direction) {
+    if (state.flipping) return;
     if (direction === "prev" && !canFlipPrev()) return;
     if (direction === "next" && !canFlipNext()) return;
     const step = pagesPerSpread();
     animateFlip(direction, () => {
       if (state.mode === "reading") {
         state.readingPageIndex += direction === "next" ? step : -step;
-      } else if (state.viewMode === "list" && isDesktop()) {
-        state.browseIndex += direction === "next" ? step : -step;
       } else {
         state.browseIndex += direction === "next" ? step : -step;
       }
@@ -407,8 +446,7 @@
     } else {
       url.searchParams.delete("recipe");
     }
-    const next = `${url.pathname}${url.search}${url.hash}`;
-    window.history.replaceState({}, "", next);
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
   }
 
   function repackReadingSoon() {
@@ -416,19 +454,20 @@
     requestAnimationFrame(() => {
       state.readingPages = [];
       render();
-      const spread = qs("[data-spread]");
-      spread?.querySelectorAll("img").forEach((img) => {
-        if (img.complete) return;
-        img.addEventListener(
-          "load",
-          () => {
-            if (state.mode !== "reading" || !isDesktop()) return;
-            state.readingPages = [];
-            render();
-          },
-          { once: true }
-        );
-      });
+      qs("[data-spread]")
+        ?.querySelectorAll("img")
+        .forEach((img) => {
+          if (img.complete) return;
+          img.addEventListener(
+            "load",
+            () => {
+              if (state.mode !== "reading" || !isDesktop()) return;
+              state.readingPages = [];
+              render();
+            },
+            { once: true }
+          );
+        });
     });
   }
 
@@ -445,8 +484,9 @@
       render();
       repackReadingSoon();
     } catch (err) {
-      const left = qs('[data-page="left"]');
-      setPage(left, `<div class="empty">${escapeHtml(err.message)}</div>`);
+      const host = isDesktop() ? qs('[data-page="left"]') : qs('[data-page="right"]');
+      setPage(host, `<div class="empty">${escapeHtml(err.message)}</div>`);
+      updateChrome();
     }
   }
 
@@ -462,6 +502,7 @@
 
   function setViewMode(mode) {
     if (mode !== "book" && mode !== "list") return;
+    if (state.mode === "reading") return;
     state.viewMode = mode;
     state.browseIndex = 0;
     try {
@@ -482,7 +523,7 @@
     spread.addEventListener(
       "touchstart",
       (e) => {
-        if (state.mode !== "browse" || state.viewMode !== "book" || isDesktop()) return;
+        if (state.mode !== "browse" || state.viewMode !== "book" || isDesktop() || state.flipping) return;
         const t = e.changedTouches[0];
         startX = t.clientX;
         startY = t.clientY;
@@ -559,12 +600,9 @@
 
     bindUi();
 
-    const params = new URLSearchParams(window.location.search);
-    const recipeId = params.get("recipe");
+    const recipeId = new URLSearchParams(window.location.search).get("recipe");
     render();
-    if (recipeId) {
-      await openRecipe(recipeId);
-    }
+    if (recipeId) await openRecipe(recipeId);
   }
 
   window.CookbookBook = { start, openRecipe, closeReading };

@@ -48,22 +48,48 @@
             </button>
           </div>
           <div class="book__reading-bar" data-reading-bar hidden>
-            <button type="button" class="btn btn--ghost btn--small" data-back>Back</button>
+            <button type="button" class="icon-btn" data-back aria-label="Back">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path
+                  d="M12.5 4.5L7 10l5.5 5.5"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
             <a class="btn btn--ghost btn--small" data-edit data-cook-only hidden>Edit recipe</a>
           </div>
         </div>
 
         <div class="book__stage">
-          <button type="button" class="book__nav book__nav--prev" data-prev aria-label="Previous pages" hidden>
-            ‹
+          <button type="button" class="icon-btn book__nav book__nav--prev" data-prev aria-label="Previous pages" hidden>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path
+                d="M12.5 4.5L7 10l5.5 5.5"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
           </button>
           <div class="book__spread" data-spread>
             <article class="book__page book__page--left" data-page="left"></article>
             <div class="book__spine" aria-hidden="true"></div>
             <article class="book__page book__page--right" data-page="right"></article>
           </div>
-          <button type="button" class="book__nav book__nav--next" data-next aria-label="Next pages" hidden>
-            ›
+          <button type="button" class="icon-btn book__nav book__nav--next" data-next aria-label="Next pages" hidden>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path
+                d="M7.5 4.5L13 10l-5.5 5.5"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
           </button>
         </div>
       </div>
