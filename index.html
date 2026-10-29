@@ -12,24 +12,61 @@
   <body>
     <div id="auth-gate"></div>
     <header class="site-header" data-site-header></header>
-    <main class="page">
-      <section class="hero" aria-label="My Cookbook">
-        <div class="hero__media" aria-hidden="true"></div>
-        <div class="hero__content">
-          <p class="hero__eyebrow">Personal recipe book</p>
-          <h1 class="hero__title">My Cookbook</h1>
-          <p class="hero__copy">A quiet place for the dishes you cook again and again.</p>
-          <div class="actions" data-cook-only hidden>
-            <a class="btn btn--primary" href="edit.html">New recipe</a>
-            <a class="btn btn--ghost" href="manage.html">Manage catalogs</a>
+    <main class="page page--book">
+      <div class="book" data-book>
+        <div class="book__toolbar">
+          <div class="book__modes" data-book-modes>
+            <button
+              type="button"
+              class="book__mode-btn"
+              data-view="book"
+              aria-pressed="true"
+              title="Book view"
+              aria-label="Book view"
+            >
+              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5V5.5zm16 0V21.5A2.5 2.5 0 0 1 17.5 19H13V3h4.5A2.5 2.5 0 0 1 20 5.5z"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="book__mode-btn"
+              data-view="list"
+              aria-pressed="false"
+              title="List view"
+              aria-label="List view"
+            >
+              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"
+                />
+              </svg>
+            </button>
+          </div>
+          <div class="book__reading-bar" data-reading-bar hidden>
+            <button type="button" class="btn btn--ghost btn--small" data-back>Back</button>
+            <a class="btn btn--ghost btn--small" data-edit data-cook-only hidden>Edit recipe</a>
           </div>
         </div>
-      </section>
 
-      <div class="toolbar">
-        <div class="filters" data-filters></div>
+        <div class="book__stage">
+          <button type="button" class="book__nav book__nav--prev" data-prev aria-label="Previous pages" hidden>
+            ‹
+          </button>
+          <div class="book__spread" data-spread>
+            <article class="book__page book__page--left" data-page="left"></article>
+            <div class="book__spine" aria-hidden="true"></div>
+            <article class="book__page book__page--right" data-page="right"></article>
+          </div>
+          <button type="button" class="book__nav book__nav--next" data-next aria-label="Next pages" hidden>
+            ›
+          </button>
+        </div>
       </div>
-      <section class="recipe-grid" data-recipe-grid aria-live="polite"></section>
     </main>
 
     <script src="js/config.js"></script>
@@ -37,6 +74,7 @@
     <script src="js/auth.js"></script>
     <script src="js/data.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/book.js"></script>
     <script src="js/home.js"></script>
   </body>
 </html>
