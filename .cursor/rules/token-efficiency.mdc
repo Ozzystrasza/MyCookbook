@@ -1,0 +1,27 @@
+---
+description: Minimize Cursor monthly token usage for this repo
+alwaysApply: true
+---
+
+# Token Efficiency
+
+Optimize for lower Plan & usage spend. Prefer the smallest useful action.
+
+## Responses
+
+- Keep answers short; no task restating or long wrap-ups
+- Do not paste large unchanged code into chat
+- Cite paths and small diffs instead of dumping whole files
+
+## Exploration
+
+- Read or search only what the task needs
+- Prefer targeted reads (offset/limit) over whole-file or whole-repo dumps
+- Skip exploratory tool loops when the path is already clear
+- Batch independent reads only when a few files are truly required
+
+## Edits
+
+- Touch the fewest files; use patches, not full-file rewrites
+- No unsolicited docs, READMEs, summaries, or refactors
+- Do not expand scope beyond what was asked

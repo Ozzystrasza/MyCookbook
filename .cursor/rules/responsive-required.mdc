@@ -1,0 +1,20 @@
+---
+description: Site must work on phone and desktop for every UI change
+alwaysApply: true
+---
+
+# Phone + Desktop Required
+
+My Cookbook must work on both phone and computer. Treat this as a hard requirement for every UI change.
+
+## Always
+
+- Keep `viewport` meta (`width=device-width, initial-scale=1`) on all HTML pages
+- Mobile-first layout; enhance at existing breakpoints in `css/styles.css` (`min-width: 700px` / `800px`)
+- Touch-friendly controls: adequate tap targets; no hover-only critical actions
+- Avoid fixed widths that break narrow screens; keep images fluid (`max-width: 100%`)
+
+## Before finishing UI work
+
+- Sanity-check narrow (~375px) and wide (~1100px) layouts for the changed screens
+- Forms, headers, grids, and cook tools must stay usable without horizontal scroll on a phone
