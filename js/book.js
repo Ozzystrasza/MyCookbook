@@ -1,7 +1,7 @@
 (function () {
   const VIEW_KEY = "mycookbook_view_mode";
   const DESKTOP_MQ = "(min-width: 800px)";
-  const FLIP_MS = 380;
+  const FLIP_MS = 260;
   const BLANK_PAGE = `<div class="book-read book-read--blank" aria-hidden="true"></div>`;
 
   const state = {
@@ -302,9 +302,13 @@
 
     window.CookbookAuth.applyCookUi(document);
     if (edit) {
-      const showEdit = reading && state.readingId && window.CookbookAuth.isCook();
+      const showEdit = reading && !!state.readingId && window.CookbookAuth.isCook();
       edit.hidden = !showEdit;
-      if (showEdit) edit.href = `edit.html?id=${encodeURIComponent(state.readingId)}`;
+      if (showEdit) {
+        edit.href = `edit.html?id=${encodeURIComponent(state.readingId)}`;
+      } else {
+        edit.removeAttribute("href");
+      }
     }
   }
 
@@ -398,29 +402,19 @@
     }
 
     state.flipping = true;
-    // Desktop: next turns right leaf toward spine; prev turns left leaf.
-    // Phone: only the right leaf is readable, so it always turns.
-    const turning = !isDesktop()
-      ? qs('[data-page="right"]')
-      : direction === "next"
-        ? qs('[data-page="right"]')
-        : qs('[data-page="left"]');
-
-    spread.classList.remove("is-flipping", "is-flipping-next", "is-flipping-prev");
-    qs('[data-page="left"]')?.classList.remove("is-turning");
-    qs('[data-page="right"]')?.classList.remove("is-turning");
+    spread.classList.remove("is-flipping", "is-flipping-next", "is-flipping-prev", "is-flipping-settle");
     void spread.offsetWidth;
-
     spread.classList.add("is-flipping", direction === "next" ? "is-flipping-next" : "is-flipping-prev");
-    turning?.classList.add("is-turning");
 
     clearTimeout(flipTimer);
     flipTimer = setTimeout(() => {
       then();
-      spread.classList.remove("is-flipping", "is-flipping-next", "is-flipping-prev");
-      qs('[data-page="left"]')?.classList.remove("is-turning");
-      qs('[data-page="right"]')?.classList.remove("is-turning");
-      state.flipping = false;
+      spread.classList.remove("is-flipping-next", "is-flipping-prev");
+      spread.classList.add("is-flipping-settle");
+      requestAnimationFrame(() => {
+        spread.classList.remove("is-flipping", "is-flipping-settle");
+        state.flipping = false;
+      });
     }, FLIP_MS);
   }
 
