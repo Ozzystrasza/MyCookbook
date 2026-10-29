@@ -681,23 +681,16 @@ body.is-reading .site-header {
   border: 1px solid rgba(28, 36, 28, 0.16);
   border-left: 0;
   background: #c4b59a;
-  transition: transform 0.26s ease, opacity 0.26s ease;
+  transition: opacity 0.22s ease, transform 0.22s ease;
 }
 
-.book__spread.is-flipping-next {
-  transform: translateX(-14%);
-  opacity: 0.72;
+.book__spread.is-flipping {
+  opacity: 0.55;
+  transform: translateX(-8px);
 }
 
-.book__spread.is-flipping-prev {
-  transform: translateX(14%);
-  opacity: 0.72;
-}
-
-.book__spread.is-flipping-settle {
-  transition: none;
-  transform: translateX(0);
-  opacity: 1;
+.book__spread.is-flipping-forward {
+  transform: translateX(8px);
 }
 
 .book__spine {

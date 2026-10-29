@@ -1,7 +1,7 @@
 (function () {
   const VIEW_KEY = "mycookbook_view_mode";
   const DESKTOP_MQ = "(min-width: 800px)";
-  const FLIP_MS = 260;
+  const FLIP_MS = 160;
   const BLANK_PAGE = `<div class="book-read book-read--blank" aria-hidden="true"></div>`;
 
   const state = {
@@ -402,19 +402,16 @@
     }
 
     state.flipping = true;
-    spread.classList.remove("is-flipping", "is-flipping-next", "is-flipping-prev", "is-flipping-settle");
+    spread.classList.remove("is-flipping", "is-flipping-forward");
     void spread.offsetWidth;
-    spread.classList.add("is-flipping", direction === "next" ? "is-flipping-next" : "is-flipping-prev");
+    spread.classList.add("is-flipping");
+    if (direction === "next") spread.classList.add("is-flipping-forward");
 
     clearTimeout(flipTimer);
     flipTimer = setTimeout(() => {
       then();
-      spread.classList.remove("is-flipping-next", "is-flipping-prev");
-      spread.classList.add("is-flipping-settle");
-      requestAnimationFrame(() => {
-        spread.classList.remove("is-flipping", "is-flipping-settle");
-        state.flipping = false;
-      });
+      spread.classList.remove("is-flipping", "is-flipping-forward");
+      state.flipping = false;
     }, FLIP_MS);
   }
 
