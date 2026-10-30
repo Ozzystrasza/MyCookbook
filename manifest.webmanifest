@@ -1,6 +1,6 @@
 {
   "name": "My Cookbook",
-  "short_name": "Cookbook",
+  "short_name": "My Cookbook",
   "description": "Personal recipe book",
   "start_url": "./index.html",
   "display": "standalone",

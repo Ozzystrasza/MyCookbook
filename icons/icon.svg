@@ -1,5 +1,66 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="My Cookbook">
-  <rect width="512" height="512" rx="96" fill="#2f5d3a"/>
-  <path d="M146 120h84c48 0 78 28 78 72s-30 72-78 72h-36v128h-48V120zm48 96h28c20 0 32-10 32-24s-12-24-32-24h-28v48z" fill="#f3efe6"/>
-  <path d="M320 120c62 0 106 42 106 118s-44 118-106 118h-40V120h40zm-2 188c36 0 58-26 58-70s-22-70-58-70h-8v140h8z" fill="#f3efe6"/>
+  <defs>
+    <linearGradient id="pageWash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#efe8d8"/>
+      <stop offset="42%" stop-color="#d9e2d4"/>
+      <stop offset="100%" stop-color="#c9d4c4"/>
+    </linearGradient>
+    <radialGradient id="peachGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(40 40) rotate(90) scale(280)">
+      <stop offset="0%" stop-color="rgba(232,160,106,0.28)"/>
+      <stop offset="100%" stop-color="rgba(232,160,106,0)"/>
+    </radialGradient>
+    <radialGradient id="leafGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(435 75) rotate(90) scale(220)">
+      <stop offset="0%" stop-color="rgba(47,93,58,0.18)"/>
+      <stop offset="100%" stop-color="rgba(47,93,58,0)"/>
+    </radialGradient>
+    <linearGradient id="pagePaper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f7f2e6"/>
+      <stop offset="100%" stop-color="#efe6d4"/>
+    </linearGradient>
+    <linearGradient id="spineShade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="rgba(28,36,28,0.28)"/>
+      <stop offset="45%" stop-color="rgba(255,252,246,0.35)"/>
+      <stop offset="100%" stop-color="rgba(28,36,28,0.2)"/>
+    </linearGradient>
+    <linearGradient id="leftShade" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0%" stop-color="rgba(28,36,28,0.05)"/>
+      <stop offset="100%" stop-color="rgba(28,36,28,0)"/>
+    </linearGradient>
+    <linearGradient id="rightShade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="rgba(28,36,28,0.05)"/>
+      <stop offset="100%" stop-color="rgba(28,36,28,0)"/>
+    </linearGradient>
+    <filter id="bookShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="rgba(28,36,28,0.22)"/>
+    </filter>
+    <pattern id="pageLines" width="512" height="28" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="27" x2="512" y2="27" stroke="rgba(47,93,58,0.08)" stroke-width="1"/>
+    </pattern>
+    <clipPath id="tile">
+      <rect width="512" height="512" rx="96"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#tile)">
+    <rect width="512" height="512" fill="url(#pageWash)"/>
+    <rect width="512" height="512" fill="url(#peachGlow)"/>
+    <rect width="512" height="512" fill="url(#leafGlow)"/>
+
+    <g filter="url(#bookShadow)">
+      <rect x="72" y="108" width="368" height="296" rx="22" fill="#c4b59a"/>
+
+      <path d="M86 120h156v272H86c-8 0-14-6-14-14V134c0-8 6-14 14-14z" fill="url(#pagePaper)"/>
+      <path d="M86 120h156v272H86c-8 0-14-6-14-14V134c0-8 6-14 14-14z" fill="url(#pageLines)"/>
+      <path d="M86 120h156v272H86c-8 0-14-6-14-14V134c0-8 6-14 14-14z" fill="url(#leftShade)"/>
+
+      <rect x="242" y="120" width="28" height="272" fill="url(#spineShade)"/>
+
+      <path d="M270 120h156c8 0 14 6 14 14v244c0 8-6 14-14 14H270V120z" fill="url(#pagePaper)"/>
+      <path d="M270 120h156c8 0 14 6 14 14v244c0 8-6 14-14 14H270V120z" fill="url(#pageLines)"/>
+      <path d="M270 120h156c8 0 14 6 14 14v244c0 8-6 14-14 14H270V120z" fill="url(#rightShade)"/>
+      <path d="M270 120v272" stroke="rgba(28,36,28,0.14)" stroke-width="2"/>
+
+      <rect x="72" y="108" width="368" height="296" rx="22" fill="none" stroke="rgba(28,36,28,0.16)" stroke-width="2"/>
+    </g>
+  </g>
 </svg>
