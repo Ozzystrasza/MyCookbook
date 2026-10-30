@@ -477,9 +477,13 @@ textarea {
   display: grid;
   place-items: center;
   padding: 1.25rem;
-  background:
-    linear-gradient(160deg, rgba(31, 63, 40, 0.72), rgba(28, 36, 28, 0.78)),
-    url("../data/images/gate/closed-cookbook.svg") center/cover;
+  background-color: #2a0e14;
+  background-image:
+    linear-gradient(160deg, rgba(20, 8, 12, 0.35), rgba(20, 8, 12, 0.55)),
+    url("../data/images/gate/recipes-book.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 .gate [hidden] {
