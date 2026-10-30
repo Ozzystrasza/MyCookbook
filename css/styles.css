@@ -477,13 +477,10 @@ textarea {
   display: grid;
   place-items: center;
   padding: 1.25rem;
-  background-color: #2a0e14;
-  background-image:
-    linear-gradient(160deg, rgba(20, 8, 12, 0.35), rgba(20, 8, 12, 0.55)),
-    url("../data/images/gate/recipes-book.jpg");
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
+  background:
+    radial-gradient(circle at top left, rgba(232, 160, 106, 0.28), transparent 34%),
+    radial-gradient(circle at 85% 15%, rgba(47, 93, 58, 0.18), transparent 28%),
+    linear-gradient(160deg, #efe8d8 0%, #d9e2d4 42%, #c9d4c4 100%);
 }
 
 .gate [hidden] {
