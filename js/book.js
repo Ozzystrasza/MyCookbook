@@ -7,6 +7,7 @@
   const state = {
     recipes: [],
     categories: [],
+    categoryFilters: [],
     measures: [],
     ingredients: [],
     viewMode: "book",
@@ -18,6 +19,7 @@
     listPages: [],
     readingRecipe: null,
     flipping: false,
+    filterOpen: false,
   };
 
   let flipTimer = null;
@@ -37,6 +39,19 @@
 
   function categoryName(id) {
     return state.categories.find((c) => c.id === id)?.name || id || "Uncategorized";
+  }
+
+  function visibleRecipes() {
+    if (!state.categoryFilters.length) return state.recipes;
+    const allowed = new Set(state.categoryFilters);
+    return state.recipes.filter((recipe) => allowed.has(recipe.categoryId));
+  }
+
+  function emptyBrowseHtml() {
+    if (state.recipes.length && state.categoryFilters.length) {
+      return `<div class="empty">No recipes match these filters.</div>`;
+    }
+    return `<div class="empty">No recipes yet.</div>`;
   }
 
   function escapeHtml(value) {
@@ -79,7 +94,7 @@
       return;
     }
     if (state.viewMode === "book") {
-      const max = Math.max(0, state.recipes.length - 1);
+      const max = Math.max(0, visibleRecipes().length - 1);
       let idx = Math.min(Math.max(0, state.browseIndex), max);
       if (isDesktop()) idx -= idx % 2;
       state.browseIndex = idx;
@@ -106,7 +121,7 @@
     if (state.viewMode === "list") {
       return isDesktop() && state.browseIndex + step < state.listPages.length;
     }
-    return state.browseIndex + step < state.recipes.length;
+    return state.browseIndex + step < visibleRecipes().length;
   }
 
   function previewHtml(recipe) {
@@ -131,7 +146,7 @@
   }
 
   function listRowsHtml(recipes) {
-    if (!recipes.length) return `<div class="empty">No recipes yet.</div>`;
+    if (!recipes.length) return emptyBrowseHtml();
     return `<div class="book-list">${recipes.map(listRowHtml).join("")}</div>`;
   }
 
@@ -242,13 +257,14 @@
   }
 
   function packListPages(pageEl) {
-    if (!state.recipes.length) {
-      state.listPages = padEvenPages([`<div class="empty">No recipes yet.</div>`]);
+    const recipes = visibleRecipes();
+    if (!recipes.length) {
+      state.listPages = padEvenPages([emptyBrowseHtml()]);
       return;
     }
     state.listPages = padEvenPages(
       packHtmlUnits(
-        state.recipes.map((recipe) => listRowHtml(recipe)),
+        recipes.map((recipe) => listRowHtml(recipe)),
         pageEl,
         "book-list"
       )
@@ -273,25 +289,36 @@
 
   function updateChrome() {
     const modes = qs("[data-book-modes]");
+    const actions = qs("[data-book-actions]");
     const readingBar = qs("[data-reading-bar]");
     const prev = qs("[data-prev]");
     const next = qs("[data-next]");
     const edit = qs("[data-edit]");
+    const filterToggle = qs("[data-filter-toggle]");
     const reading = state.mode === "reading";
 
     document.body.classList.toggle("is-reading", reading);
 
     if (modes) modes.hidden = reading;
+    if (actions) actions.hidden = reading;
     if (readingBar) readingBar.hidden = !reading;
+    if (reading && state.filterOpen) closeFilterPanel();
 
     qsAllModeButtons().forEach((btn) => {
       const active = btn.getAttribute("data-view") === state.viewMode;
       btn.setAttribute("aria-pressed", active ? "true" : "false");
     });
 
+    if (filterToggle) {
+      const filtered = state.categoryFilters.length > 0;
+      filterToggle.setAttribute("aria-pressed", filtered ? "true" : "false");
+      filterToggle.setAttribute("aria-expanded", state.filterOpen ? "true" : "false");
+    }
+
+    const visible = visibleRecipes();
     const showNav =
       (reading && isDesktop() && state.readingPages.length > pagesPerSpread()) ||
-      (!reading && state.viewMode === "book" && state.recipes.length > pagesPerSpread()) ||
+      (!reading && state.viewMode === "book" && visible.length > pagesPerSpread()) ||
       (!reading &&
         state.viewMode === "list" &&
         isDesktop() &&
@@ -316,22 +343,103 @@
     return [...document.querySelectorAll("[data-book-modes] [data-view]")];
   }
 
+  function syncFilterCheckboxes() {
+    const list = qs("[data-filter-list]");
+    if (!list) return;
+    const selected = new Set(state.categoryFilters);
+    list.querySelectorAll('input[type="checkbox"][data-category-id]').forEach((input) => {
+      input.checked = selected.has(input.getAttribute("data-category-id"));
+    });
+  }
+
+  function renderFilterList() {
+    const list = qs("[data-filter-list]");
+    if (!list) return;
+    if (!state.categories.length) {
+      list.innerHTML = `<p class="book-filter__empty">No categories yet.</p>`;
+      return;
+    }
+    const selected = new Set(state.categoryFilters);
+    list.innerHTML = state.categories
+      .map(
+        (category) => `
+      <label class="book-filter__option">
+        <input
+          type="checkbox"
+          data-category-id="${escapeHtml(category.id)}"
+          ${selected.has(category.id) ? "checked" : ""}
+        />
+        <span>${escapeHtml(category.name)}</span>
+      </label>`
+      )
+      .join("");
+  }
+
+  function openFilterPanel() {
+    const panel = qs("[data-filter-panel]");
+    if (!panel) return;
+    renderFilterList();
+    state.filterOpen = true;
+    panel.hidden = false;
+    updateChrome();
+  }
+
+  function closeFilterPanel() {
+    if (!state.filterOpen) return;
+    state.filterOpen = false;
+    const panel = qs("[data-filter-panel]");
+    if (panel) panel.hidden = true;
+  }
+
+  function toggleFilterPanel() {
+    if (state.filterOpen) {
+      closeFilterPanel();
+      updateChrome();
+    } else {
+      openFilterPanel();
+    }
+  }
+
+  function applyFilters() {
+    const list = qs("[data-filter-list]");
+    const next = list
+      ? [...list.querySelectorAll('input[type="checkbox"][data-category-id]:checked')].map((input) =>
+          input.getAttribute("data-category-id")
+        )
+      : [];
+    state.categoryFilters = next;
+    state.browseIndex = 0;
+    state.listPages = [];
+    closeFilterPanel();
+    render();
+  }
+
+  function resetFilters() {
+    state.categoryFilters = [];
+    state.browseIndex = 0;
+    state.listPages = [];
+    syncFilterCheckboxes();
+    closeFilterPanel();
+    render();
+  }
+
   function renderBrowseBook() {
     const left = qs('[data-page="left"]');
     const right = qs('[data-page="right"]');
+    const recipes = visibleRecipes();
 
     if (isDesktop()) {
-      const leftRecipe = state.recipes[state.browseIndex];
-      const rightRecipe = state.recipes[state.browseIndex + 1];
+      const leftRecipe = recipes[state.browseIndex];
+      const rightRecipe = recipes[state.browseIndex + 1];
       setPage(left, leftRecipe ? previewHtml(leftRecipe) : "", { blank: !leftRecipe });
       setPage(right, rightRecipe ? previewHtml(rightRecipe) : "", { blank: !rightRecipe });
       if (!leftRecipe && !rightRecipe) {
-        setPage(left, `<div class="empty">No recipes yet.</div>`);
+        setPage(left, emptyBrowseHtml());
       }
     } else {
-      const recipe = state.recipes[state.browseIndex];
+      const recipe = recipes[state.browseIndex];
       setPage(left, "", { blank: true });
-      setPage(right, recipe ? previewHtml(recipe) : `<div class="empty">No recipes yet.</div>`, {
+      setPage(right, recipe ? previewHtml(recipe) : emptyBrowseHtml(), {
         blank: !recipe,
       });
     }
@@ -344,7 +452,7 @@
 
     if (!isDesktop()) {
       setPage(left, "", { blank: true });
-      setPage(right, listRowsHtml(state.recipes), { scrollable: true });
+      setPage(right, listRowsHtml(visibleRecipes()), { scrollable: true });
       bindOpenHandlers(right);
       return;
     }
@@ -547,11 +655,34 @@
     qs("[data-prev]")?.addEventListener("click", () => flip("prev"));
     qs("[data-next]")?.addEventListener("click", () => flip("next"));
     qs("[data-back]")?.addEventListener("click", closeReading);
+    qs("[data-filter-toggle]")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleFilterPanel();
+    });
+    qs("[data-filter-apply]")?.addEventListener("click", applyFilters);
+    qs("[data-filter-reset]")?.addEventListener("click", resetFilters);
+    qs("[data-favorites]")?.addEventListener("click", (e) => {
+      e.preventDefault();
+    });
+    qs("[data-filter-panel]")?.addEventListener("click", (e) => e.stopPropagation());
+
+    document.addEventListener("click", () => {
+      if (!state.filterOpen) return;
+      closeFilterPanel();
+      updateChrome();
+    });
 
     window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && state.mode === "reading") {
-        closeReading();
-        return;
+      if (e.key === "Escape") {
+        if (state.filterOpen) {
+          closeFilterPanel();
+          updateChrome();
+          return;
+        }
+        if (state.mode === "reading") {
+          closeReading();
+          return;
+        }
       }
       if (e.key === "ArrowLeft") flip("prev");
       if (e.key === "ArrowRight") flip("next");
