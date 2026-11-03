@@ -14,7 +14,7 @@
     <header class="site-header" data-site-header></header>
     <main class="page page--book">
       <div class="book" data-book>
-        <div class="book__toolbar">
+        <div class="book__chrome" data-book-chrome>
           <div class="book__modes" data-book-modes>
             <button
               type="button"
@@ -61,6 +61,15 @@
             </button>
             <a class="btn btn--ghost btn--small" data-edit hidden>Edit recipe</a>
           </div>
+          <label class="book__search" data-book-search>
+            <span class="visually-hidden">Search recipes</span>
+            <input
+              type="search"
+              data-recipe-search
+              placeholder="Search recipes"
+              autocomplete="off"
+            />
+          </label>
           <div class="book__actions" data-book-actions>
             <button
               type="button"

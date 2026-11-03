@@ -590,15 +590,37 @@ body.is-reading .site-header {
 
 .book {
   display: grid;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
-.book__toolbar {
-  display: flex;
+.book__chrome {
+  display: grid;
+  grid-template-columns: auto auto;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  column-gap: 0.75rem;
+  row-gap: 0.75rem;
   min-height: 2.75rem;
+}
+
+.book__modes {
+  grid-column: 1;
+  justify-self: start;
+}
+
+.book__actions {
+  grid-column: 2;
+  justify-self: end;
+}
+
+.book__search {
+  grid-column: 1 / -1;
+  display: block;
+  min-width: 0;
+}
+
+.book__reading-bar {
+  grid-column: 1 / -1;
 }
 
 .book__modes,
@@ -615,8 +637,35 @@ body.is-reading .site-header {
   position: relative;
 }
 
+.book__search input {
+  width: 100%;
+  min-height: 2.5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  background: rgba(255, 252, 246, 0.92);
+  color: var(--ink);
+}
+
+.book__search input::placeholder {
+  color: var(--muted);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .book__modes[hidden],
 .book__actions[hidden],
+.book__search[hidden],
 .book__reading-bar[hidden] {
   display: none !important;
 }
@@ -985,9 +1034,13 @@ body.is-reading .site-header {
     padding-right: 1.25rem;
   }
 
-  .book__toolbar {
+  .book__chrome {
     padding-left: 1.25rem;
     padding-right: 0;
+  }
+
+  .book {
+    gap: 1.15rem;
   }
 
   .book-filter {
@@ -1012,6 +1065,31 @@ body.is-reading .site-header {
 }
 
 @media (min-width: 800px) {
+  .book__chrome {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    justify-content: stretch;
+  }
+
+  .book__modes {
+    grid-column: 1;
+  }
+
+  .book__search {
+    grid-column: 2;
+    max-width: 22rem;
+    width: 100%;
+    justify-self: center;
+  }
+
+  .book__actions {
+    grid-column: 3;
+  }
+
+  .book__reading-bar {
+    grid-column: 1;
+    justify-self: start;
+  }
+
   .book__spread {
     grid-template-columns: 1fr 14px 1fr;
     min-height: min(72vh, 680px);

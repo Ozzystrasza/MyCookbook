@@ -8,6 +8,7 @@
     recipes: [],
     categories: [],
     categoryFilters: [],
+    searchQuery: "",
     measures: [],
     ingredients: [],
     viewMode: "book",
@@ -42,13 +43,25 @@
   }
 
   function visibleRecipes() {
-    if (!state.categoryFilters.length) return state.recipes;
-    const allowed = new Set(state.categoryFilters);
-    return state.recipes.filter((recipe) => allowed.has(recipe.categoryId));
+    let recipes = state.recipes;
+    if (state.categoryFilters.length) {
+      const allowed = new Set(state.categoryFilters);
+      recipes = recipes.filter((recipe) => allowed.has(recipe.categoryId));
+    }
+    const query = state.searchQuery.trim().toLowerCase();
+    if (query) {
+      recipes = recipes.filter((recipe) =>
+        String(recipe.title || "")
+          .toLowerCase()
+          .includes(query)
+      );
+    }
+    return recipes;
   }
 
   function emptyBrowseHtml() {
-    if (state.recipes.length && state.categoryFilters.length) {
+    const narrowed = state.categoryFilters.length > 0 || state.searchQuery.trim();
+    if (state.recipes.length && narrowed) {
       return `<div class="empty">No recipes match these filters.</div>`;
     }
     return `<div class="empty">No recipes yet.</div>`;
@@ -290,6 +303,7 @@
   function updateChrome() {
     const modes = qs("[data-book-modes]");
     const actions = qs("[data-book-actions]");
+    const search = qs("[data-book-search]");
     const readingBar = qs("[data-reading-bar]");
     const prev = qs("[data-prev]");
     const next = qs("[data-next]");
@@ -301,6 +315,7 @@
 
     if (modes) modes.hidden = reading;
     if (actions) actions.hidden = reading;
+    if (search) search.hidden = reading;
     if (readingBar) readingBar.hidden = !reading;
     if (reading && state.filterOpen) closeFilterPanel();
 
@@ -665,6 +680,12 @@
       e.preventDefault();
     });
     qs("[data-filter-panel]")?.addEventListener("click", (e) => e.stopPropagation());
+    qs("[data-recipe-search]")?.addEventListener("input", (e) => {
+      state.searchQuery = e.target.value || "";
+      state.browseIndex = 0;
+      state.listPages = [];
+      render();
+    });
 
     document.addEventListener("click", () => {
       if (!state.filterOpen) return;
