@@ -78,6 +78,13 @@ textarea {
   gap: 1rem;
 }
 
+.site-header__brand-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
 .brand {
   font-family: var(--font-display);
   font-weight: 700;
