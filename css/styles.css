@@ -885,13 +885,18 @@ body.is-reading .site-header {
   flex-shrink: 0;
 }
 
-.favorite-btn:hover {
-  color: var(--ember);
+.favorite-btn:hover:not([aria-pressed="true"]) {
+  color: rgba(196, 92, 38, 0.65);
   background: #fff;
 }
 
 .favorite-btn[aria-pressed="true"] {
   color: var(--ember);
+}
+
+.favorite-btn[aria-pressed="true"]:hover {
+  color: var(--ember);
+  background: #fff;
 }
 
 .favorite-btn:focus-visible {
