@@ -3,6 +3,7 @@
   const DESKTOP_MQ = "(min-width: 800px)";
   const FLIP_MS = 160;
   const BLANK_PAGE = `<div class="book-read book-read--blank" aria-hidden="true"></div>`;
+  const HEART_SVG = `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
 
   const state = {
     recipes: [],
@@ -21,6 +22,8 @@
     readingRecipe: null,
     flipping: false,
     filterOpen: false,
+    favoriteIds: new Set(),
+    favoritesOnly: false,
   };
 
   let flipTimer = null;
@@ -42,8 +45,181 @@
     return state.categories.find((c) => c.id === id)?.name || id || "Uncategorized";
   }
 
+  function favoritesStorageKey() {
+    return window.CookbookConfig?.storageKeys?.favorites || "mycookbook_favorites";
+  }
+
+  function favoritesCookCacheKey() {
+    return window.CookbookConfig?.storageKeys?.favoritesCookCache || "mycookbook_favorites_cook";
+  }
+
+  function parseFavoriteIds(value) {
+    if (!Array.isArray(value)) return [];
+    return value.filter((id) => typeof id === "string" && id);
+  }
+
+  function readLocalFavoriteIds(key) {
+    try {
+      const raw = localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return parseFavoriteIds(parsed);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function writeLocalFavoriteIds(key, ids) {
+    try {
+      localStorage.setItem(key, JSON.stringify([...ids]));
+    } catch (_) {
+      /* ignore */
+    }
+  }
+
+  function saveFavoritesLocal() {
+    if (window.CookbookAuth.isCook()) {
+      writeLocalFavoriteIds(favoritesCookCacheKey(), state.favoriteIds);
+    } else {
+      writeLocalFavoriteIds(favoritesStorageKey(), state.favoriteIds);
+    }
+  }
+
+  function loadVisitorFavorites() {
+    state.favoriteIds = new Set(readLocalFavoriteIds(favoritesStorageKey()));
+  }
+
+  function hasLocalKey(key) {
+    try {
+      return localStorage.getItem(key) !== null;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function loadCookFavorites() {
+    const token = window.CookbookAuth.getToken();
+    const cacheKey = favoritesCookCacheKey();
+    let remoteIds = [];
+    let missing = false;
+
+    try {
+      const file = await window.CookbookGitHub.getFile("data/favorites.json", token);
+      if (!file) {
+        missing = true;
+      } else {
+        const text = window.CookbookGitHub.decodeContent(file);
+        remoteIds = parseFavoriteIds(JSON.parse(text || "[]"));
+      }
+    } catch (_) {
+      state.favoriteIds = new Set(readLocalFavoriteIds(cacheKey));
+      return;
+    }
+
+    // One-time migrate: empty/missing remote and no cook cache yet → seed from visitor local.
+    if ((missing || remoteIds.length === 0) && !hasLocalKey(cacheKey)) {
+      const seedSource = readLocalFavoriteIds(favoritesStorageKey());
+      if (seedSource.length > 0) {
+        state.favoriteIds = new Set(seedSource);
+        writeLocalFavoriteIds(cacheKey, state.favoriteIds);
+        try {
+          await window.CookbookGitHub.putJsonFile(
+            "data/favorites.json",
+            [...state.favoriteIds],
+            "Seed favorites",
+            token
+          );
+        } catch (_) {
+          /* keep local cache; sync on next toggle */
+        }
+        return;
+      }
+    }
+
+    state.favoriteIds = new Set(remoteIds);
+    writeLocalFavoriteIds(cacheKey, state.favoriteIds);
+  }
+
+  async function loadFavorites() {
+    if (window.CookbookAuth.isCook()) {
+      await loadCookFavorites();
+    } else {
+      loadVisitorFavorites();
+    }
+  }
+
+  function isFavorite(id) {
+    return state.favoriteIds.has(id);
+  }
+
+  function favoriteBtnHtml(recipeId, extraClass = "") {
+    const on = isFavorite(recipeId);
+    const label = on ? "Remove from favorites" : "Add to favorites";
+    const cls = extraClass ? `favorite-btn ${extraClass}` : "favorite-btn";
+    return `<button type="button" class="${cls}" data-favorite-toggle="${escapeHtml(recipeId)}" aria-pressed="${on ? "true" : "false"}" title="${label}" aria-label="${label}">${HEART_SVG}</button>`;
+  }
+
+  function syncFavoriteButtons() {
+    document.querySelectorAll("[data-favorite-toggle]").forEach((btn) => {
+      const id = btn.getAttribute("data-favorite-toggle");
+      const on = isFavorite(id);
+      const label = on ? "Remove from favorites" : "Add to favorites";
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.setAttribute("aria-label", label);
+      btn.title = label;
+    });
+  }
+
+  function refreshFavoriteUi() {
+    if (state.mode === "browse" && state.favoritesOnly) {
+      state.browseIndex = 0;
+      state.listPages = [];
+      render();
+      return;
+    }
+    syncFavoriteButtons();
+    updateChrome();
+  }
+
+  async function toggleFavorite(id) {
+    if (!id) return;
+    const wasOn = state.favoriteIds.has(id);
+    if (wasOn) state.favoriteIds.delete(id);
+    else state.favoriteIds.add(id);
+
+    saveFavoritesLocal();
+    refreshFavoriteUi();
+
+    if (!window.CookbookAuth.isCook()) return;
+
+    try {
+      await window.CookbookGitHub.putJsonFile(
+        "data/favorites.json",
+        [...state.favoriteIds],
+        "Update favorites",
+        window.CookbookAuth.getToken()
+      );
+    } catch (err) {
+      if (wasOn) state.favoriteIds.add(id);
+      else state.favoriteIds.delete(id);
+      saveFavoritesLocal();
+      refreshFavoriteUi();
+      window.alert(err.message || "Could not sync favorites.");
+    }
+  }
+
+  function toggleFavoritesFilter() {
+    if (state.mode === "reading") return;
+    state.favoritesOnly = !state.favoritesOnly;
+    state.browseIndex = 0;
+    state.listPages = [];
+    render();
+  }
+
   function visibleRecipes() {
     let recipes = state.recipes;
+    if (state.favoritesOnly) {
+      recipes = recipes.filter((recipe) => state.favoriteIds.has(recipe.id));
+    }
     if (state.categoryFilters.length) {
       const allowed = new Set(state.categoryFilters);
       recipes = recipes.filter((recipe) => allowed.has(recipe.categoryId));
@@ -60,8 +236,12 @@
   }
 
   function emptyBrowseHtml() {
-    const narrowed = state.categoryFilters.length > 0 || state.searchQuery.trim();
+    const narrowed =
+      state.favoritesOnly || state.categoryFilters.length > 0 || state.searchQuery.trim();
     if (state.recipes.length && narrowed) {
+      if (state.favoritesOnly && !state.favoriteIds.size) {
+        return `<div class="empty">No favorite recipes yet.</div>`;
+      }
       return `<div class="empty">No recipes match these filters.</div>`;
     }
     return `<div class="empty">No recipes yet.</div>`;
@@ -139,23 +319,36 @@
 
   function previewHtml(recipe) {
     if (!recipe) return "";
+    const id = escapeHtml(recipe.id);
+    const title = escapeHtml(recipe.title);
     return `
-      <button type="button" class="book-preview" data-open-recipe="${escapeHtml(recipe.id)}">
-        <img class="book-preview__media" src="${escapeHtml(recipe.image || "")}" alt="" />
-        <p class="book-preview__category">${escapeHtml(categoryName(recipe.categoryId))}</p>
-        <h2 class="book-preview__title">${escapeHtml(recipe.title)}</h2>
-      </button>`;
+      <div class="book-preview">
+        <div class="book-preview__media-wrap">
+          <button type="button" class="book-preview__media-btn" data-open-recipe="${id}" aria-label="Open ${title}">
+            <img class="book-preview__media" src="${escapeHtml(recipe.image || "")}" alt="" />
+          </button>
+          ${favoriteBtnHtml(recipe.id, "book-preview__favorite")}
+        </div>
+        <button type="button" class="book-preview__text" data-open-recipe="${id}">
+          <p class="book-preview__category">${escapeHtml(categoryName(recipe.categoryId))}</p>
+          <h2 class="book-preview__title">${title}</h2>
+        </button>
+      </div>`;
   }
 
   function listRowHtml(recipe) {
+    const id = escapeHtml(recipe.id);
     return `
-      <button type="button" class="book-list__row" data-open-recipe="${escapeHtml(recipe.id)}">
-        <img class="book-list__thumb" src="${escapeHtml(recipe.image || "")}" alt="" />
-        <div class="book-list__meta">
-          <p class="book-list__category">${escapeHtml(categoryName(recipe.categoryId))}</p>
-          <h3 class="book-list__title">${escapeHtml(recipe.title)}</h3>
-        </div>
-      </button>`;
+      <div class="book-list__row">
+        <button type="button" class="book-list__open" data-open-recipe="${id}">
+          <img class="book-list__thumb" src="${escapeHtml(recipe.image || "")}" alt="" />
+          <div class="book-list__meta">
+            <p class="book-list__category">${escapeHtml(categoryName(recipe.categoryId))}</p>
+            <h3 class="book-list__title">${escapeHtml(recipe.title)}</h3>
+          </div>
+        </button>
+        ${favoriteBtnHtml(recipe.id, "book-list__favorite")}
+      </div>`;
   }
 
   function listRowsHtml(recipes) {
@@ -177,7 +370,11 @@
     const category = categoryName(recipe.categoryId);
     const blocks = [];
 
-    blocks.push(`<p class="book-read__eyebrow">${escapeHtml(category)}</p>`);
+    blocks.push(`
+      <div class="book-read__header">
+        <p class="book-read__eyebrow">${escapeHtml(category)}</p>
+        ${favoriteBtnHtml(recipe.id, "book-read__favorite")}
+      </div>`);
     blocks.push(`<h1 class="book-read__title">${escapeHtml(recipe.title)}</h1>`);
     if (recipe.image) {
       blocks.push(`<img class="book-read__media" src="${escapeHtml(recipe.image)}" alt="" />`);
@@ -328,6 +525,14 @@
       const filtered = state.categoryFilters.length > 0;
       filterToggle.setAttribute("aria-pressed", filtered ? "true" : "false");
       filterToggle.setAttribute("aria-expanded", state.filterOpen ? "true" : "false");
+    }
+
+    const favoritesBtn = qs("[data-favorites]");
+    if (favoritesBtn) {
+      favoritesBtn.setAttribute("aria-pressed", state.favoritesOnly ? "true" : "false");
+      const favLabel = state.favoritesOnly ? "Show all recipes" : "Show favorites";
+      favoritesBtn.setAttribute("aria-label", favLabel);
+      favoritesBtn.title = favLabel;
     }
 
     const visible = visibleRecipes();
@@ -678,6 +883,15 @@
     qs("[data-filter-reset]")?.addEventListener("click", resetFilters);
     qs("[data-favorites]")?.addEventListener("click", (e) => {
       e.preventDefault();
+      e.stopPropagation();
+      toggleFavoritesFilter();
+    });
+    qs("[data-spread]")?.addEventListener("click", (e) => {
+      const fav = e.target.closest("[data-favorite-toggle]");
+      if (!fav) return;
+      e.preventDefault();
+      e.stopPropagation();
+      void toggleFavorite(fav.getAttribute("data-favorite-toggle"));
     });
     qs("[data-filter-panel]")?.addEventListener("click", (e) => e.stopPropagation());
     qs("[data-recipe-search]")?.addEventListener("input", (e) => {
@@ -732,6 +946,7 @@
     } catch (_) {
       /* ignore */
     }
+    await loadFavorites();
 
     try {
       [state.measures, state.ingredients] = await Promise.all([

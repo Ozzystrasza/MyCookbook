@@ -6,5 +6,7 @@ window.CookbookConfig = {
   storageKeys: {
     role: "mycookbook_role",
     token: "mycookbook_token",
+    favorites: "mycookbook_favorites",
+    favoritesCookCache: "mycookbook_favorites_cook",
   },
 };

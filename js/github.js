@@ -39,6 +39,14 @@
     return btoa(binary);
   }
 
+  function decodeContent(file) {
+    if (!file?.content) return "";
+    const normalized = String(file.content).replace(/\n/g, "");
+    const binary = atob(normalized);
+    const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+  }
+
   async function putFile(path, contentBase64, message, token, sha) {
     const url = `${api}/repos/${owner}/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g, "/")}`;
     const body = {
@@ -127,5 +135,6 @@
     fileToBase64,
     extensionForFile,
     encodeUtf8Base64,
+    decodeContent,
   };
 })();
