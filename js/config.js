@@ -9,5 +9,6 @@ window.CookbookConfig = {
     favorites: "mycookbook_favorites",
     favoritesCookCache: "mycookbook_favorites_cook",
     favoritesLastSync: "mycookbook_favorites_last_sync",
+    shoppingList: "mycookbook_shopping_list",
   },
 };

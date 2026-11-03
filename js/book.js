@@ -530,6 +530,7 @@
     const prev = qs("[data-prev]");
     const next = qs("[data-next]");
     const edit = qs("[data-edit]");
+    const addToCart = qs("[data-add-to-cart]");
     const filterToggle = qs("[data-filter-toggle]");
     const reading = state.mode === "reading";
 
@@ -573,6 +574,9 @@
     if (next) next.hidden = !(showNav && canFlipNext());
 
     window.CookbookAuth.applyCookUi(document);
+    if (addToCart) {
+      addToCart.hidden = !(reading && !!state.readingId);
+    }
     if (edit) {
       const showEdit = reading && !!state.readingId && window.CookbookAuth.isCook();
       edit.hidden = !showEdit;
@@ -900,6 +904,14 @@
     qs("[data-prev]")?.addEventListener("click", () => flip("prev"));
     qs("[data-next]")?.addEventListener("click", () => flip("next"));
     qs("[data-back]")?.addEventListener("click", closeReading);
+    qs("[data-add-to-cart]")?.addEventListener("click", () => {
+      if (!state.readingRecipe) return;
+      window.CookbookShopping?.openRecipePicker(
+        state.readingRecipe,
+        ingredientMap(),
+        measureMap()
+      );
+    });
     qs("[data-filter-toggle]")?.addEventListener("click", (e) => {
       e.stopPropagation();
       toggleFilterPanel();
