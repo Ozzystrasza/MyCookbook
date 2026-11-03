@@ -779,6 +779,16 @@ body.is-reading .site-header {
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.book__reading-bar .icon-btn {
+  color: var(--muted);
+}
+
+.book__reading-bar .icon-btn:hover {
+  color: var(--leaf-deep);
 }
 
 .book__stage {
@@ -1196,9 +1206,9 @@ body.is-reading .site-header {
   }
 
   .book__reading-bar {
-    grid-column: 1;
+    grid-column: 1 / -1;
     grid-row: 1;
-    justify-self: start;
+    justify-self: stretch;
   }
 
   .book__spread {
