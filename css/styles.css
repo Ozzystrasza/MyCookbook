@@ -1313,7 +1313,7 @@ body.is-shopping .site-header {
 
 .shopping-row {
   display: grid;
-  grid-template-columns: 2.5rem 40px minmax(0, 1fr) auto auto;
+  grid-template-columns: 2.5rem 40px minmax(0, 1fr) auto;
   gap: 0.4rem 0.5rem;
   align-items: center;
   padding: 0.45rem 0.2rem;
@@ -1345,7 +1345,8 @@ body.is-shopping .site-header {
 
 .shopping-row__stepper {
   display: inline-flex;
-  gap: 0.1rem;
+  align-items: center;
+  gap: 0.15rem;
 }
 
 .shopping-step {

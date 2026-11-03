@@ -279,10 +279,24 @@
       recipeEl.querySelectorAll("[data-recipe-line]").forEach((row) => {
         const input = row.querySelector('input[type="checkbox"]');
         if (!input?.checked) return;
-        lines.push({
-          ingredientId: row.getAttribute("data-ingredient-id"),
-          measureId: row.getAttribute("data-measure-id"),
-          quantity: row.getAttribute("data-quantity") || "",
+        const ingredientId = row.getAttribute("data-ingredient-id");
+        if (!ingredientId) return;
+        let amounts = [];
+        try {
+          amounts = JSON.parse(row.getAttribute("data-amounts") || "[]");
+        } catch {
+          amounts = [];
+        }
+        if (!Array.isArray(amounts) || !amounts.length) {
+          lines.push({ ingredientId, measureId: "", quantity: "" });
+          return;
+        }
+        amounts.forEach((amount) => {
+          lines.push({
+            ingredientId,
+            measureId: amount.measureId || "",
+            quantity: amount.quantity ?? "",
+          });
         });
       });
       addRecipeLines(lines);
@@ -320,6 +334,7 @@
       openCatalogPicker();
     });
     bar.querySelector("[data-shopping-clear]")?.addEventListener("click", () => {
+      if (!window.confirm("Limpar toda a lista de compras?")) return;
       clearList();
       renderPage();
     });
@@ -369,9 +384,9 @@
           <span class="shopping-row__name">${escapeHtml(name)}</span>
           ${amountText ? `<span class="shopping-row__amount">${escapeHtml(amountText)}</span>` : ""}
         </div>
-        <span class="shopping-row__qty">${item.quantity}x</span>
         <div class="shopping-row__stepper">
           <button type="button" class="icon-btn shopping-step" data-shopping-action="dec" data-id="${escapeHtml(item.ingredientId)}" aria-label="Diminuir">−</button>
+          <span class="shopping-row__qty">${item.quantity}x</span>
           <button type="button" class="icon-btn shopping-step" data-shopping-action="inc" data-id="${escapeHtml(item.ingredientId)}" aria-label="Aumentar">+</button>
         </div>
       </div>
@@ -476,26 +491,39 @@
     await ensureData();
     const listRoot = recipeEl.querySelector("[data-recipe-list]");
     const lines = (recipe?.groups || []).flatMap((g) => g.ingredients || []);
-    if (!lines.length) {
+    const merged = [];
+    const byId = new Map();
+    lines.forEach((line) => {
+      if (!line?.ingredientId) return;
+      let entry = byId.get(line.ingredientId);
+      if (!entry) {
+        entry = { ingredientId: line.ingredientId, amounts: [] };
+        byId.set(line.ingredientId, entry);
+        merged.push(entry);
+      }
+      mergeAmountInto(entry.amounts, {
+        quantity: line.quantity,
+        measureId: line.measureId,
+      });
+    });
+    if (!merged.length) {
       listRoot.innerHTML = `<p class="shopping-page__empty">Esta receita não tem ingredientes.</p>`;
     } else {
-      listRoot.innerHTML = lines
-        .map((line, index) => {
-          const ing = (ingredientsCache || {})[line.ingredientId];
-          const measure = (measuresCache || {})[line.measureId];
-          const qtyLabel = window.CookbookData.formatQuantity(line.quantity, measure);
+      listRoot.innerHTML = merged
+        .map((entry) => {
+          const ing = (ingredientsCache || {})[entry.ingredientId];
+          const qtyLabel = formatAmounts(entry.amounts, measuresCache || {});
+          const amountsJson = escapeHtml(JSON.stringify(entry.amounts));
           return `
             <label class="shopping-check shopping-recipe-line" data-recipe-line
-              data-ingredient-id="${escapeHtml(line.ingredientId)}"
-              data-measure-id="${escapeHtml(line.measureId || "")}"
-              data-quantity="${escapeHtml(line.quantity ?? "")}"
-              data-index="${index}"
+              data-ingredient-id="${escapeHtml(entry.ingredientId)}"
+              data-amounts="${amountsJson}"
             >
               <input type="checkbox" checked />
               <span class="shopping-check__box" aria-hidden="true"></span>
               <span class="shopping-recipe-line__qty">${escapeHtml(qtyLabel)}</span>
               <img src="${escapeHtml(ing?.image || "")}" alt="" />
-              <span class="shopping-recipe-line__name">${escapeHtml(ing?.name || line.ingredientId)}</span>
+              <span class="shopping-recipe-line__name">${escapeHtml(ing?.name || entry.ingredientId)}</span>
             </label>
           `;
         })
@@ -503,7 +531,7 @@
     }
     const checkAll = recipeEl.querySelector("[data-recipe-check-all]");
     if (checkAll) {
-      checkAll.checked = lines.length > 0;
+      checkAll.checked = merged.length > 0;
       checkAll.indeterminate = false;
     }
     recipeEl.hidden = false;
