@@ -25,8 +25,8 @@
           <strong>${item.name}</strong>
           <span class="hint">${item.id}</span>
           <div class="actions">
-            <button type="button" class="btn btn--ghost btn--small" data-edit-category="${item.id}">Edit</button>
-            <button type="button" class="btn btn--danger btn--small" data-delete-category="${item.id}">Delete</button>
+            <button type="button" class="btn btn--ghost btn--small" data-edit-category="${item.id}">Editar</button>
+            <button type="button" class="btn btn--danger btn--small" data-delete-category="${item.id}">Excluir</button>
           </div>
         </div>
       </div>`
@@ -39,15 +39,15 @@
         qs("#category-id").value = item.id;
         qs("#category-id").disabled = true;
         qs("#category-name").value = item.name;
-        qs("#category-form [type='submit']").textContent = "Update category";
+        qs("#category-form [type='submit']").textContent = "Atualizar categoria";
       });
     });
 
     list.querySelectorAll("[data-delete-category]").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        if (!window.confirm("Delete this category?")) return;
+        if (!window.confirm("Excluir esta categoria?")) return;
         categories = categories.filter((c) => c.id !== btn.dataset.deleteCategory);
-        await saveCategories("Delete category");
+        await saveCategories("Excluir categoria");
       });
     });
   }
@@ -62,8 +62,8 @@
           <strong>${item.name}</strong>
           <span class="hint">${item.abbrev || item.id}</span>
           <div class="actions">
-            <button type="button" class="btn btn--ghost btn--small" data-edit-measure="${item.id}">Edit</button>
-            <button type="button" class="btn btn--danger btn--small" data-delete-measure="${item.id}">Delete</button>
+            <button type="button" class="btn btn--ghost btn--small" data-edit-measure="${item.id}">Editar</button>
+            <button type="button" class="btn btn--danger btn--small" data-delete-measure="${item.id}">Excluir</button>
           </div>
         </div>
       </div>`
@@ -77,15 +77,15 @@
         qs("#measure-id").disabled = true;
         qs("#measure-name").value = item.name;
         qs("#measure-abbrev").value = item.abbrev || "";
-        qs("#measure-form [type='submit']").textContent = "Update measure";
+        qs("#measure-form [type='submit']").textContent = "Atualizar medida";
       });
     });
 
     list.querySelectorAll("[data-delete-measure]").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        if (!window.confirm("Delete this measure?")) return;
+        if (!window.confirm("Excluir esta medida?")) return;
         measures = measures.filter((m) => m.id !== btn.dataset.deleteMeasure);
-        await saveMeasures("Delete measure");
+        await saveMeasures("Excluir medida");
       });
     });
   }
@@ -101,8 +101,8 @@
           <strong>${item.name}</strong>
           <span class="hint">${item.id}</span>
           <div class="actions">
-            <button type="button" class="btn btn--ghost btn--small" data-edit-ingredient="${item.id}">Edit</button>
-            <button type="button" class="btn btn--danger btn--small" data-delete-ingredient="${item.id}">Delete</button>
+            <button type="button" class="btn btn--ghost btn--small" data-edit-ingredient="${item.id}">Editar</button>
+            <button type="button" class="btn btn--danger btn--small" data-delete-ingredient="${item.id}">Excluir</button>
           </div>
         </div>
       </div>`
@@ -115,38 +115,38 @@
         qs("#ingredient-id").value = item.id;
         qs("#ingredient-id").disabled = true;
         qs("#ingredient-name").value = item.name;
-        qs("#ingredient-form [type='submit']").textContent = "Update ingredient";
+        qs("#ingredient-form [type='submit']").textContent = "Atualizar ingrediente";
         qs("[data-ingredient-image-hint]").textContent = item.image
-          ? `Current image: ${item.image}`
-          : "No image yet.";
+          ? `Imagem atual: ${item.image}`
+          : "Nenhuma imagem ainda.";
       });
     });
 
     list.querySelectorAll("[data-delete-ingredient]").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        if (!window.confirm("Delete this ingredient from the catalog?")) return;
+        if (!window.confirm("Excluir este ingrediente do catálogo?")) return;
         const token = window.CookbookAuth.getToken();
         const item = ingredients.find((i) => i.id === btn.dataset.deleteIngredient);
         const status = qs("[data-status]");
-        showStatus(status, "Deleting ingredient…", "info");
+        showStatus(status, "Excluindo ingrediente…", "info");
         try {
           await window.CookbookGitHub.deleteFile(
             `data/ingredients/${item.id}.json`,
-            `Delete ingredient ${item.id}`,
+            `Excluir ingrediente ${item.id}`,
             token
           );
           if (item.image && item.image.startsWith("data/images/ingredients/")) {
-            await window.CookbookGitHub.deleteFile(item.image, `Delete ingredient image ${item.id}`, token);
+            await window.CookbookGitHub.deleteFile(item.image, `Excluir imagem do ingrediente ${item.id}`, token);
           }
           ingredients = ingredients.filter((i) => i.id !== item.id);
           await window.CookbookGitHub.putJsonFile(
             "data/ingredients/_index.json",
             ingredients,
-            `Refresh ingredient index after delete ${item.id}`,
+            `Atualizar índice de ingredientes após excluir ${item.id}`,
             token
           );
           renderIngredients();
-          showStatus(status, "Ingredient deleted. Pages may take a minute to update.", "ok");
+          showStatus(status, "Ingrediente excluído. As páginas podem levar um minuto para atualizar.", "ok");
         } catch (err) {
           showStatus(status, err.message, "error");
         }
@@ -156,17 +156,17 @@
 
   async function saveCategories(message) {
     const status = qs("[data-status]");
-    showStatus(status, "Saving categories…", "info");
+    showStatus(status, "Salvando categorias…", "info");
     try {
       await window.CookbookGitHub.putJsonFile(
         "data/categories.json",
         categories,
-        message || "Update categories",
+        message || "Atualizar categorias",
         window.CookbookAuth.getToken()
       );
       renderCategories();
       resetCategoryForm();
-      showStatus(status, "Categories saved.", "ok");
+      showStatus(status, "Categorias salvas.", "ok");
     } catch (err) {
       showStatus(status, err.message, "error");
     }
@@ -174,17 +174,17 @@
 
   async function saveMeasures(message) {
     const status = qs("[data-status]");
-    showStatus(status, "Saving measures…", "info");
+    showStatus(status, "Salvando medidas…", "info");
     try {
       await window.CookbookGitHub.putJsonFile(
         "data/measures.json",
         measures,
-        message || "Update measures",
+        message || "Atualizar medidas",
         window.CookbookAuth.getToken()
       );
       renderMeasures();
       resetMeasureForm();
-      showStatus(status, "Measures saved.", "ok");
+      showStatus(status, "Medidas salvas.", "ok");
     } catch (err) {
       showStatus(status, err.message, "error");
     }
@@ -193,19 +193,19 @@
   function resetCategoryForm() {
     qs("#category-form").reset();
     qs("#category-id").disabled = false;
-    qs("#category-form [type='submit']").textContent = "Add category";
+    qs("#category-form [type='submit']").textContent = "Adicionar categoria";
   }
 
   function resetMeasureForm() {
     qs("#measure-form").reset();
     qs("#measure-id").disabled = false;
-    qs("#measure-form [type='submit']").textContent = "Add measure";
+    qs("#measure-form [type='submit']").textContent = "Adicionar medida";
   }
 
   function resetIngredientForm() {
     qs("#ingredient-form").reset();
     qs("#ingredient-id").disabled = false;
-    qs("#ingredient-form [type='submit']").textContent = "Add ingredient";
+    qs("#ingredient-form [type='submit']").textContent = "Adicionar ingrediente";
     qs("[data-ingredient-image-hint]").textContent = "";
   }
 
@@ -240,7 +240,7 @@
       const existing = categories.find((c) => c.id === id);
       if (existing) existing.name = name;
       else categories.push({ id, name });
-      await saveCategories(existing ? `Update category ${id}` : `Add category ${id}`);
+      await saveCategories(existing ? `Atualizar categoria ${id}` : `Adicionar categoria ${id}`);
     });
 
     qs("#measure-form").addEventListener("submit", async (event) => {
@@ -259,7 +259,7 @@
       } else {
         measures.push({ id, name, abbrev: abbrev || name });
       }
-      await saveMeasures(existing ? `Update measure ${id}` : `Add measure ${id}`);
+      await saveMeasures(existing ? `Atualizar medida ${id}` : `Adicionar medida ${id}`);
     });
 
     qs("#ingredient-form").addEventListener("submit", async (event) => {
@@ -278,7 +278,7 @@
       const existing = ingredients.find((i) => i.id === id);
       let imagePath = existing?.image || "";
 
-      showStatus(status, "Saving ingredient…", "info");
+      showStatus(status, "Salvando ingrediente…", "info");
       try {
         if (file) {
           const ext = window.CookbookGitHub.extensionForFile(file);
@@ -287,7 +287,7 @@
           await window.CookbookGitHub.putFile(
             imagePath,
             base64,
-            `Update ingredient image: ${name}`,
+            `Atualizar imagem do ingrediente: ${name}`,
             token,
             (await window.CookbookGitHub.getFile(imagePath, token))?.sha
           );
@@ -297,7 +297,7 @@
         await window.CookbookGitHub.putJsonFile(
           `data/ingredients/${id}.json`,
           record,
-          `${existing ? "Update" : "Add"} ingredient: ${name}`,
+          `${existing ? "Atualizar" : "Adicionar"} ingrediente: ${name}`,
           token
         );
 
@@ -311,13 +311,13 @@
         await window.CookbookGitHub.putJsonFile(
           "data/ingredients/_index.json",
           ingredients,
-          `Refresh ingredient index after ${name}`,
+          `Atualizar índice de ingredientes após ${name}`,
           token
         );
 
         renderIngredients();
         resetIngredientForm();
-        showStatus(status, "Ingredient saved.", "ok");
+        showStatus(status, "Ingrediente salvo.", "ok");
       } catch (err) {
         showStatus(status, err.message, "error");
       }

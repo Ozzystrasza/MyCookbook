@@ -31,11 +31,11 @@
     header.innerHTML = `
       <div class="site-header__inner">
         <a class="brand" href="index.html">My Cookbook</a>
-        <nav class="site-nav" aria-label="Primary">
-          <a href="index.html" class="${active === "home" ? "is-active" : ""}">Recipes</a>
-          ${cook ? `<a href="edit.html" class="${active === "edit" ? "is-active" : ""}" data-cook-only>New recipe</a>` : ""}
-          ${cook ? `<a href="manage.html" class="${active === "manage" ? "is-active" : ""}" data-cook-only>Manage</a>` : ""}
-          <button type="button" class="linkish" data-sign-out>${cook ? "Sign out" : "Switch role"}</button>
+        <nav class="site-nav" aria-label="Principal">
+          <a href="index.html" class="${active === "home" ? "is-active" : ""}">Receitas</a>
+          ${cook ? `<a href="edit.html" class="${active === "edit" ? "is-active" : ""}" data-cook-only>Nova receita</a>` : ""}
+          ${cook ? `<a href="manage.html" class="${active === "manage" ? "is-active" : ""}" data-cook-only>Gerenciar</a>` : ""}
+          <button type="button" class="linkish" data-sign-out>${cook ? "Sair" : "Trocar perfil"}</button>
         </nav>
       </div>
     `;

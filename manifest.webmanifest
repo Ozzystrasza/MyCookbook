@@ -1,7 +1,7 @@
 {
   "name": "My Cookbook",
   "short_name": "My Cookbook",
-  "description": "Personal recipe book",
+  "description": "Livro de receitas pessoal",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#d9e2d4",

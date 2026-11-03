@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -21,8 +21,8 @@
               class="book__mode-btn"
               data-view="book"
               aria-pressed="true"
-              title="Book view"
-              aria-label="Book view"
+              title="Vista de livro"
+              aria-label="Vista de livro"
             >
               <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
                 <path
@@ -36,8 +36,8 @@
               class="book__mode-btn"
               data-view="list"
               aria-pressed="false"
-              title="List view"
-              aria-label="List view"
+              title="Vista de lista"
+              aria-label="Vista de lista"
             >
               <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
                 <path
@@ -48,7 +48,7 @@
             </button>
           </div>
           <div class="book__reading-bar" data-reading-bar hidden>
-            <button type="button" class="icon-btn" data-back aria-label="Back">
+            <button type="button" class="icon-btn" data-back aria-label="Voltar">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path
                   d="M12.5 4.5L7 10l5.5 5.5"
@@ -59,14 +59,14 @@
                 />
               </svg>
             </button>
-            <a class="btn btn--ghost btn--small" data-edit hidden>Edit recipe</a>
+            <a class="btn btn--ghost btn--small" data-edit hidden>Editar receita</a>
           </div>
           <label class="book__search" data-book-search>
-            <span class="visually-hidden">Search recipes</span>
+            <span class="visually-hidden">Buscar receitas</span>
             <input
               type="search"
               data-recipe-search
-              placeholder="Search recipes"
+              placeholder="Buscar receitas"
               autocomplete="off"
             />
           </label>
@@ -76,8 +76,8 @@
               class="book__mode-btn"
               data-favorites
               aria-pressed="false"
-              title="Show favorites"
-              aria-label="Show favorites"
+              title="Mostrar favoritos"
+              aria-label="Mostrar favoritos"
             >
               <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
                 <path
@@ -93,8 +93,8 @@
               aria-pressed="false"
               aria-expanded="false"
               aria-controls="book-filter-panel"
-              title="Filter recipes"
-              aria-label="Filter recipes"
+              title="Filtrar receitas"
+              aria-label="Filtrar receitas"
             >
               <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
                 <path
@@ -109,16 +109,16 @@
               data-filter-panel
               hidden
               role="dialog"
-              aria-label="Filter by category"
+              aria-label="Filtrar por categoria"
             >
-              <p class="book-filter__title">Categories</p>
+              <p class="book-filter__title">Categorias</p>
               <div class="book-filter__list" data-filter-list></div>
               <div class="book-filter__actions">
                 <button type="button" class="btn btn--ghost btn--small" data-filter-reset>
-                  Reset filters
+                  Limpar filtros
                 </button>
                 <button type="button" class="btn btn--primary btn--small" data-filter-apply>
-                  Apply
+                  Aplicar
                 </button>
               </div>
             </div>
@@ -126,7 +126,7 @@
         </div>
 
         <div class="book__stage">
-          <button type="button" class="icon-btn book__nav book__nav--prev" data-prev aria-label="Previous pages" hidden>
+          <button type="button" class="icon-btn book__nav book__nav--prev" data-prev aria-label="Páginas anteriores" hidden>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <path
                 d="M12.5 4.5L7 10l5.5 5.5"
@@ -142,7 +142,7 @@
             <div class="book__spine" aria-hidden="true"></div>
             <article class="book__page book__page--right" data-page="right"></article>
           </div>
-          <button type="button" class="icon-btn book__nav book__nav--next" data-next aria-label="Next pages" hidden>
+          <button type="button" class="icon-btn book__nav book__nav--next" data-next aria-label="Próximas páginas" hidden>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <path
                 d="M7.5 4.5L13 10l-5.5 5.5"

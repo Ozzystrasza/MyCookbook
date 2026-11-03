@@ -1,7 +1,7 @@
 (function () {
   async function fetchJson(path) {
     const res = await fetch(path, { cache: "no-store" });
-    if (!res.ok) throw new Error(`Could not load ${path}`);
+    if (!res.ok) throw new Error(`Não foi possível carregar ${path}`);
     return res.json();
   }
 

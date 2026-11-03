@@ -21,7 +21,7 @@
 
   function optionList(items, selected, labelKey = "name") {
     return [
-      `<option value="">Select…</option>`,
+      `<option value="">Selecione…</option>`,
       ...items.map(
         (item) =>
           `<option value="${item.id}" ${item.id === selected ? "selected" : ""}>${item[labelKey]}</option>`
@@ -39,24 +39,24 @@
       wrap.innerHTML = `
         <div class="row row--2">
           <label class="field">
-            <span>Group name</span>
-            <input data-field="name" value="${group.name || ""}" placeholder="Batter, Frosting…" />
+            <span>Nome do grupo</span>
+            <input data-field="name" value="${group.name || ""}" placeholder="Massa, Cobertura…" />
           </label>
           <div class="actions" style="align-items:end">
-            <button type="button" class="btn btn--ghost btn--small" data-remove-group>Remove group</button>
+            <button type="button" class="btn btn--ghost btn--small" data-remove-group>Remover grupo</button>
           </div>
         </div>
         <div>
           <div class="toolbar">
-            <strong>Ingredients</strong>
-            <button type="button" class="btn btn--ghost btn--small" data-add-ingredient>Add ingredient</button>
+            <strong>Ingredientes</strong>
+            <button type="button" class="btn btn--ghost btn--small" data-add-ingredient>Adicionar ingrediente</button>
           </div>
           <div data-ingredient-lines></div>
         </div>
         <div>
           <div class="toolbar">
-            <strong>Steps</strong>
-            <button type="button" class="btn btn--ghost btn--small" data-add-step>Add step</button>
+            <strong>Passos</strong>
+            <button type="button" class="btn btn--ghost btn--small" data-add-step>Adicionar passo</button>
           </div>
           <div data-step-lines></div>
         </div>
@@ -68,19 +68,19 @@
         row.className = "line-row ingredients";
         row.innerHTML = `
           <label class="field">
-            <span>Ingredient</span>
+            <span>Ingrediente</span>
             <select data-field="ingredientId">${optionList(ingredients, line.ingredientId)}</select>
           </label>
           <label class="field">
-            <span>Measure</span>
+            <span>Medida</span>
             <select data-field="measureId">${optionList(measures, line.measureId)}</select>
           </label>
           <label class="field">
-            <span>Quantity</span>
-            <input data-field="quantity" value="${line.quantity ?? ""}" placeholder="2 or 1/2" />
+            <span>Quantidade</span>
+            <input data-field="quantity" value="${line.quantity ?? ""}" placeholder="2 ou 1/2" />
           </label>
           <div class="actions" style="align-items:end">
-            <button type="button" class="btn btn--ghost btn--small" data-remove-ingredient>Remove</button>
+            <button type="button" class="btn btn--ghost btn--small" data-remove-ingredient>Remover</button>
           </div>
         `;
         row.querySelector("[data-remove-ingredient]").addEventListener("click", () => {
@@ -100,11 +100,11 @@
         row.className = "line-row steps";
         row.innerHTML = `
           <label class="field">
-            <span>Step</span>
-            <textarea data-field="description" placeholder="What to do…">${step.description || ""}</textarea>
+            <span>Passo</span>
+            <textarea data-field="description" placeholder="O que fazer…">${step.description || ""}</textarea>
           </label>
           <div class="actions" style="align-items:end">
-            <button type="button" class="btn btn--ghost btn--small" data-remove-step>Remove</button>
+            <button type="button" class="btn btn--ghost btn--small" data-remove-step>Remover</button>
           </div>
         `;
         row.querySelector("[data-remove-step]").addEventListener("click", () => {
@@ -168,8 +168,8 @@
     qs("#categoryId").innerHTML = optionList(categories, recipe.categoryId);
     currentImagePath = recipe.image || "";
     qs("[data-current-image]").textContent = currentImagePath
-      ? `Current image: ${currentImagePath}`
-      : "No image yet.";
+      ? `Imagem atual: ${currentImagePath}`
+      : "Nenhuma imagem ainda.";
     renderGroups(recipe.groups?.length ? recipe.groups : [blankGroup()]);
   }
 
@@ -180,17 +180,17 @@
     const title = qs("#title").value.trim();
     const categoryId = qs("#categoryId").value;
     if (!title) {
-      showStatus(status, "Title is required.", "error");
+      showStatus(status, "O título é obrigatório.", "error");
       return;
     }
     if (!categoryId) {
-      showStatus(status, "Pick a category.", "error");
+      showStatus(status, "Escolha uma categoria.", "error");
       return;
     }
 
     const groups = readGroupsFromDom().filter((g) => g.name || g.ingredients.length || g.steps.length);
     if (!groups.length) {
-      showStatus(status, "Add at least one group.", "error");
+      showStatus(status, "Adicione pelo menos um grupo.", "error");
       return;
     }
 
@@ -200,7 +200,7 @@
 
     const submit = qs('[type="submit"]');
     submit.disabled = true;
-    showStatus(status, "Saving to GitHub…", "info");
+    showStatus(status, "Salvando no GitHub…", "info");
 
     try {
       let imagePath = currentImagePath;
@@ -211,7 +211,7 @@
         await window.CookbookGitHub.putFile(
           imagePath,
           base64,
-          `Update recipe image: ${title}`,
+          `Atualizar imagem da receita: ${title}`,
           token,
           (await window.CookbookGitHub.getFile(imagePath, token))?.sha
         );
@@ -229,7 +229,7 @@
       await window.CookbookGitHub.putJsonFile(
         `data/recipes/${id}.json`,
         recipe,
-        `${editingId ? "Update" : "Add"} recipe: ${title}`,
+        `${editingId ? "Atualizar" : "Adicionar"} receita: ${title}`,
         token
       );
 
@@ -243,36 +243,36 @@
       await window.CookbookGitHub.putJsonFile(
         "data/recipes/_index.json",
         nextIndex,
-        `Refresh recipe index after ${title}`,
+        `Atualizar índice de receitas após ${title}`,
         token
       );
 
-      showStatus(status, "Saved. GitHub Pages may take a minute to update.", "ok");
+      showStatus(status, "Salvo. O GitHub Pages pode levar um minuto para atualizar.", "ok");
       window.setTimeout(() => {
         window.location.href = `recipe.html?id=${encodeURIComponent(id)}`;
       }, 900);
     } catch (err) {
-      showStatus(status, err.message || "Save failed.", "error");
+      showStatus(status, err.message || "Falha ao salvar.", "error");
       submit.disabled = false;
     }
   }
 
   async function deleteRecipe() {
     if (!editingId) return;
-    if (!window.confirm("Delete this recipe from the repo?")) return;
+    if (!window.confirm("Excluir esta receita do repositório?")) return;
     const status = qs("[data-status]");
     const token = window.CookbookAuth.getToken();
-    showStatus(status, "Deleting…", "info");
+    showStatus(status, "Excluindo…", "info");
     try {
       await window.CookbookGitHub.deleteFile(
         `data/recipes/${editingId}.json`,
-        `Delete recipe ${editingId}`,
+        `Excluir receita ${editingId}`,
         token
       );
       if (currentImagePath && currentImagePath.startsWith("data/images/recipes/")) {
         await window.CookbookGitHub.deleteFile(
           currentImagePath,
-          `Delete recipe image ${editingId}`,
+          `Excluir imagem da receita ${editingId}`,
           token
         );
       }
@@ -280,12 +280,12 @@
       await window.CookbookGitHub.putJsonFile(
         "data/recipes/_index.json",
         nextIndex,
-        `Refresh recipe index after delete ${editingId}`,
+        `Atualizar índice de receitas após excluir ${editingId}`,
         token
       );
       window.location.href = "index.html";
     } catch (err) {
-      showStatus(status, err.message || "Delete failed.", "error");
+      showStatus(status, err.message || "Falha ao excluir.", "error");
     }
   }
 
@@ -300,7 +300,7 @@
       window.CookbookData.loadRecipeIndex(),
     ]);
 
-    qs("#page-title").textContent = editingId ? "Edit recipe" : "New recipe";
+    qs("#page-title").textContent = editingId ? "Editar receita" : "Nova receita";
     qs("[data-delete]")?.toggleAttribute("hidden", !editingId);
 
     if (editingId) {

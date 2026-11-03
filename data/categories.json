@@ -1,5 +1,5 @@
 [
-  { "id": "desserts", "name": "Desserts" },
-  { "id": "mains", "name": "Mains" },
-  { "id": "breakfast", "name": "Breakfast" }
+  { "id": "desserts", "name": "Sobremesas" },
+  { "id": "mains", "name": "Pratos principais" },
+  { "id": "breakfast", "name": "Café da manhã" }
 ]

@@ -1,37 +1,37 @@
 [
   {
     "id": "flour",
-    "name": "All-purpose flour",
+    "name": "Farinha de trigo",
     "image": "data/images/ingredients/flour.svg"
   },
   {
     "id": "sugar",
-    "name": "Granulated sugar",
+    "name": "Açúcar cristal",
     "image": "data/images/ingredients/sugar.svg"
   },
   {
     "id": "eggs",
-    "name": "Eggs",
+    "name": "Ovos",
     "image": "data/images/ingredients/eggs.svg"
   },
   {
     "id": "butter",
-    "name": "Butter",
+    "name": "Manteiga",
     "image": "data/images/ingredients/butter.svg"
   },
   {
     "id": "milk",
-    "name": "Milk",
+    "name": "Leite",
     "image": "data/images/ingredients/milk.svg"
   },
   {
     "id": "chocolate",
-    "name": "Dark chocolate",
+    "name": "Chocolate amargo",
     "image": "data/images/ingredients/chocolate.svg"
   },
   {
     "id": "salt",
-    "name": "Salt",
+    "name": "Sal",
     "image": "data/images/ingredients/salt.svg"
   }
 ]

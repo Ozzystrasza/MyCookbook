@@ -97,7 +97,7 @@
     if (!res.ok) await parseError(res);
     const data = await res.json();
     if (data.permissions && data.permissions.push === false) {
-      throw new Error("This token can read the repo but cannot write. Create a token with Contents: Read and write.");
+      throw new Error("Este token consegue ler o repositório, mas não gravar. Crie um token com Contents: Read and write.");
     }
     return data;
   }

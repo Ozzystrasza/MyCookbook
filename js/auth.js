@@ -28,7 +28,7 @@
 
   async function setCook(token) {
     const trimmed = token.trim();
-    if (!trimmed) throw new Error("Paste a GitHub personal access token.");
+    if (!trimmed) throw new Error("Cole um token de acesso pessoal do GitHub.");
     await window.CookbookGitHub.validateToken(trimmed);
     localStorage.setItem(storageKeys.role, "cook");
     localStorage.setItem(storageKeys.token, trimmed);
@@ -60,30 +60,30 @@
         <div class="gate__panel" data-gate-step="choice">
           <h1 id="gate-title" class="gate__title">My Cookbook</h1>
           <div class="gate__actions">
-            <button type="button" class="btn btn--primary" data-gate="cook">Open Book</button>
-            <button type="button" class="btn btn--ghost" data-gate="visitor">Peek Inside</button>
+            <button type="button" class="btn btn--primary" data-gate="cook">Abrir livro</button>
+            <button type="button" class="btn btn--ghost" data-gate="visitor">Dar uma espiada</button>
           </div>
         </div>
         <div class="gate__panel" data-gate-step="token" hidden>
-          <button type="button" class="gate__back" data-gate-back aria-label="Back">
+          <button type="button" class="gate__back" data-gate-back aria-label="Voltar">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <path d="M12.5 4.5L7 10l5.5 5.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-          <h1 id="gate-token-title" class="gate__title gate__title--sm">Open Book</h1>
+          <h1 id="gate-token-title" class="gate__title gate__title--sm">Abrir livro</h1>
           <form class="gate__cook" data-gate-cook>
             <div class="field">
               <input
                 type="password"
                 name="token"
                 autocomplete="off"
-                placeholder="Password"
-                aria-label="Password"
+                placeholder="Senha"
+                aria-label="Senha"
                 required
               />
             </div>
             <p class="form-error" data-gate-error hidden></p>
-            <button type="submit" class="btn btn--primary">Open</button>
+            <button type="submit" class="btn btn--primary">Abrir</button>
           </form>
         </div>
       </div>
@@ -125,18 +125,18 @@
       const token = new FormData(cookForm).get("token");
       const submit = cookForm.querySelector('button[type="submit"]');
       submit.disabled = true;
-      submit.textContent = "Checking…";
+      submit.textContent = "Verificando…";
       try {
         await setCook(String(token || ""));
         container.remove();
         document.body.classList.remove("is-gated");
         window.dispatchEvent(new CustomEvent("cookbook:ready"));
       } catch (err) {
-        errorEl.textContent = err.message || "Could not validate token.";
+        errorEl.textContent = err.message || "Não foi possível validar o token.";
         errorEl.hidden = false;
       } finally {
         submit.disabled = false;
-        submit.textContent = "Open";
+        submit.textContent = "Abrir";
       }
     });
   }

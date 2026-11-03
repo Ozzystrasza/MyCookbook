@@ -42,7 +42,7 @@
   }
 
   function categoryName(id) {
-    return state.categories.find((c) => c.id === id)?.name || id || "Uncategorized";
+    return state.categories.find((c) => c.id === id)?.name || id || "Sem categoria";
   }
 
   function favoritesStorageKey() {
@@ -125,7 +125,7 @@
           await window.CookbookGitHub.putJsonFile(
             "data/favorites.json",
             [...state.favoriteIds],
-            "Seed favorites",
+            "Inicializar favoritos",
             token
           );
         } catch (_) {
@@ -153,7 +153,7 @@
 
   function favoriteBtnHtml(recipeId, extraClass = "") {
     const on = isFavorite(recipeId);
-    const label = on ? "Remove from favorites" : "Add to favorites";
+    const label = on ? "Remover dos favoritos" : "Adicionar aos favoritos";
     const cls = extraClass ? `favorite-btn ${extraClass}` : "favorite-btn";
     return `<button type="button" class="${cls}" data-favorite-toggle="${escapeHtml(recipeId)}" aria-pressed="${on ? "true" : "false"}" title="${label}" aria-label="${label}">${HEART_SVG}</button>`;
   }
@@ -162,9 +162,10 @@
     document.querySelectorAll("[data-favorite-toggle]").forEach((btn) => {
       const id = btn.getAttribute("data-favorite-toggle");
       const on = isFavorite(id);
-      const label = on ? "Remove from favorites" : "Add to favorites";
+      const label = on ? "Remover dos favoritos" : "Adicionar aos favoritos";
       btn.setAttribute("aria-pressed", on ? "true" : "false");
       btn.setAttribute("aria-label", label);
+      btn.setAttribute("title", label);
       btn.title = label;
     });
   }
@@ -195,7 +196,7 @@
       await window.CookbookGitHub.putJsonFile(
         "data/favorites.json",
         [...state.favoriteIds],
-        "Update favorites",
+        "Atualizar favoritos",
         window.CookbookAuth.getToken()
       );
     } catch (err) {
@@ -203,7 +204,7 @@
       else state.favoriteIds.delete(id);
       saveFavoritesLocal();
       refreshFavoriteUi();
-      window.alert(err.message || "Could not sync favorites.");
+      window.alert(err.message || "Não foi possível sincronizar os favoritos.");
     }
   }
 
@@ -240,11 +241,11 @@
       state.favoritesOnly || state.categoryFilters.length > 0 || state.searchQuery.trim();
     if (state.recipes.length && narrowed) {
       if (state.favoritesOnly && !state.favoriteIds.size) {
-        return `<div class="empty">No favorite recipes yet.</div>`;
+        return `<div class="empty">Nenhuma receita favorita ainda.</div>`;
       }
-      return `<div class="empty">No recipes match these filters.</div>`;
+      return `<div class="empty">Nenhuma receita corresponde a estes filtros.</div>`;
     }
-    return `<div class="empty">No recipes yet.</div>`;
+    return `<div class="empty">Nenhuma receita ainda.</div>`;
   }
 
   function escapeHtml(value) {
@@ -324,7 +325,7 @@
     return `
       <div class="book-preview">
         <div class="book-preview__media-wrap">
-          <button type="button" class="book-preview__media-btn" data-open-recipe="${id}" aria-label="Open ${title}">
+          <button type="button" class="book-preview__media-btn" data-open-recipe="${id}" aria-label="Abrir ${title}">
             <img class="book-preview__media" src="${escapeHtml(recipe.image || "")}" alt="" />
           </button>
           ${favoriteBtnHtml(recipe.id, "book-preview__favorite")}
@@ -381,11 +382,11 @@
     }
 
     (recipe.groups || []).forEach((group) => {
-      blocks.push(`<h2 class="book-read__section-title">${escapeHtml(group.name || "Section")}</h2>`);
-      blocks.push(`<p class="book-read__label">Ingredients</p>`);
+      blocks.push(`<h2 class="book-read__section-title">${escapeHtml(group.name || "Seção")}</h2>`);
+      blocks.push(`<p class="book-read__label">Ingredientes</p>`);
       const lines = group.ingredients || [];
       if (!lines.length) {
-        blocks.push(`<p>None listed.</p>`);
+        blocks.push(`<p>Nenhum listado.</p>`);
       } else {
         lines.forEach((line) => {
           const ingredient = ingredients[line.ingredientId];
@@ -398,10 +399,10 @@
             </div>`);
         });
       }
-      blocks.push(`<p class="book-read__label">Steps</p>`);
+      blocks.push(`<p class="book-read__label">Passos</p>`);
       const steps = group.steps || [];
       if (!steps.length) {
-        blocks.push(`<p>No steps yet.</p>`);
+        blocks.push(`<p>Nenhum passo ainda.</p>`);
       } else {
         steps.forEach((step, index) => {
           blocks.push(
@@ -530,7 +531,7 @@
     const favoritesBtn = qs("[data-favorites]");
     if (favoritesBtn) {
       favoritesBtn.setAttribute("aria-pressed", state.favoritesOnly ? "true" : "false");
-      const favLabel = state.favoritesOnly ? "Show all recipes" : "Show favorites";
+      const favLabel = state.favoritesOnly ? "Mostrar todas as receitas" : "Mostrar favoritos";
       favoritesBtn.setAttribute("aria-label", favLabel);
       favoritesBtn.title = favLabel;
     }
@@ -576,7 +577,7 @@
     const list = qs("[data-filter-list]");
     if (!list) return;
     if (!state.categories.length) {
-      list.innerHTML = `<p class="book-filter__empty">No categories yet.</p>`;
+      list.innerHTML = `<p class="book-filter__empty">Nenhuma categoria ainda.</p>`;
       return;
     }
     const selected = new Set(state.categoryFilters);

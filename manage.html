@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#2f5d3a" />
-    <title>Manage · My Cookbook</title>
+    <title>Gerenciar · My Cookbook</title>
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
@@ -14,31 +14,31 @@
     <header class="site-header" data-site-header></header>
     <main class="page">
       <section class="panel">
-        <h1>Manage catalogs</h1>
-        <p class="hint">Categories, measures, and reusable ingredients with pictures.</p>
+        <h1>Gerenciar catálogos</h1>
+        <p class="hint">Categorias, medidas e ingredientes reutilizáveis com fotos.</p>
         <p class="status" data-status hidden></p>
 
         <div class="tabs" data-tabs>
-          <button type="button" class="btn btn--ghost is-active" data-tab="categories">Categories</button>
-          <button type="button" class="btn btn--ghost" data-tab="measures">Measures</button>
-          <button type="button" class="btn btn--ghost" data-tab="ingredients">Ingredients</button>
+          <button type="button" class="btn btn--ghost is-active" data-tab="categories">Categorias</button>
+          <button type="button" class="btn btn--ghost" data-tab="measures">Medidas</button>
+          <button type="button" class="btn btn--ghost" data-tab="ingredients">Ingredientes</button>
         </div>
 
         <div data-panel-categories>
           <form id="category-form" class="stack">
             <div class="row row--2">
               <label class="field">
-                <span>Id (optional on create)</span>
+                <span>Id (opcional ao criar)</span>
                 <input id="category-id" placeholder="desserts" />
               </label>
               <label class="field">
-                <span>Name</span>
-                <input id="category-name" required placeholder="Desserts" />
+                <span>Nome</span>
+                <input id="category-name" required placeholder="Sobremesas" />
               </label>
             </div>
             <div class="actions">
-              <button type="submit" class="btn btn--primary">Add category</button>
-              <button type="button" class="btn btn--ghost" data-reset-category>Reset</button>
+              <button type="submit" class="btn btn--primary">Adicionar categoria</button>
+              <button type="button" class="btn btn--ghost" data-reset-category>Limpar</button>
             </div>
           </form>
           <div class="catalog-grid" data-category-list style="margin-top:1rem"></div>
@@ -48,21 +48,21 @@
           <form id="measure-form" class="stack">
             <div class="row row--3">
               <label class="field">
-                <span>Id (optional on create)</span>
+                <span>Id (opcional ao criar)</span>
                 <input id="measure-id" placeholder="tbsp" />
               </label>
               <label class="field">
-                <span>Name</span>
-                <input id="measure-name" required placeholder="tablespoon" />
+                <span>Nome</span>
+                <input id="measure-name" required placeholder="colher de sopa" />
               </label>
               <label class="field">
-                <span>Abbreviation</span>
-                <input id="measure-abbrev" placeholder="tbsp" />
+                <span>Abreviação</span>
+                <input id="measure-abbrev" placeholder="c.s." />
               </label>
             </div>
             <div class="actions">
-              <button type="submit" class="btn btn--primary">Add measure</button>
-              <button type="button" class="btn btn--ghost" data-reset-measure>Reset</button>
+              <button type="submit" class="btn btn--primary">Adicionar medida</button>
+              <button type="button" class="btn btn--ghost" data-reset-measure>Limpar</button>
             </div>
           </form>
           <div class="catalog-grid" data-measure-list style="margin-top:1rem"></div>
@@ -72,22 +72,22 @@
           <form id="ingredient-form" class="stack">
             <div class="row row--2">
               <label class="field">
-                <span>Id (optional on create)</span>
+                <span>Id (opcional ao criar)</span>
                 <input id="ingredient-id" placeholder="flour" />
               </label>
               <label class="field">
-                <span>Name</span>
-                <input id="ingredient-name" required placeholder="All-purpose flour" />
+                <span>Nome</span>
+                <input id="ingredient-name" required placeholder="Farinha de trigo" />
               </label>
             </div>
             <label class="field">
-              <span>Picture</span>
+              <span>Foto</span>
               <input id="ingredient-image" type="file" accept="image/*" />
             </label>
             <p class="hint" data-ingredient-image-hint></p>
             <div class="actions">
-              <button type="submit" class="btn btn--primary">Add ingredient</button>
-              <button type="button" class="btn btn--ghost" data-reset-ingredient>Reset</button>
+              <button type="submit" class="btn btn--primary">Adicionar ingrediente</button>
+              <button type="button" class="btn btn--ghost" data-reset-ingredient>Limpar</button>
             </div>
           </form>
           <div class="catalog-grid" data-ingredient-list style="margin-top:1rem"></div>
