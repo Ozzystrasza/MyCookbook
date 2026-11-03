@@ -585,7 +585,8 @@ textarea {
 }
 
 /* —— Book shell —— */
-body.is-reading .site-header {
+body.is-reading .site-header,
+body.is-shopping .site-header {
   display: none;
 }
 
@@ -628,7 +629,8 @@ body.is-reading .site-header {
   min-width: 0;
 }
 
-.book__reading-bar {
+.book__reading-bar,
+.book__shopping-bar {
   grid-column: 1 / -1;
   grid-row: 1;
 }
@@ -676,7 +678,8 @@ body.is-reading .site-header {
 .book__modes[hidden],
 .book__actions[hidden],
 .book__search[hidden],
-.book__reading-bar[hidden] {
+.book__reading-bar[hidden],
+.book__shopping-bar[hidden] {
   display: none !important;
 }
 
@@ -1205,7 +1208,8 @@ body.is-reading .site-header {
     grid-row: 1;
   }
 
-  .book__reading-bar {
+  .book__reading-bar,
+  .book__shopping-bar {
     grid-column: 1 / -1;
     grid-row: 1;
     justify-self: stretch;
@@ -1255,81 +1259,81 @@ body.is-reading .site-header {
   }
 }
 
-.book__reading-actions {
+.book__reading-actions,
+.book__shopping-actions {
   display: inline-flex;
   gap: 0.25rem;
   align-items: center;
   margin-left: auto;
 }
 
-.shopping-panel {
-  position: fixed;
-  top: 4.25rem;
-  right: max(0.75rem, calc((100vw - 1100px) / 2 + 1.25rem));
-  z-index: 30;
-  width: min(22rem, calc(100vw - 1.5rem));
-  max-height: min(70vh, 32rem);
+.book__shopping-bar {
   display: flex;
-  flex-direction: column;
-  padding: 0.9rem;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: rgba(255, 252, 246, 0.98);
-  box-shadow: var(--shadow);
-}
-
-.shopping-panel[hidden] {
-  display: none !important;
-}
-
-.shopping-panel__header {
-  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0.65rem;
+  width: 100%;
+  grid-column: 1 / -1;
+  grid-row: 1;
 }
 
-.shopping-panel__title {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
+.book__shopping-bar .icon-btn {
+  color: var(--muted);
+}
+
+.book__shopping-bar .icon-btn:hover {
   color: var(--leaf-deep);
 }
 
-.shopping-panel__list {
-  overflow: auto;
+.shopping-page {
   display: grid;
-  gap: 0.45rem;
-  min-height: 0;
-  flex: 1;
+  gap: 1rem;
+  padding: 0.25rem 0.1rem 1rem;
 }
 
-.shopping-panel__empty {
+.shopping-page__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  color: var(--leaf-deep);
+}
+
+.shopping-page__list {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.shopping-page__empty {
   margin: 0;
   padding: 0.75rem 0.25rem;
   color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.shopping-panel__footer {
-  margin-top: 0.75rem;
-  display: flex;
-  justify-content: flex-end;
+  font-size: 0.95rem;
 }
 
 .shopping-row {
   display: grid;
-  grid-template-columns: auto auto auto 40px minmax(0, 1fr);
-  gap: 0.35rem 0.4rem;
+  grid-template-columns: 2.5rem 40px minmax(0, 1fr) auto auto;
+  gap: 0.4rem 0.5rem;
   align-items: center;
-  padding: 0.35rem 0.25rem;
+  padding: 0.45rem 0.2rem;
   border-radius: 10px;
+}
+
+.shopping-row.is-checked {
+  opacity: 0.55;
+  filter: grayscale(0.35);
+  color: var(--muted);
+}
+
+.shopping-row.is-checked .shopping-row__name,
+.shopping-row.is-checked .shopping-row__amount,
+.shopping-row.is-checked .shopping-row__qty {
+  color: var(--muted);
 }
 
 .shopping-row.is-checked .shopping-row__name {
   text-decoration: line-through;
-  color: var(--muted);
 }
 
 .shopping-row__qty {
@@ -1379,11 +1383,18 @@ body.is-reading .site-header {
 .shopping-check-btn {
   border: 0;
   background: transparent;
-  padding: 0.2rem;
+  padding: 0;
+  width: 2.5rem;
+  height: 2.5rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.shopping-check__mark {
+  display: block;
+  flex-shrink: 0;
 }
 
 .shopping-check {
@@ -1413,13 +1424,11 @@ body.is-reading .site-header {
   position: relative;
 }
 
-.shopping-check__box.is-on,
 .shopping-check input:checked + .shopping-check__box {
   border-color: #1f8f4e;
   background: #1f8f4e;
 }
 
-.shopping-check__box.is-on::after,
 .shopping-check input:checked + .shopping-check__box::after {
   content: "";
   position: absolute;

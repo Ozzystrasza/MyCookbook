@@ -1,9 +1,23 @@
 (function () {
   let measuresCache = null;
   let ingredientsCache = null;
-  let panelEl = null;
   let catalogEl = null;
   let recipeEl = null;
+  let chromeBound = false;
+  let listActionsBound = false;
+
+  const CHECK_MARK_SVG = `
+    <svg class="shopping-check__mark" width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+      <path
+        d="M6 15.2 11.2 20.5 22 7.5"
+        fill="none"
+        stroke="#1f8f4e"
+        stroke-width="3.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  `;
 
   function storageKey() {
     return window.CookbookConfig.storageKeys.shoppingList;
@@ -180,25 +194,8 @@
       .join(" + ");
   }
 
-  function ensureShell() {
-    if (panelEl) return;
-
-    panelEl = document.createElement("div");
-    panelEl.className = "shopping-panel";
-    panelEl.hidden = true;
-    panelEl.setAttribute("role", "dialog");
-    panelEl.setAttribute("aria-label", "Lista de compras");
-    panelEl.innerHTML = `
-      <div class="shopping-panel__header">
-        <h2 class="shopping-panel__title">Lista de compras</h2>
-        <button type="button" class="btn btn--ghost btn--small" data-shopping-clear>Limpar lista</button>
-      </div>
-      <div class="shopping-panel__list" data-shopping-list></div>
-      <div class="shopping-panel__footer">
-        <button type="button" class="btn btn--primary" data-shopping-add>+</button>
-      </div>
-    `;
-    document.body.appendChild(panelEl);
+  function ensureModals() {
+    if (catalogEl) return;
 
     catalogEl = document.createElement("div");
     catalogEl.className = "shopping-modal";
@@ -250,30 +247,6 @@
     `;
     document.body.appendChild(recipeEl);
 
-    panelEl.querySelector("[data-shopping-clear]")?.addEventListener("click", () => {
-      clearList();
-      renderPanel();
-    });
-    panelEl.querySelector("[data-shopping-add]")?.addEventListener("click", () => {
-      openCatalogPicker();
-    });
-    panelEl.addEventListener("click", (event) => {
-      const btn = event.target.closest("[data-shopping-action]");
-      if (!btn) return;
-      const id = btn.getAttribute("data-id");
-      const action = btn.getAttribute("data-shopping-action");
-      if (!id || !action) return;
-      if (action === "toggle") {
-        const checked = btn.getAttribute("aria-pressed") !== "true";
-        setChecked(id, checked);
-      } else if (action === "inc") {
-        adjustQuantity(id, 1);
-      } else if (action === "dec") {
-        adjustQuantity(id, -1);
-      }
-      renderPanel();
-    });
-
     catalogEl.querySelectorAll("[data-catalog-close]").forEach((el) => {
       el.addEventListener("click", closeCatalogPicker);
     });
@@ -285,8 +258,8 @@
       if (!btn) return;
       addManual(btn.getAttribute("data-catalog-pick"));
       closeCatalogPicker();
-      openPanel();
-      renderPanel();
+      open();
+      renderPage();
     });
 
     recipeEl.querySelectorAll("[data-recipe-close]").forEach((el) => {
@@ -314,90 +287,137 @@
       });
       addRecipeLines(lines);
       closeRecipePicker();
-      openPanel();
-      renderPanel();
+      open();
     });
 
-    document.addEventListener("keydown", (event) => {
-      if (event.key !== "Escape") return;
-      if (!catalogEl.hidden) closeCatalogPicker();
-      else if (!recipeEl.hidden) closeRecipePicker();
-      else if (!panelEl.hidden) closePanel();
-    });
+    document.addEventListener(
+      "keydown",
+      (event) => {
+        if (event.key !== "Escape") return;
+        if (catalogEl && !catalogEl.hidden) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          closeCatalogPicker();
+        } else if (recipeEl && !recipeEl.hidden) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          closeRecipePicker();
+        }
+      },
+      true
+    );
+  }
 
-    document.addEventListener("click", (event) => {
-      if (panelEl.hidden) return;
-      if (panelEl.contains(event.target)) return;
-      if (event.target.closest("[data-shopping-toggle]")) return;
-      if (!catalogEl.hidden || !recipeEl.hidden) return;
-      closePanel();
+  function bindChrome() {
+    if (chromeBound) return;
+    const bar = document.querySelector("[data-shopping-bar]");
+    if (!bar) return;
+    chromeBound = true;
+    bar.querySelector("[data-shopping-back]")?.addEventListener("click", () => {
+      close();
+    });
+    bar.querySelector("[data-shopping-add]")?.addEventListener("click", () => {
+      openCatalogPicker();
+    });
+    bar.querySelector("[data-shopping-clear]")?.addEventListener("click", () => {
+      clearList();
+      renderPage();
     });
   }
 
-  async function renderPanel() {
-    ensureShell();
-    const listRoot = panelEl.querySelector("[data-shopping-list]");
+  function bindListActions() {
+    if (listActionsBound) return;
+    listActionsBound = true;
+    document.addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-shopping-action]");
+      if (!btn || !btn.closest("[data-shopping-list]")) return;
+      const id = btn.getAttribute("data-id");
+      const action = btn.getAttribute("data-shopping-action");
+      if (!id || !action) return;
+      if (action === "toggle") {
+        const checked = btn.getAttribute("aria-pressed") !== "true";
+        setChecked(id, checked);
+      } else if (action === "inc") {
+        adjustQuantity(id, 1);
+      } else if (action === "dec") {
+        adjustQuantity(id, -1);
+      }
+      renderPage();
+    });
+  }
+
+  function rowHtml(item, ingredients, measures) {
+    const ing = ingredients[item.ingredientId];
+    const name = ing?.name || item.ingredientId;
+    const image = ing?.image || "";
+    const amountText = formatAmounts(item.amounts, measures);
+    const checked = item.checked;
+    return `
+      <div class="shopping-row${checked ? " is-checked" : ""}">
+        <button
+          type="button"
+          class="shopping-check-btn"
+          data-shopping-action="toggle"
+          data-id="${escapeHtml(item.ingredientId)}"
+          aria-pressed="${checked ? "true" : "false"}"
+          aria-label="${checked ? "Desmarcar" : "Marcar"} ${escapeHtml(name)}"
+        >
+          ${checked ? CHECK_MARK_SVG : `<span class="shopping-check__box" aria-hidden="true"></span>`}
+        </button>
+        <img class="shopping-row__icon" src="${escapeHtml(image)}" alt="" />
+        <div class="shopping-row__meta">
+          <span class="shopping-row__name">${escapeHtml(name)}</span>
+          ${amountText ? `<span class="shopping-row__amount">${escapeHtml(amountText)}</span>` : ""}
+        </div>
+        <span class="shopping-row__qty">${item.quantity}x</span>
+        <div class="shopping-row__stepper">
+          <button type="button" class="icon-btn shopping-step" data-shopping-action="dec" data-id="${escapeHtml(item.ingredientId)}" aria-label="Diminuir">−</button>
+          <button type="button" class="icon-btn shopping-step" data-shopping-action="inc" data-id="${escapeHtml(item.ingredientId)}" aria-label="Aumentar">+</button>
+        </div>
+      </div>
+    `;
+  }
+
+  async function renderPage() {
+    ensureModals();
+    bindChrome();
+    bindListActions();
+    const listRoot = document.querySelector("[data-shopping-list]");
     if (!listRoot) return;
     const { measures, ingredients } = await ensureData();
     const list = loadList();
     if (!list.length) {
-      listRoot.innerHTML = `<p class="shopping-panel__empty">Sua lista está vazia.</p>`;
+      listRoot.innerHTML = `<p class="shopping-page__empty">Sua lista está vazia.</p>`;
       return;
     }
-    listRoot.innerHTML = list
-      .map((item) => {
-        const ing = ingredients[item.ingredientId];
-        const name = ing?.name || item.ingredientId;
-        const image = ing?.image || "";
-        const amountText = formatAmounts(item.amounts, measures);
-        const checked = item.checked;
-        return `
-          <div class="shopping-row${checked ? " is-checked" : ""}">
-            <button
-              type="button"
-              class="shopping-check-btn"
-              data-shopping-action="toggle"
-              data-id="${escapeHtml(item.ingredientId)}"
-              aria-pressed="${checked ? "true" : "false"}"
-              aria-label="${checked ? "Desmarcar" : "Marcar"} ${escapeHtml(name)}"
-            >
-              <span class="shopping-check__box${checked ? " is-on" : ""}" aria-hidden="true"></span>
-            </button>
-            <span class="shopping-row__qty">${item.quantity}x</span>
-            <div class="shopping-row__stepper">
-              <button type="button" class="icon-btn shopping-step" data-shopping-action="dec" data-id="${escapeHtml(item.ingredientId)}" aria-label="Diminuir">−</button>
-              <button type="button" class="icon-btn shopping-step" data-shopping-action="inc" data-id="${escapeHtml(item.ingredientId)}" aria-label="Aumentar">+</button>
-            </div>
-            <img class="shopping-row__icon" src="${escapeHtml(image)}" alt="" />
-            <div class="shopping-row__meta">
-              <span class="shopping-row__name">${escapeHtml(name)}</span>
-              ${amountText ? `<span class="shopping-row__amount">${escapeHtml(amountText)}</span>` : ""}
-            </div>
-          </div>
-        `;
-      })
-      .join("");
+    listRoot.innerHTML = list.map((item) => rowHtml(item, ingredients, measures)).join("");
   }
 
-  function openPanel() {
-    ensureShell();
-    panelEl.hidden = false;
-    document.querySelector("[data-shopping-toggle]")?.classList.add("is-active");
-    document.querySelector("[data-shopping-toggle]")?.setAttribute("aria-expanded", "true");
-    renderPanel();
+  function pageShellHtml() {
+    return `
+      <div class="shopping-page">
+        <h1 class="shopping-page__title">Lista de compras</h1>
+        <div class="shopping-page__list" data-shopping-list></div>
+      </div>
+    `;
   }
 
-  function closePanel() {
-    if (!panelEl) return;
-    panelEl.hidden = true;
-    document.querySelector("[data-shopping-toggle]")?.classList.remove("is-active");
-    document.querySelector("[data-shopping-toggle]")?.setAttribute("aria-expanded", "false");
+  function open() {
+    ensureModals();
+    bindChrome();
+    if (window.CookbookBook?.openShopping) {
+      window.CookbookBook.openShopping();
+      return;
+    }
+    window.location.href = "index.html?shopping=1";
   }
 
-  function togglePanel() {
-    ensureShell();
-    if (panelEl.hidden) openPanel();
-    else closePanel();
+  function close() {
+    if (window.CookbookBook?.closeShopping) {
+      window.CookbookBook.closeShopping();
+      return;
+    }
+    window.location.href = "index.html";
   }
 
   async function renderCatalogList() {
@@ -408,7 +428,7 @@
       .filter((ing) => !query || String(ing.name || "").toLowerCase().includes(query))
       .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "pt"));
     if (!items.length) {
-      listRoot.innerHTML = `<p class="shopping-panel__empty">Nenhum ingrediente encontrado.</p>`;
+      listRoot.innerHTML = `<p class="shopping-page__empty">Nenhum ingrediente encontrado.</p>`;
       return;
     }
     listRoot.innerHTML = items
@@ -424,7 +444,7 @@
   }
 
   async function openCatalogPicker() {
-    ensureShell();
+    ensureModals();
     catalogEl.hidden = false;
     const search = catalogEl.querySelector("[data-catalog-search]");
     if (search) search.value = "";
@@ -446,7 +466,7 @@
   }
 
   async function openRecipePicker(recipe, ingredientsMap, measuresMap) {
-    ensureShell();
+    ensureModals();
     if (ingredientsMap) {
       ingredientsCache = { ...(ingredientsCache || {}), ...ingredientsMap };
     }
@@ -457,7 +477,7 @@
     const listRoot = recipeEl.querySelector("[data-recipe-list]");
     const lines = (recipe?.groups || []).flatMap((g) => g.ingredients || []);
     if (!lines.length) {
-      listRoot.innerHTML = `<p class="shopping-panel__empty">Esta receita não tem ingredientes.</p>`;
+      listRoot.innerHTML = `<p class="shopping-page__empty">Esta receita não tem ingredientes.</p>`;
     } else {
       listRoot.innerHTML = lines
         .map((line, index) => {
@@ -494,14 +514,19 @@
     recipeEl.hidden = true;
   }
 
+  function hasOpenModal() {
+    return Boolean((catalogEl && !catalogEl.hidden) || (recipeEl && !recipeEl.hidden));
+  }
+
   function bindHeaderToggle(root = document) {
-    ensureShell();
     const btn = root.querySelector("[data-shopping-toggle]");
     if (!btn || btn.dataset.shoppingBound === "1") return;
     btn.dataset.shoppingBound = "1";
+    btn.removeAttribute("aria-haspopup");
+    btn.removeAttribute("aria-expanded");
     btn.addEventListener("click", (event) => {
       event.stopPropagation();
-      togglePanel();
+      open();
     });
   }
 
@@ -512,11 +537,15 @@
     setChecked,
     adjustQuantity,
     clearList,
-    openPanel,
-    closePanel,
-    togglePanel,
+    open,
+    close,
+    openPanel: open,
+    closePanel: close,
+    togglePanel: open,
     openRecipePicker,
     bindHeaderToggle,
-    renderPanel,
+    renderPage,
+    pageShellHtml,
+    hasOpenModal,
   };
 })();

@@ -57,7 +57,7 @@
               <circle cx="15.5" cy="14.5" r="1.75" stroke="currentColor" stroke-width="1.5"/>
             </svg>
           </a>` : ""}
-          <button type="button" class="icon-btn" data-shopping-toggle title="Lista de compras" aria-label="Lista de compras" aria-expanded="false" aria-haspopup="dialog">
+          <button type="button" class="icon-btn" data-shopping-toggle title="Lista de compras" aria-label="Lista de compras">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <path d="M3.5 4.5h1.2l1.1 8.2a1.5 1.5 0 0 0 1.5 1.3h6.9a1.5 1.5 0 0 0 1.5-1.2l1.1-5.3H6.2" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
               <circle cx="8.2" cy="16.2" r="1.1" fill="currentColor"/>
