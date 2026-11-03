@@ -44,9 +44,29 @@
           <a class="brand" href="index.html">My Cookbook</a>
         </div>
         <nav class="site-nav" aria-label="Principal">
-          ${cook ? `<a href="edit.html" class="${active === "edit" ? "is-active" : ""}" data-cook-only>Nova receita</a>` : ""}
-          ${cook ? `<a href="manage.html" class="${active === "manage" ? "is-active" : ""}" data-cook-only>Gerenciar</a>` : ""}
-          <button type="button" class="linkish" data-sign-out>${cook ? "Sair" : "Trocar perfil"}</button>
+          ${cook ? `<a href="edit.html" class="icon-btn${active === "edit" ? " is-active" : ""}" data-cook-only title="Nova receita" aria-label="Nova receita">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+            </svg>
+          </a>` : ""}
+          ${cook ? `<a href="manage.html" class="icon-btn${active === "manage" ? " is-active" : ""}" data-cook-only title="Gerenciar" aria-label="Gerenciar">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M3.5 5.5h9M3.5 10h13M3.5 14.5h9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+              <circle cx="15.5" cy="5.5" r="1.75" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="8.5" cy="10" r="1.75" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="15.5" cy="14.5" r="1.75" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </a>` : ""}
+          <button type="button" class="icon-btn" data-sign-out title="${cook ? "Sair" : "Trocar perfil"}" aria-label="${cook ? "Sair" : "Trocar perfil"}">
+            ${cook
+              ? `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M8 4.5H5.5A1.5 1.5 0 0 0 4 6v8a1.5 1.5 0 0 0 1.5 1.5H8M11.5 13.5 15.5 10 11.5 6.5M15.5 10H8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>`
+              : `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.75"/>
+                  <path d="M4.5 16.5c.9-2.6 2.9-4 5.5-4s4.6 1.4 5.5 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                </svg>`}
+          </button>
         </nav>
       </div>
     `;

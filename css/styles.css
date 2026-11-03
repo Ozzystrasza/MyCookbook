@@ -95,23 +95,22 @@ textarea {
 .site-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.85rem;
+  gap: 0.25rem;
   align-items: center;
 }
 
-.site-nav a,
-.linkish {
+.site-nav .icon-btn {
   color: var(--muted);
-  background: none;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
 }
 
-.site-nav a.is-active,
-.site-nav a:hover,
-.linkish:hover {
+.site-nav .icon-btn.is-active,
+.site-nav .icon-btn:hover {
   color: var(--leaf-deep);
+  background: rgba(31, 63, 40, 0.08);
+}
+
+.site-nav .icon-btn.is-active {
+  background: rgba(31, 63, 40, 0.12);
 }
 
 .page {
