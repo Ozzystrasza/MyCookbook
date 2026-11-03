@@ -4,6 +4,9 @@
   let measures = [];
   let ingredients = [];
   let activeTab = "categories";
+  let editingCategoryId = null;
+  let editingMeasureId = null;
+  let editingIngredientId = null;
 
   function setTab(tab) {
     activeTab = tab;
@@ -23,7 +26,6 @@
       <div class="catalog-card">
         <div class="catalog-card__body">
           <strong>${item.name}</strong>
-          <span class="hint">${item.id}</span>
           <div class="actions">
             <button type="button" class="btn btn--ghost btn--small" data-edit-category="${item.id}">Editar</button>
             <button type="button" class="btn btn--danger btn--small" data-delete-category="${item.id}">Excluir</button>
@@ -36,8 +38,7 @@
     list.querySelectorAll("[data-edit-category]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const item = categories.find((c) => c.id === btn.dataset.editCategory);
-        qs("#category-id").value = item.id;
-        qs("#category-id").disabled = true;
+        editingCategoryId = item.id;
         qs("#category-name").value = item.name;
         qs("#category-form [type='submit']").textContent = "Atualizar categoria";
       });
@@ -73,8 +74,7 @@
     list.querySelectorAll("[data-edit-measure]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const item = measures.find((m) => m.id === btn.dataset.editMeasure);
-        qs("#measure-id").value = item.id;
-        qs("#measure-id").disabled = true;
+        editingMeasureId = item.id;
         qs("#measure-name").value = item.name;
         qs("#measure-abbrev").value = item.abbrev || "";
         qs("#measure-form [type='submit']").textContent = "Atualizar medida";
@@ -99,7 +99,6 @@
         <img src="${item.image || ""}" alt="" />
         <div class="catalog-card__body">
           <strong>${item.name}</strong>
-          <span class="hint">${item.id}</span>
           <div class="actions">
             <button type="button" class="btn btn--ghost btn--small" data-edit-ingredient="${item.id}">Editar</button>
             <button type="button" class="btn btn--danger btn--small" data-delete-ingredient="${item.id}">Excluir</button>
@@ -112,8 +111,7 @@
     list.querySelectorAll("[data-edit-ingredient]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const item = ingredients.find((i) => i.id === btn.dataset.editIngredient);
-        qs("#ingredient-id").value = item.id;
-        qs("#ingredient-id").disabled = true;
+        editingIngredientId = item.id;
         qs("#ingredient-name").value = item.name;
         qs("#ingredient-form [type='submit']").textContent = "Atualizar ingrediente";
         qs("[data-ingredient-image-hint]").textContent = item.image
@@ -192,19 +190,19 @@
 
   function resetCategoryForm() {
     qs("#category-form").reset();
-    qs("#category-id").disabled = false;
+    editingCategoryId = null;
     qs("#category-form [type='submit']").textContent = "Adicionar categoria";
   }
 
   function resetMeasureForm() {
     qs("#measure-form").reset();
-    qs("#measure-id").disabled = false;
+    editingMeasureId = null;
     qs("#measure-form [type='submit']").textContent = "Adicionar medida";
   }
 
   function resetIngredientForm() {
     qs("#ingredient-form").reset();
-    qs("#ingredient-id").disabled = false;
+    editingIngredientId = null;
     qs("#ingredient-form [type='submit']").textContent = "Adicionar ingrediente";
     qs("[data-ingredient-image-hint]").textContent = "";
   }
@@ -231,12 +229,10 @@
 
     qs("#category-form").addEventListener("submit", async (event) => {
       event.preventDefault();
-      const idInput = qs("#category-id");
       const name = qs("#category-name").value.trim();
-      const id = idInput.disabled
-        ? idInput.value
-        : window.CookbookData.slugify(qs("#category-id").value.trim() || name);
-      if (!name || !id) return;
+      if (!name) return;
+      const id = editingCategoryId || window.CookbookData.slugify(name);
+      if (!id) return;
       const existing = categories.find((c) => c.id === id);
       if (existing) existing.name = name;
       else categories.push({ id, name });
@@ -245,13 +241,11 @@
 
     qs("#measure-form").addEventListener("submit", async (event) => {
       event.preventDefault();
-      const idInput = qs("#measure-id");
       const name = qs("#measure-name").value.trim();
       const abbrev = qs("#measure-abbrev").value.trim();
-      const id = idInput.disabled
-        ? idInput.value
-        : window.CookbookData.slugify(qs("#measure-id").value.trim() || name);
-      if (!name || !id) return;
+      if (!name) return;
+      const id = editingMeasureId || window.CookbookData.slugify(name);
+      if (!id) return;
       const existing = measures.find((m) => m.id === id);
       if (existing) {
         existing.name = name;
@@ -266,13 +260,12 @@
       event.preventDefault();
       const status = qs("[data-status]");
       const token = window.CookbookAuth.getToken();
-      const idInput = qs("#ingredient-id");
       const name = qs("#ingredient-name").value.trim();
+      if (!name) return;
+
       const existingIds = new Set(ingredients.map((i) => i.id));
-      const id = idInput.disabled
-        ? idInput.value
-        : window.CookbookData.uniqueId(qs("#ingredient-id").value.trim() || name, existingIds);
-      if (!name || !id) return;
+      const id = editingIngredientId || window.CookbookData.uniqueId(name, existingIds);
+      if (!id) return;
 
       const file = qs("#ingredient-image").files?.[0];
       const existing = ingredients.find((i) => i.id === id);

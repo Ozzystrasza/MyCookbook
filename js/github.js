@@ -24,7 +24,10 @@
 
   async function getFile(path, token) {
     const url = `${api}/repos/${owner}/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g, "/")}?ref=${branch}`;
-    const res = await fetch(url, { headers: headers(token) });
+    const res = await fetch(url, {
+      cache: "no-store",
+      headers: headers(token, { "Cache-Control": "no-cache" }),
+    });
     if (res.status === 404) return null;
     if (!res.ok) await parseError(res);
     return res.json();
@@ -65,8 +68,15 @@
   }
 
   async function putTextFile(path, text, message, token) {
+    const contentBase64 = encodeUtf8Base64(text);
     const existing = await getFile(path, token);
-    return putFile(path, encodeUtf8Base64(text), message, token, existing?.sha);
+    try {
+      return await putFile(path, contentBase64, message, token, existing?.sha);
+    } catch (err) {
+      if (!/does not match/i.test(err?.message || "")) throw err;
+      const fresh = await getFile(path, token);
+      return putFile(path, contentBase64, message, token, fresh?.sha);
+    }
   }
 
   async function putJsonFile(path, data, message, token) {

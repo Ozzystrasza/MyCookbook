@@ -26,16 +26,10 @@
 
         <div data-panel-categories>
           <form id="category-form" class="stack">
-            <div class="row row--2">
-              <label class="field">
-                <span>Id (opcional ao criar)</span>
-                <input id="category-id" placeholder="desserts" />
-              </label>
-              <label class="field">
-                <span>Nome</span>
-                <input id="category-name" required placeholder="Sobremesas" />
-              </label>
-            </div>
+            <label class="field">
+              <span>Nome</span>
+              <input id="category-name" required placeholder="Sobremesas" />
+            </label>
             <div class="actions">
               <button type="submit" class="btn btn--primary">Adicionar categoria</button>
               <button type="button" class="btn btn--ghost" data-reset-category>Limpar</button>
@@ -46,11 +40,7 @@
 
         <div data-panel-measures hidden>
           <form id="measure-form" class="stack">
-            <div class="row row--3">
-              <label class="field">
-                <span>Id (opcional ao criar)</span>
-                <input id="measure-id" placeholder="tbsp" />
-              </label>
+            <div class="row row--2">
               <label class="field">
                 <span>Nome</span>
                 <input id="measure-name" required placeholder="colher de sopa" />
@@ -70,16 +60,10 @@
 
         <div data-panel-ingredients hidden>
           <form id="ingredient-form" class="stack">
-            <div class="row row--2">
-              <label class="field">
-                <span>Id (opcional ao criar)</span>
-                <input id="ingredient-id" placeholder="flour" />
-              </label>
-              <label class="field">
-                <span>Nome</span>
-                <input id="ingredient-name" required placeholder="Farinha de trigo" />
-              </label>
-            </div>
+            <label class="field">
+              <span>Nome</span>
+              <input id="ingredient-name" required placeholder="Farinha de trigo" />
+            </label>
             <label class="field">
               <span>Foto</span>
               <input id="ingredient-image" type="file" accept="image/*" />
