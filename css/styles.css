@@ -605,22 +605,26 @@ body.is-reading .site-header {
 
 .book__modes {
   grid-column: 1;
+  grid-row: 1;
   justify-self: start;
 }
 
 .book__actions {
   grid-column: 2;
+  grid-row: 1;
   justify-self: end;
 }
 
 .book__search {
   grid-column: 1 / -1;
+  grid-row: 2;
   display: block;
   min-width: 0;
 }
 
 .book__reading-bar {
   grid-column: 1 / -1;
+  grid-row: 1;
 }
 
 .book__modes,
@@ -1072,10 +1076,12 @@ body.is-reading .site-header {
 
   .book__modes {
     grid-column: 1;
+    grid-row: 1;
   }
 
   .book__search {
     grid-column: 2;
+    grid-row: 1;
     max-width: 22rem;
     width: 100%;
     justify-self: center;
@@ -1083,10 +1089,12 @@ body.is-reading .site-header {
 
   .book__actions {
     grid-column: 3;
+    grid-row: 1;
   }
 
   .book__reading-bar {
     grid-column: 1;
+    grid-row: 1;
     justify-self: start;
   }
 
