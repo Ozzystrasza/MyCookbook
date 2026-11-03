@@ -61,11 +61,14 @@ After you save, GitHub stores the JSON and images in this repo. The public site 
 | `recipe.html` | Single recipe |
 | `edit.html` | Create/edit recipe (cook) |
 | `manage.html` | Categories, measures, ingredients (cook) |
+| `vendor/page-flip.browser.js` | StPageFlip (page-turn) browser bundle |
 | `data/categories.json` | Category catalog |
 | `data/measures.json` | Measure catalog |
 | `data/ingredients/` | Ingredient catalog + `_index.json` |
 | `data/recipes/` | Recipes + `_index.json` |
 | `data/images/` | Ingredient and recipe images |
+
+Book browse and recipe reading use [StPageFlip](https://nodlik.github.io/StPageFlip/) via the vendored script above (loaded in `index.html` before `js/book.js`). List view and shopping list do not use it.
 
 ## Local preview
 

@@ -801,7 +801,7 @@ body.is-shopping .site-header {
 
 .book__nav {
   position: absolute;
-  z-index: 5;
+  z-index: 20;
   background: rgba(255, 252, 246, 0.88);
   box-shadow: 0 2px 10px rgba(28, 36, 28, 0.08);
 }
@@ -822,6 +822,23 @@ body.is-shopping .site-header {
   display: none !important;
 }
 
+.book__flip-slot {
+  position: relative;
+  width: 100%;
+  min-height: min(70vh, 640px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.book__flip-slot[hidden] {
+  display: none !important;
+}
+
+.book__flip {
+  margin: 0 auto;
+}
+
 .book__spread {
   display: grid;
   grid-template-columns: 8px 1fr;
@@ -832,12 +849,10 @@ body.is-shopping .site-header {
   border: 1px solid rgba(28, 36, 28, 0.16);
   border-left: 0;
   background: #c4b59a;
-  transition: opacity 0.22s ease;
 }
 
-.book__spread.is-flipping,
-.book__spread.is-flipping-forward {
-  opacity: 0.55;
+.book__spread[hidden] {
+  display: none !important;
 }
 
 .book__spine {
@@ -866,6 +881,16 @@ body.is-shopping .site-header {
     ),
     linear-gradient(180deg, #f7f2e6 0%, #efe6d4 100%);
   color: var(--ink);
+}
+
+.stf-page {
+  height: 100%;
+  box-shadow: 0 4px 18px rgba(28, 36, 28, 0.12);
+  border: 1px solid rgba(28, 36, 28, 0.12);
+}
+
+.stf-page .book-preview {
+  height: 100%;
 }
 
 .book__page--left {
@@ -1213,6 +1238,10 @@ body.is-shopping .site-header {
     grid-column: 1 / -1;
     grid-row: 1;
     justify-self: stretch;
+  }
+
+  .book__flip-slot {
+    min-height: min(72vh, 680px);
   }
 
   .book__spread {
