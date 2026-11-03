@@ -476,7 +476,8 @@
       clickEventForward: true,
       disableFlipByClick: true,
       mobileScrollSupport: false,
-      useMouseEvents: !reduced,
+      useMouseEvents: false,
+      showPageCorners: false,
       startPage: start,
       maxShadowOpacity: 0.45,
     });
@@ -487,7 +488,7 @@
     });
 
     pageFlip.on("changeState", (e) => {
-      state.flipping = e.data === "flipping" || e.data === "user_fold" || e.data === "fold_corner";
+      state.flipping = e.data === "flipping";
     });
 
     pageFlip.loadFromHTML(pages);
@@ -758,7 +759,7 @@
     const showNav =
       !shopping &&
       ((reading && state.readingPages.length > pagesPerSpread()) ||
-        (!reading && state.viewMode === "book" && visible.length > pagesPerSpread()) ||
+        (!reading && state.viewMode === "book" && visible.length > 1) ||
         (!reading &&
           state.viewMode === "list" &&
           isDesktop() &&
@@ -1068,6 +1069,59 @@
     void toggleFavorite(fav.getAttribute("data-favorite-toggle"));
   }
 
+  function onFlipSlotEdgeTap(e) {
+    if (!usesFlipBook() || !pageFlip || state.flipping) return;
+    if (e.target.closest("button, a, input, label, [data-open-recipe], [data-favorite-toggle]")) {
+      return;
+    }
+    const slot = qs("[data-flip-slot]");
+    if (!slot) return;
+    const rect = slot.getBoundingClientRect();
+    if (!rect.width) return;
+    const ratio = (e.clientX - rect.left) / rect.width;
+    if (ratio <= 0.25) flip("prev");
+    else if (ratio >= 0.75) flip("next");
+  }
+
+  function bindFlipGestures() {
+    const slot = qs("[data-flip-slot]");
+    if (!slot) return;
+
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+
+    slot.addEventListener(
+      "touchstart",
+      (e) => {
+        if (!usesFlipBook() || state.flipping) return;
+        const t = e.changedTouches[0];
+        startX = t.clientX;
+        startY = t.clientY;
+        tracking = true;
+      },
+      { passive: true }
+    );
+
+    slot.addEventListener(
+      "touchend",
+      (e) => {
+        if (!tracking) return;
+        tracking = false;
+        if (!usesFlipBook() || state.flipping) return;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        if (Math.abs(dx) < 40 || Math.abs(dx) <= Math.abs(dy)) return;
+        if (dx < 0) flip("next");
+        else flip("prev");
+      },
+      { passive: true }
+    );
+
+    slot.addEventListener("click", onFlipSlotEdgeTap);
+  }
+
   function bindUi() {
     qsAllModeButtons().forEach((btn) => {
       btn.addEventListener("click", () => setViewMode(btn.getAttribute("data-view")));
@@ -1096,6 +1150,7 @@
     });
     qs("[data-spread]")?.addEventListener("click", onFavoriteClick);
     qs("[data-flip-slot]")?.addEventListener("click", onFavoriteClick);
+    bindFlipGestures();
     qs("[data-filter-panel]")?.addEventListener("click", (e) => e.stopPropagation());
     qs("[data-recipe-search]")?.addEventListener("input", (e) => {
       state.searchQuery = e.target.value || "";
