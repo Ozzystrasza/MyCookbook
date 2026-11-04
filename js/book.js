@@ -400,16 +400,17 @@
     const stage = qs(".book__stage");
     const stageW = Math.max(260, stage?.clientWidth || window.innerWidth - 32);
     const stageH = Math.min(window.innerHeight * (isDesktop() ? 0.72 : 0.7), isDesktop() ? 680 : 640);
+    // Prefer a taller ~2:3 page so the flip reads more like a book than a magazine.
     if (isDesktop()) {
-      return {
-        width: Math.max(280, Math.floor(stageW / 2)),
-        height: Math.max(360, Math.floor(stageH)),
-        minWidth: 260,
-      };
+      const height = Math.max(360, Math.floor(stageH));
+      const width = Math.max(280, Math.min(Math.floor(stageW / 2), Math.floor(height * 0.68)));
+      return { width, height, minWidth: 260 };
     }
+    const width = Math.max(260, Math.floor(stageW));
+    const height = Math.max(360, Math.min(Math.floor(stageH), Math.floor(width / 0.68)));
     return {
-      width: Math.max(260, Math.floor(stageW)),
-      height: Math.max(360, Math.floor(stageH)),
+      width,
+      height,
       minWidth: Math.floor(stageW / 2) + 1,
     };
   }
@@ -491,7 +492,7 @@
       minHeight: 360,
       maxHeight: 1200,
       drawShadow: true,
-      flippingTime: 1000,
+      flippingTime: 1300,
       usePortrait: !desktop,
       showCover: false,
       autoSize: true,
@@ -501,7 +502,7 @@
       useMouseEvents: false,
       showPageCorners: false,
       startPage: start,
-      maxShadowOpacity: 0.8,
+      maxShadowOpacity: 0.05,
     });
 
     pageFlip.on("flip", (e) => {
@@ -979,8 +980,8 @@
     if (direction === "next" && !canFlipNext()) return;
 
     if (pageFlip && usesFlipBook()) {
-      if (direction === "next") pageFlip.flipNext("top");
-      else pageFlip.flipPrev("top");
+      if (direction === "next") pageFlip.flipNext("bottom");
+      else pageFlip.flipPrev("bottom");
       return;
     }
 

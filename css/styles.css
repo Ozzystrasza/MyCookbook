@@ -898,20 +898,20 @@ body.is-shopping .site-header {
   padding: 1.15rem 1.1rem 1.35rem;
   overflow: hidden;
   background:
-    linear-gradient(90deg, rgba(28, 36, 28, 0.04), transparent 12px),
+    linear-gradient(90deg, rgba(28, 36, 28, 0.06), transparent 14px),
     repeating-linear-gradient(
       transparent,
       transparent 27px,
-      rgba(47, 93, 58, 0.06) 28px
+      rgba(47, 93, 58, 0.03) 28px
     ),
-    linear-gradient(180deg, #f7f2e6 0%, #efe6d4 100%);
+    #efe8dc;
   color: var(--ink);
 }
 
 .stf-page {
   height: 100%;
-  box-shadow: 0 4px 18px rgba(28, 36, 28, 0.12);
-  border: 1px solid rgba(28, 36, 28, 0.12);
+  box-shadow: 0 1px 4px rgba(28, 36, 28, 0.06);
+  border: 1px solid rgba(28, 36, 28, 0.1);
 }
 
 .stf-page .book-preview {
@@ -935,8 +935,8 @@ body.is-shopping .site-header {
 
 .book__page.is-blank {
   background:
-    linear-gradient(90deg, rgba(28, 36, 28, 0.03), transparent 12px),
-    linear-gradient(180deg, #f3ebe0 0%, #e8dfd0 100%);
+    linear-gradient(90deg, rgba(28, 36, 28, 0.05), transparent 14px),
+    #e9e0d2;
 }
 
 .favorite-btn {
@@ -1296,26 +1296,26 @@ body.is-shopping .site-header {
   .book__page--left {
     display: block;
     background:
-      linear-gradient(90deg, rgba(28, 36, 28, 0.05), transparent 18px),
+      linear-gradient(90deg, rgba(28, 36, 28, 0.06), transparent 18px),
       repeating-linear-gradient(
         transparent,
         transparent 27px,
-        rgba(47, 93, 58, 0.055) 28px
+        rgba(47, 93, 58, 0.03) 28px
       ),
-      linear-gradient(180deg, #f7f2e6 0%, #efe6d4 100%);
+      #efe8dc;
     border-radius: 16px 0 0 16px;
     box-shadow: none;
   }
 
   .book__page--right {
     background:
-      linear-gradient(270deg, rgba(28, 36, 28, 0.05), transparent 18px),
+      linear-gradient(270deg, rgba(28, 36, 28, 0.06), transparent 18px),
       repeating-linear-gradient(
         transparent,
         transparent 27px,
-        rgba(47, 93, 58, 0.055) 28px
+        rgba(47, 93, 58, 0.03) 28px
       ),
-      linear-gradient(180deg, #f7f2e6 0%, #efe6d4 100%);
+      #efe8dc;
     border-radius: 0 16px 16px 0;
     box-shadow: none;
   }
