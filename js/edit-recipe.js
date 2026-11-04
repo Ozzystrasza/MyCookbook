@@ -275,7 +275,12 @@
     list.innerHTML = `
       ${rows}
       <button type="button" class="shopping-catalog-item shopping-catalog-item--action" data-pick-create>
-        Adicionar novo ingrediente…
+        <span class="shopping-catalog-item__icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span>Novo Ingrediente</span>
       </button>
     `;
   }
