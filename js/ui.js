@@ -78,13 +78,28 @@
       </div>
     `;
 
-    qs("[data-sign-out]", header)?.addEventListener("click", () => {
-      window.CookbookAuth.signOut();
-      window.location.href = "index.html";
-    });
-
     window.CookbookShopping?.bindHeaderToggle(header);
     window.CookbookAuth.applyCookUi(document);
+  }
+
+  if (!window.__cookbookSignOutBound) {
+    window.__cookbookSignOutBound = true;
+    document.addEventListener(
+      "pointerup",
+      (e) => {
+        const btn = e.target.closest("[data-sign-out]");
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.CookbookBook?.closeToCover) {
+          window.CookbookBook.closeToCover();
+          return;
+        }
+        window.CookbookAuth.signOut();
+        window.location.href = "index.html";
+      },
+      true
+    );
   }
 
   function showStatus(elNode, message, kind = "info") {

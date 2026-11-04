@@ -2,6 +2,7 @@
   const VIEW_KEY = "mycookbook_view_mode";
   const DESKTOP_MQ = "(min-width: 800px)";
   const BLANK_PAGE = `<div class="book-read book-read--blank" aria-hidden="true"></div>`;
+  const COVER_PAGE = "<!--book-cover-->";
   const HEART_SVG = `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
 
   const state = {
@@ -23,13 +24,18 @@
     filterOpen: false,
     favoriteIds: new Set(),
     favoritesOnly: false,
+    coverPhase: "closed",
+    pendingDeepLink: null,
   };
 
   let pageFlip = null;
   let flipSyncing = false;
   let lastFlipSize = null;
   let flipHtmlPages = [];
+  let flipHasCover = false;
   let resizeTimer = null;
+  let autoOpenTimer = null;
+  let closeFallbackTimer = null;
 
   function qs(sel, root = document) {
     return root.querySelector(sel);
@@ -339,7 +345,12 @@
     return pagesPerSpread();
   }
 
+  function coverIsInteractive() {
+    return state.coverPhase !== "open";
+  }
+
   function canFlipPrev() {
+    if (coverIsInteractive()) return false;
     if (pageFlip && usesFlipBook()) {
       return pageFlip.getCurrentPageIndex() > 0;
     }
@@ -353,9 +364,11 @@
   }
 
   function canFlipNext() {
+    if (coverIsInteractive()) return false;
     if (pageFlip && usesFlipBook()) {
-      const content = contentPageCount(flipHtmlPages);
-      return pageFlip.getCurrentPageIndex() + flipStep() < content;
+      const content = contentPageCount(flipHtmlPages.filter((p) => p !== COVER_PAGE));
+      const idx = pageFlip.getCurrentPageIndex();
+      return idx + flipStep() < content;
     }
     const step = pagesPerSpread();
     if (state.mode === "reading") {
@@ -368,10 +381,16 @@
   }
 
   function usesFlipBook() {
+    if (coverIsInteractive() && state.mode === "browse") return true;
     return (
       (state.mode === "reading" && isDesktop()) ||
       (state.mode === "browse" && state.viewMode === "book")
     );
+  }
+
+  function browseContentHtmlPages() {
+    const recipes = visibleRecipes();
+    return recipes.length ? recipes.map((recipe) => previewHtml(recipe)) : [emptyBrowseHtml()];
   }
 
   function setFlipHostsVisible(flipActive) {
@@ -424,10 +443,20 @@
     return el;
   }
 
+  function isCoverPageHtml(html) {
+    return html === COVER_PAGE;
+  }
+
   function buildFlipPageEls(htmlPages) {
     return htmlPages.map((html) => {
       const el = document.createElement("div");
       el.className = "book__page stf-page";
+      if (isCoverPageHtml(html)) {
+        el.classList.add("book__page--cover");
+        el.setAttribute("data-density", "hard");
+        el.innerHTML = window.CookbookAuth.coverFaceHtml();
+        return el;
+      }
       const blank = isBlankPageHtml(html);
       el.classList.toggle("is-blank", blank);
       el.innerHTML = html || BLANK_PAGE;
@@ -435,11 +464,31 @@
     });
   }
 
+  function softenLastPageIfCover() {
+    if (!pageFlip || !flipHasCover) return;
+    try {
+      const last = pageFlip.getPageCount() - 1;
+      if (last > 0) pageFlip.getPage(last).setDensity("soft");
+    } catch (_) {
+      /* ignore */
+    }
+  }
+
   function syncFlipIndex(idx) {
     const page = Number(idx) || 0;
     if (state.mode === "reading") state.readingPageIndex = page;
-    else state.browseIndex = page;
+    else {
+      const contentIdx = flipHasCover ? Math.max(0, page - 1) : page;
+      state.browseIndex = contentIdx;
+    }
     updateChrome();
+  }
+
+  function onCoverFlipSettled() {
+    if (!pageFlip) return;
+    const idx = pageFlip.getCurrentPageIndex();
+    if (state.coverPhase === "opening" && idx >= 1) finishCoverOpen();
+    else if (state.coverPhase === "closing" && idx === 0) finishCoverClose();
   }
 
   function destroyPageFlipOnly() {
@@ -451,6 +500,7 @@
     }
     pageFlip = null;
     lastFlipSize = null;
+    flipHasCover = false;
     ensureFlipRoot();
   }
 
@@ -461,7 +511,7 @@
     state.flipping = false;
   }
 
-  function mountFlipBook(htmlPages, startIndex) {
+  function mountFlipBook(htmlPages, startIndex, options = {}) {
     if (!window.St?.PageFlip) {
       console.warn("StPageFlip not loaded");
       return;
@@ -474,6 +524,7 @@
     if (!root) return;
 
     flipHtmlPages = htmlPages.slice();
+    flipHasCover = Boolean(options.showCover) || isCoverPageHtml(htmlPages[0]);
     const size = measureFlipSize();
     const pages = buildFlipPageEls(htmlPages);
     root.innerHTML = "";
@@ -482,7 +533,9 @@
     const desktop = isDesktop();
     const maxIdx = Math.max(0, pages.length - 1);
     const start = Math.min(Math.max(0, startIndex || 0), maxIdx);
-
+    // Only lock while sitting on the closed cover. During closing, flipPrev goes through
+    // StPageFlip's flip(point) which no-ops when disableFlipByClick is true and the
+    // synthetic left-edge point fails isPointOnCorners — that caused the snap-to-cover bug.
     pageFlip = new window.St.PageFlip(root, {
       width: size.width,
       height: size.height,
@@ -494,10 +547,10 @@
       drawShadow: true,
       flippingTime: 1300,
       usePortrait: !desktop,
-      showCover: false,
+      showCover: flipHasCover,
       autoSize: true,
       clickEventForward: true,
-      disableFlipByClick: false,
+      disableFlipByClick: state.coverPhase === "closed",
       mobileScrollSupport: false,
       useMouseEvents: false,
       showPageCorners: false,
@@ -512,10 +565,12 @@
 
     pageFlip.on("changeState", (e) => {
       state.flipping = e.data === "flipping";
+      if (e.data === "read") onCoverFlipSettled();
     });
 
     pageFlip.loadFromHTML(pages);
-    lastFlipSize = { width: size.width, height: size.height, desktop };
+    softenLastPageIfCover();
+    lastFlipSize = { width: size.width, height: size.height, desktop, cover: flipHasCover };
     flipSyncing = true;
     try {
       pageFlip.turnToPage(start);
@@ -523,36 +578,180 @@
       flipSyncing = false;
     }
     bindOpenHandlers(qs("[data-flip-slot]"));
+    if (flipHasCover && state.coverPhase === "closed") bindCoverAuth();
   }
 
-  function refreshFlipBook(htmlPages, startIndex) {
+  function refreshFlipBook(htmlPages, startIndex, options = {}) {
     setFlipHostsVisible(true);
     const size = measureFlipSize();
     const desktop = isDesktop();
+    const wantCover = Boolean(options.showCover) || isCoverPageHtml(htmlPages[0]);
     const needRemount =
       !pageFlip ||
       !lastFlipSize ||
       lastFlipSize.width !== size.width ||
       lastFlipSize.height !== size.height ||
-      lastFlipSize.desktop !== desktop;
+      lastFlipSize.desktop !== desktop ||
+      lastFlipSize.cover !== wantCover;
 
     if (needRemount) {
-      mountFlipBook(htmlPages, startIndex);
+      mountFlipBook(htmlPages, startIndex, { showCover: wantCover });
       return;
     }
 
     flipHtmlPages = htmlPages.slice();
+    flipHasCover = wantCover;
     const pages = buildFlipPageEls(htmlPages);
     const maxIdx = Math.max(0, pages.length - 1);
     const start = Math.min(Math.max(0, startIndex || 0), maxIdx);
     flipSyncing = true;
     try {
       pageFlip.updateFromHtml(pages);
+      softenLastPageIfCover();
       pageFlip.turnToPage(start);
     } finally {
       flipSyncing = false;
     }
     bindOpenHandlers(qs("[data-flip-slot]"));
+    if (flipHasCover && state.coverPhase === "closed") bindCoverAuth();
+  }
+
+  function bindCoverAuth() {
+    const root = qs("[data-flip-slot]") || qs("[data-flip-root]");
+    window.CookbookAuth.bindCoverGate(root, () => {
+      openFromCover();
+    });
+  }
+
+  function openFromCover() {
+    if (state.coverPhase !== "closed") return;
+    if (!window.CookbookAuth.hasChosenRole()) return;
+    if (!pageFlip) return;
+    state.coverPhase = "opening";
+    updateChrome();
+    try {
+      pageFlip.flipNext("bottom");
+    } catch (_) {
+      finishCoverOpen();
+    }
+  }
+
+  function finishCoverOpen() {
+    if (state.coverPhase !== "opening") return;
+    state.coverPhase = "open";
+    state.browseIndex = 0;
+    document.body.classList.remove("is-gated");
+    render();
+    window.CookbookUI?.mountShell?.({ active: "home" });
+    applyPendingDeepLink();
+  }
+
+  function finishCoverClose() {
+    if (state.coverPhase !== "closing") return;
+    clearTimeout(closeFallbackTimer);
+    state.coverPhase = "closed";
+    document.body.classList.add("is-gated");
+    // Stay on the already-flipped cover — remounting would snap and kill the animation.
+    bindCoverAuth();
+    updateChrome();
+    window.CookbookUI?.mountShell?.({ active: "home" });
+  }
+
+  function closeToCover() {
+    if (state.coverPhase === "closed" || state.coverPhase === "closing") return;
+    clearTimeout(autoOpenTimer);
+    clearTimeout(closeFallbackTimer);
+
+    // Capture current view before resetting — close from this page/spread, not page 1.
+    let currentContentIndex = state.browseIndex;
+    if (
+      pageFlip &&
+      !flipHasCover &&
+      state.mode === "browse" &&
+      state.viewMode === "book"
+    ) {
+      currentContentIndex = pageFlip.getCurrentPageIndex();
+    }
+
+    window.CookbookAuth.signOut();
+    if (state.filterOpen) closeFilterPanel();
+    state.mode = "browse";
+    state.readingId = null;
+    state.readingRecipe = null;
+    state.readingPages = [];
+    state.readingPageIndex = 0;
+    state.browseIndex = 0;
+    syncUrl();
+    state.coverPhase = "closing";
+    updateChrome();
+
+    const content = padEvenPages(browseContentHtmlPages());
+    if (!content.length) content.push(BLANK_PAGE);
+    const idx = Math.min(Math.max(0, currentContentIndex), content.length - 1);
+    let slice;
+    if (isDesktop()) {
+      const spreadStart = idx - (idx % 2);
+      slice = content.slice(spreadStart, spreadStart + 2);
+      if (slice.length === 1) slice.push(BLANK_PAGE);
+    } else {
+      slice = [content[idx] || BLANK_PAGE];
+    }
+
+    // Cover + current view only so one flipPrev hard-closes onto the cover.
+    mountFlipBook([COVER_PAGE, ...slice], 1, { showCover: true });
+
+    if (!pageFlip) {
+      finishCoverClose();
+      return;
+    }
+
+    const startFlipClose = () => {
+      if (!pageFlip || state.coverPhase !== "closing") return;
+      if (pageFlip.getCurrentPageIndex() <= 0) {
+        finishCoverClose();
+        return;
+      }
+      try {
+        pageFlip.flipPrev("bottom");
+      } catch (_) {
+        flipSyncing = true;
+        try {
+          pageFlip.turnToPage(0);
+        } finally {
+          flipSyncing = false;
+        }
+        finishCoverClose();
+        return;
+      }
+      clearTimeout(closeFallbackTimer);
+      closeFallbackTimer = setTimeout(() => {
+        if (state.coverPhase !== "closing") return;
+        if (pageFlip && pageFlip.getCurrentPageIndex() > 0) {
+          flipSyncing = true;
+          try {
+            pageFlip.turnToPage(0);
+          } finally {
+            flipSyncing = false;
+          }
+        }
+        finishCoverClose();
+      }, 2000);
+    };
+
+    requestAnimationFrame(startFlipClose);
+  }
+
+  function applyPendingDeepLink() {
+    const pending = state.pendingDeepLink;
+    state.pendingDeepLink = null;
+    if (!pending) return;
+    if (pending.shopping) {
+      openShopping();
+      return;
+    }
+    if (pending.recipeId) {
+      void openRecipe(pending.recipeId);
+    }
   }
 
   function previewHtml(recipe) {
@@ -749,16 +948,21 @@
     const reading = state.mode === "reading";
     const shopping = state.mode === "shopping";
     const immersed = reading || shopping;
+    const coverClosed = coverIsInteractive();
+    // Keep is-gated off while closing so the hard-close flip keeps open-book layout
+    // (spine/stage). Gate styles apply once settled on the cover.
+    const showGateShell = state.coverPhase === "closed" || state.coverPhase === "opening";
 
-    document.body.classList.toggle("is-reading", reading);
-    document.body.classList.toggle("is-shopping", shopping);
+    document.body.classList.toggle("is-reading", reading && !coverClosed);
+    document.body.classList.toggle("is-shopping", shopping && !coverClosed);
+    document.body.classList.toggle("is-gated", showGateShell);
 
-    if (modes) modes.hidden = immersed;
-    if (actions) actions.hidden = immersed;
-    if (search) search.hidden = immersed;
-    if (readingBar) readingBar.hidden = !reading;
-    if (shoppingBar) shoppingBar.hidden = !shopping;
-    if (immersed && state.filterOpen) closeFilterPanel();
+    if (modes) modes.hidden = immersed || coverClosed;
+    if (actions) actions.hidden = immersed || coverClosed;
+    if (search) search.hidden = immersed || coverClosed;
+    if (readingBar) readingBar.hidden = !reading || coverClosed;
+    if (shoppingBar) shoppingBar.hidden = !shopping || coverClosed;
+    if ((immersed || coverClosed) && state.filterOpen) closeFilterPanel();
 
     qsAllModeButtons().forEach((btn) => {
       const active = btn.getAttribute("data-view") === state.viewMode;
@@ -781,6 +985,7 @@
 
     const visible = visibleRecipes();
     const showNav =
+      !coverClosed &&
       !shopping &&
       ((reading &&
         isDesktop() &&
@@ -894,12 +1099,20 @@
   }
 
   function renderBrowseBook() {
-    const recipes = visibleRecipes();
-    const htmlPages = recipes.length
-      ? recipes.map((recipe) => previewHtml(recipe))
-      : [emptyBrowseHtml()];
     clampBrowseIndex();
-    refreshFlipBook(padEvenPages(htmlPages), state.browseIndex);
+    const content = padEvenPages(browseContentHtmlPages());
+    if (state.coverPhase === "open") {
+      refreshFlipBook(content, state.browseIndex, { showCover: false });
+      return;
+    }
+    if (state.coverPhase === "opening" || state.coverPhase === "closing") {
+      if (!pageFlip) {
+        const start = state.coverPhase === "closing" ? Math.min(1, content.length) : 0;
+        refreshFlipBook([COVER_PAGE, ...content], start, { showCover: true });
+      }
+      return;
+    }
+    refreshFlipBook([COVER_PAGE, ...content], 0, { showCover: true });
   }
 
   function renderBrowseList() {
@@ -955,6 +1168,11 @@
 
   function render() {
     clampBrowseIndex();
+    if (coverIsInteractive() && state.mode === "browse") {
+      renderBrowseBook();
+      updateChrome();
+      return;
+    }
     if (state.mode === "shopping") {
       teardownFlipBook();
       renderShopping();
@@ -975,6 +1193,7 @@
   }
 
   function flip(direction) {
+    if (coverIsInteractive()) return;
     if (state.flipping || state.mode === "shopping") return;
     if (direction === "prev" && !canFlipPrev()) return;
     if (direction === "next" && !canFlipNext()) return;
@@ -1083,6 +1302,7 @@
 
   function setViewMode(mode) {
     if (mode !== "book" && mode !== "list") return;
+    if (coverIsInteractive()) return;
     if (state.mode === "reading" || state.mode === "shopping") return;
     state.viewMode = mode;
     state.browseIndex = 0;
@@ -1103,7 +1323,7 @@
   }
 
   function onFlipSlotEdgeTap(e) {
-    if (!usesFlipBook() || !pageFlip || state.flipping) return;
+    if (coverIsInteractive() || !usesFlipBook() || !pageFlip || state.flipping) return;
     if (e.target.closest("button, a, input, label, [data-open-recipe], [data-favorite-toggle]")) {
       return;
     }
@@ -1127,7 +1347,7 @@
     slot.addEventListener(
       "touchstart",
       (e) => {
-        if (!usesFlipBook() || state.flipping) return;
+        if (coverIsInteractive() || !usesFlipBook() || state.flipping) return;
         const t = e.changedTouches[0];
         startX = t.clientX;
         startY = t.clientY;
@@ -1141,7 +1361,7 @@
       (e) => {
         if (!tracking) return;
         tracking = false;
-        if (!usesFlipBook() || state.flipping) return;
+        if (coverIsInteractive() || !usesFlipBook() || state.flipping) return;
         const t = e.changedTouches[0];
         const dx = t.clientX - startX;
         const dy = t.clientY - startY;
@@ -1215,7 +1435,7 @@
           return;
         }
       }
-      if (state.mode === "shopping") return;
+      if (coverIsInteractive() || state.mode === "shopping") return;
       if (e.key === "ArrowLeft") flip("prev");
       if (e.key === "ArrowRight") flip("next");
     });
@@ -1257,12 +1477,27 @@
     bindUi();
 
     const params = new URLSearchParams(window.location.search);
-    const recipeId = params.get("recipe");
-    const shopping = params.get("shopping") === "1";
+    state.pendingDeepLink = {
+      recipeId: params.get("recipe"),
+      shopping: params.get("shopping") === "1",
+    };
+    state.coverPhase = "closed";
+    document.body.classList.add("is-gated");
     render();
-    if (shopping) openShopping();
-    else if (recipeId) await openRecipe(recipeId);
+
+    if (window.CookbookAuth.hasChosenRole()) {
+      clearTimeout(autoOpenTimer);
+      autoOpenTimer = setTimeout(() => openFromCover(), 480);
+    }
   }
 
-  window.CookbookBook = { start, openRecipe, closeReading, openShopping, closeShopping };
+  window.CookbookBook = {
+    start,
+    openRecipe,
+    closeReading,
+    openShopping,
+    closeShopping,
+    closeToCover,
+    openFromCover,
+  };
 })();

@@ -54,107 +54,167 @@
     });
   }
 
-  function renderGate(container) {
-    container.innerHTML = `
-      <div class="gate" role="dialog" aria-labelledby="gate-title">
-        <div class="gate__panel" data-gate-step="choice">
-          <h1 id="gate-title" class="gate__title">My Cookbook</h1>
-          <div class="gate__actions">
-            <button type="button" class="btn btn--primary" data-gate="cook">Abrir livro</button>
-            <button type="button" class="btn btn--ghost" data-gate="visitor">Dar uma espiada</button>
+  function isBookAppPage() {
+    return Boolean(document.querySelector("[data-book]"));
+  }
+
+  function coverFaceHtml() {
+    return `
+      <div class="book-cover" role="dialog" aria-labelledby="gate-title">
+        <div class="book-cover__body">
+          <div class="book-cover__step" data-gate-step="choice">
+            <h1 id="gate-title" class="book-cover__title">My Cookbook</h1>
+            <div class="book-cover__actions">
+              <button type="button" class="btn btn--primary" data-gate="cook">Abrir livro</button>
+              <button type="button" class="btn btn--ghost" data-gate="visitor">Dar uma espiada</button>
+            </div>
+          </div>
+          <div class="book-cover__step" data-gate-step="token" hidden>
+            <button type="button" class="book-cover__back" data-gate-back aria-label="Voltar">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M12.5 4.5L7 10l5.5 5.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <h1 id="gate-token-title" class="book-cover__title book-cover__title--sm">Abrir livro</h1>
+            <form class="book-cover__cook" data-gate-cook>
+              <div class="field">
+                <input
+                  type="password"
+                  name="token"
+                  autocomplete="off"
+                  placeholder="Senha"
+                  aria-label="Senha"
+                  required
+                />
+              </div>
+              <p class="form-error" data-gate-error hidden></p>
+              <button type="submit" class="btn btn--primary">Abrir</button>
+            </form>
           </div>
         </div>
-        <div class="gate__panel" data-gate-step="token" hidden>
-          <button type="button" class="gate__back" data-gate-back aria-label="Voltar">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M12.5 4.5L7 10l5.5 5.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <h1 id="gate-token-title" class="gate__title gate__title--sm">Abrir livro</h1>
-          <form class="gate__cook" data-gate-cook>
-            <div class="field">
-              <input
-                type="password"
-                name="token"
-                autocomplete="off"
-                placeholder="Senha"
-                aria-label="Senha"
-                required
-              />
-            </div>
-            <p class="form-error" data-gate-error hidden></p>
-            <button type="submit" class="btn btn--primary">Abrir</button>
-          </form>
-        </div>
+        <p class="book-cover__byline">By: Oziris Moreira</p>
       </div>
     `;
+  }
 
-    const choiceStep = container.querySelector('[data-gate-step="choice"]');
-    const tokenStep = container.querySelector('[data-gate-step="token"]');
-    const cookForm = container.querySelector("[data-gate-cook]");
-    const errorEl = container.querySelector("[data-gate-error]");
+  function bindCoverGate(root, onUnlocked) {
+    if (!root) return;
+    root._coverUnlocked = onUnlocked;
+    if (window.__cookbookCoverGateBound) return;
+    window.__cookbookCoverGateBound = true;
+
+    function activeRoot() {
+      return document.querySelector("[data-flip-slot]") || root;
+    }
+
+    function covers() {
+      return [...document.querySelectorAll(".book-cover")];
+    }
 
     function showChoiceStep() {
-      cookForm.reset();
-      errorEl.hidden = true;
-      tokenStep.hidden = true;
-      choiceStep.hidden = false;
-      container.querySelector(".gate").setAttribute("aria-labelledby", "gate-title");
+      covers().forEach((cover) => {
+        const choiceStep = cover.querySelector('[data-gate-step="choice"]');
+        const tokenStep = cover.querySelector('[data-gate-step="token"]');
+        const cookForm = cover.querySelector("[data-gate-cook]");
+        const errorEl = cover.querySelector("[data-gate-error]");
+        cookForm?.reset();
+        if (errorEl) errorEl.hidden = true;
+        if (tokenStep) tokenStep.hidden = true;
+        if (choiceStep) choiceStep.hidden = false;
+        cover.setAttribute("aria-labelledby", "gate-title");
+      });
     }
 
     function showTokenStep() {
-      choiceStep.hidden = true;
-      tokenStep.hidden = false;
-      container.querySelector(".gate").setAttribute("aria-labelledby", "gate-token-title");
-      cookForm.querySelector('input[name="token"]').focus();
+      covers().forEach((cover) => {
+        const choiceStep = cover.querySelector('[data-gate-step="choice"]');
+        const tokenStep = cover.querySelector('[data-gate-step="token"]');
+        if (choiceStep) choiceStep.hidden = true;
+        if (tokenStep) tokenStep.hidden = false;
+        cover.setAttribute("aria-labelledby", "gate-token-title");
+      });
+      document.querySelector('.book-cover [data-gate-step="token"]:not([hidden]) input[name="token"]')?.focus();
     }
 
-    container.querySelector('[data-gate="visitor"]').addEventListener("click", () => {
-      setVisitor();
-      container.remove();
-      document.body.classList.remove("is-gated");
-      window.dispatchEvent(new CustomEvent("cookbook:ready"));
-    });
+    function unlock() {
+      activeRoot()?._coverUnlocked?.();
+    }
 
-    container.querySelector('[data-gate="cook"]').addEventListener("click", showTokenStep);
-    container.querySelector("[data-gate-back]").addEventListener("click", showChoiceStep);
+    document.addEventListener(
+      "pointerup",
+      (event) => {
+        if (!document.body.classList.contains("is-gated")) return;
+        if (event.target.closest('[data-gate="visitor"]')) {
+          event.preventDefault();
+          event.stopPropagation();
+          setVisitor();
+          unlock();
+          return;
+        }
+        if (event.target.closest('[data-gate="cook"]')) {
+          event.preventDefault();
+          event.stopPropagation();
+          showTokenStep();
+          return;
+        }
+        if (event.target.closest("[data-gate-back]")) {
+          event.preventDefault();
+          event.stopPropagation();
+          showChoiceStep();
+        }
+      },
+      true
+    );
 
-    cookForm.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      errorEl.hidden = true;
-      const token = new FormData(cookForm).get("token");
-      const submit = cookForm.querySelector('button[type="submit"]');
-      submit.disabled = true;
-      submit.textContent = "Verificando…";
-      try {
-        await setCook(String(token || ""));
-        container.remove();
-        document.body.classList.remove("is-gated");
-        window.dispatchEvent(new CustomEvent("cookbook:ready"));
-      } catch (err) {
-        errorEl.textContent = err.message || "Não foi possível validar o token.";
-        errorEl.hidden = false;
-      } finally {
-        submit.disabled = false;
-        submit.textContent = "Abrir";
-      }
-    });
+    document.addEventListener(
+      "submit",
+      async (event) => {
+        const cookForm = event.target.closest?.("[data-gate-cook]") || (event.target.matches?.("[data-gate-cook]") ? event.target : null);
+        if (!cookForm) return;
+        event.preventDefault();
+        const cover = cookForm.closest(".book-cover");
+        const errorEl = cover?.querySelector("[data-gate-error]");
+        if (errorEl) errorEl.hidden = true;
+        const token = new FormData(cookForm).get("token");
+        const submit = cookForm.querySelector('button[type="submit"]');
+        if (submit) {
+          submit.disabled = true;
+          submit.textContent = "Verificando…";
+        }
+        try {
+          await setCook(String(token || ""));
+          unlock();
+        } catch (err) {
+          if (errorEl) {
+            errorEl.textContent = err.message || "Não foi possível validar o token.";
+            errorEl.hidden = false;
+          }
+        } finally {
+          if (submit) {
+            submit.disabled = false;
+            submit.textContent = "Abrir";
+          }
+        }
+      },
+      true
+    );
   }
 
   function ensureSession() {
-    if (hasChosenRole()) {
+    if (!isBookAppPage()) {
+      if (!hasChosenRole()) {
+        window.location.href = "index.html";
+        return;
+      }
       document.body.classList.remove("is-gated");
       window.dispatchEvent(new CustomEvent("cookbook:ready"));
       return;
     }
+
     document.body.classList.add("is-gated");
-    let host = document.getElementById("auth-gate");
-    if (!host) {
-      host = document.createElement("div");
-      host.id = "auth-gate";
-      document.body.prepend(host);
-    }
-    renderGate(host);
+    const host = document.getElementById("auth-gate");
+    if (host) host.replaceChildren();
+    window.dispatchEvent(new CustomEvent("cookbook:ready"));
   }
 
   window.CookbookAuth = {
@@ -169,5 +229,7 @@
     requireCookOrRedirect,
     applyCookUi,
     ensureSession,
+    coverFaceHtml,
+    bindCoverGate,
   };
 })();
