@@ -153,6 +153,25 @@ textarea {
   margin-bottom: 1.25rem;
 }
 
+.toolbar--compact {
+  justify-content: flex-start;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.toolbar__label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.toolbar--compact strong.toolbar__label {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
 .filters {
   display: flex;
   flex-wrap: wrap;
@@ -464,6 +483,25 @@ textarea {
   display: grid;
   gap: 0.5rem;
   grid-template-columns: 1fr;
+  align-items: center;
+}
+
+.line-row .actions--row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  align-self: center;
+}
+
+.group-editor__header .actions--row {
+  align-self: end;
+}
+
+@media (min-width: 700px) {
+  .group-editor__header .actions--row {
+    align-self: center;
+    padding-top: 1.35rem;
+  }
 }
 
 @media (min-width: 800px) {
@@ -473,6 +511,77 @@ textarea {
   .line-row.steps {
     grid-template-columns: 1fr auto;
   }
+}
+
+.ingredient-picker {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.ingredient-picker__trigger {
+  width: 100%;
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.7rem 0.85rem;
+  background: #fffdf8;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+}
+
+.ingredient-picker__trigger:hover {
+  border-color: var(--leaf);
+}
+
+.ingredient-picker__value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ingredient-picker__value.is-placeholder {
+  color: var(--muted);
+}
+
+.ingredient-picker__chevron {
+  flex-shrink: 0;
+  opacity: 0.55;
+}
+
+.editor-modal__footer {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+
+.editor-modal__footer .btn {
+  min-height: 2.75rem;
+}
+
+.editor-modal__body {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.editor-modal__status {
+  margin: 0;
+}
+
+.shopping-catalog-item--action {
+  grid-template-columns: minmax(0, 1fr);
+  font-weight: 600;
+  color: var(--leaf-deep);
+  border-style: dashed;
 }
 
 .catalog-grid {

@@ -34,9 +34,13 @@
           </label>
           <p class="hint" data-current-image></p>
 
-          <div class="toolbar">
-            <h2 style="margin:0;font-family:var(--font-display)">Grupos</h2>
-            <button type="button" class="btn btn--ghost" data-add-group>Adicionar grupo</button>
+          <div class="toolbar toolbar--compact">
+            <h2 class="toolbar__label">Grupos</h2>
+            <button type="button" class="icon-btn" data-add-group aria-label="Adicionar grupo" title="Adicionar grupo">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+              </svg>
+            </button>
           </div>
           <div class="stack" data-groups-editor></div>
 
