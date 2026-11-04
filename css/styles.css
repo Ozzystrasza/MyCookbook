@@ -513,13 +513,8 @@ textarea {
 
   /* Align − with the control band only (skip field labels) */
   .line-row .actions--row {
-    align-self: start;
-    padding-top: calc(0.92rem + 0.35rem);
-    min-height: calc(0.92rem + 0.35rem + 2.75rem);
-  }
-
-  .group-editor__header .actions--row {
-    min-height: 0;
+    align-self: stretch;
+    padding-top: calc(0.92rem * 1.2 + 0.35rem);
   }
 }
 
