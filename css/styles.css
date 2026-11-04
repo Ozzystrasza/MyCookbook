@@ -846,11 +846,11 @@ body.is-shopping .site-header {
 .book__flip-slot:not([hidden]) .book__flip-spine {
   display: block;
   position: absolute;
-  left: 50%;
+  left: 0;
   top: 0;
   bottom: 0;
-  width: 14px;
-  transform: translateX(-50%);
+  width: 8px;
+  transform: none;
   z-index: 10;
   pointer-events: none;
   background:
@@ -1266,6 +1266,12 @@ body.is-shopping .site-header {
 
   .book__flip-slot {
     min-height: min(72vh, 680px);
+  }
+
+  .book__flip-slot:not([hidden]) .book__flip-spine {
+    left: 50%;
+    width: 14px;
+    transform: translateX(-50%);
   }
 
   .book__spread {
