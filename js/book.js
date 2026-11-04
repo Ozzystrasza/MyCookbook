@@ -39,6 +39,22 @@
   let coverSlideTimer = null;
   let coverSlideX = 0;
   let coverSlideAnim = null;
+  let pageFlipAudio = null;
+
+  function playPageFlipSound() {
+    try {
+      if (!pageFlipAudio) {
+        pageFlipAudio = new Audio("data/sounds/page-flip.wav");
+        pageFlipAudio.preload = "auto";
+        pageFlipAudio.volume = 0.6;
+      }
+      pageFlipAudio.currentTime = 0;
+      const play = pageFlipAudio.play();
+      if (play && typeof play.catch === "function") play.catch(() => {});
+    } catch (_) {
+      /* ignore missing file / autoplay */
+    }
+  }
 
   function qs(sel, root = document) {
     return root.querySelector(sel);
@@ -806,6 +822,7 @@
 
     pageFlip.on("changeState", (e) => {
       state.flipping = e.data === "flipping";
+      if (e.data === "flipping") playPageFlipSound();
       if (e.data === "read") onCoverFlipSettled();
     });
 
