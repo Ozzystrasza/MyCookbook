@@ -389,7 +389,9 @@
       root = document.createElement("div");
       root.className = "book__flip";
       root.setAttribute("data-flip-root", "");
-      slot.appendChild(root);
+      const spine = qs(".book__flip-spine", slot);
+      if (spine) slot.insertBefore(root, spine);
+      else slot.appendChild(root);
     }
     return root;
   }
@@ -402,11 +404,13 @@
       return {
         width: Math.max(280, Math.floor(stageW / 2)),
         height: Math.max(360, Math.floor(stageH)),
+        minWidth: 260,
       };
     }
     return {
       width: Math.max(260, Math.floor(stageW)),
       height: Math.max(360, Math.floor(stageH)),
+      minWidth: Math.floor(stageW / 2) + 1,
     };
   }
 
@@ -482,7 +486,7 @@
       width: size.width,
       height: size.height,
       size: "stretch",
-      minWidth: 260,
+      minWidth: size.minWidth,
       maxWidth: 900,
       minHeight: 360,
       maxHeight: 1200,

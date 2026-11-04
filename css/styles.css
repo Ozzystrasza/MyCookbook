@@ -827,7 +827,7 @@ body.is-shopping .site-header {
   width: 100%;
   min-height: min(70vh, 640px);
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
 }
 
@@ -836,7 +836,8 @@ body.is-shopping .site-header {
 }
 
 .book__flip {
-  margin: 0 auto;
+  margin: 0;
+  width: 100%;
 }
 
 .book__flip-spine {
@@ -1266,6 +1267,12 @@ body.is-shopping .site-header {
 
   .book__flip-slot {
     min-height: min(72vh, 680px);
+    justify-content: center;
+  }
+
+  .book__flip {
+    margin: 0 auto;
+    width: auto;
   }
 
   .book__flip-slot:not([hidden]) .book__flip-spine {
