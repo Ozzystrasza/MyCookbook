@@ -36,6 +36,9 @@
   let resizeTimer = null;
   let autoOpenTimer = null;
   let closeFallbackTimer = null;
+  let coverSlideTimer = null;
+  let coverSlideX = 0;
+  let coverSlideAnim = null;
 
   function qs(sel, root = document) {
     return root.querySelector(sel);
@@ -415,6 +418,237 @@
     return root;
   }
 
+  function flipRootEl() {
+    return qs("[data-flip-root]");
+  }
+
+  function syncFlipSpine() {
+    if (isDesktop()) return;
+    const slot = qs("[data-flip-slot]");
+    const spine = slot && qs(".book__flip-spine", slot);
+    if (!slot || !spine || slot.hidden) return;
+
+    function visible(el) {
+      if (!el) return false;
+      const r = el.getBoundingClientRect();
+      return r.width > 1 && r.height > 1;
+    }
+
+    let anchor =
+      findCoverAnchor(slot) ||
+      [...slot.querySelectorAll(".stf__item, .book__page")].find(visible) ||
+      null;
+
+    if (!anchor) {
+      const pages = [...slot.querySelectorAll(".stf__item, .book__page")].filter(visible);
+      pages.sort((a, b) => b.getBoundingClientRect().height - a.getBoundingClientRect().height);
+      anchor = pages[0] || null;
+    }
+    if (!anchor) return;
+
+    const slotRect = slot.getBoundingClientRect();
+    const pageRect = anchor.getBoundingClientRect();
+    // Prefer painted page face height — StPageFlip's block can be shorter than the cover.
+    const face = anchor.querySelector?.(".book-cover") || anchor;
+    const faceRect = face.getBoundingClientRect();
+    const height = Math.max(pageRect.height, faceRect.height);
+    const top = Math.min(pageRect.top, faceRect.top) - slotRect.top;
+
+    spine.style.top = `${Math.max(0, Math.round(top))}px`;
+    spine.style.left = "0px";
+    spine.style.height = `${Math.max(0, Math.round(height))}px`;
+  }
+
+  function findCoverAnchor(slot) {
+    function visible(el) {
+      if (!el) return false;
+      const r = el.getBoundingClientRect();
+      return r.width > 1 && r.height > 1;
+    }
+    return (
+      [...slot.querySelectorAll(".book__page--cover, .stf__item.--hard.--right")].find(visible) ||
+      [...slot.querySelectorAll(".stf__item.--right, .book__page--right")].find(visible) ||
+      null
+    );
+  }
+
+  function whenCoverReady(cb) {
+    const slot = qs("[data-flip-slot]");
+    if (!slot) {
+      cb(false);
+      return;
+    }
+    let tries = 0;
+    const tick = () => {
+      if (findCoverAnchor(slot)) {
+        cb(true);
+        return;
+      }
+      tries += 1;
+      if (tries >= 20) {
+        cb(false);
+        return;
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  function measureCoverCenterX() {
+    const slot = qs("[data-flip-slot]");
+    if (!slot) return 0;
+    const cover = findCoverAnchor(slot);
+    const width = cover?.getBoundingClientRect().width || lastFlipSize?.width || 0;
+    if (width < 1) return 0;
+    return -Math.round(width / 2);
+  }
+
+  function cancelCoverSlideAnim() {
+    clearTimeout(coverSlideTimer);
+    if (coverSlideAnim) {
+      try {
+        coverSlideAnim.cancel();
+      } catch (_) {
+        /* ignore */
+      }
+      coverSlideAnim = null;
+    }
+  }
+
+  function commitFlipTranslateX(el, x) {
+    if (!el) return;
+    const px = Math.round(x);
+    el.style.transform = `translateX(${px}px)`;
+    coverSlideX = px;
+  }
+
+  function animateFlipTranslateX(el, fromX, toX) {
+    if (!el) return Promise.resolve();
+    const from = Math.round(fromX);
+    const to = Math.round(toX);
+    cancelCoverSlideAnim();
+
+    if (from === to || typeof el.animate !== "function") {
+      commitFlipTranslateX(el, to);
+      return Promise.resolve();
+    }
+
+    commitFlipTranslateX(el, from);
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(coverSlideTimer);
+        coverSlideAnim = null;
+        commitFlipTranslateX(el, to);
+        resolve();
+      };
+
+      try {
+        coverSlideAnim = el.animate(
+          [
+            { transform: `translateX(${from}px)` },
+            { transform: `translateX(${to}px)` },
+          ],
+          {
+            duration: 850,
+            easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+            fill: "forwards",
+          }
+        );
+        coverSlideAnim.finished.then(finish).catch(finish);
+      } catch (_) {
+        finish();
+        return;
+      }
+      coverSlideTimer = setTimeout(finish, 1100);
+    });
+  }
+
+  function clearCoverCenterClasses() {
+    document.body.classList.remove("cover-centered", "cover-moving");
+    cancelCoverSlideAnim();
+    const root = flipRootEl();
+    commitFlipTranslateX(root, 0);
+  }
+
+  function setCoverCentered({ animate } = { animate: false }) {
+    if (!isDesktop() || state.coverPhase !== "closed") {
+      clearCoverCenterClasses();
+      return;
+    }
+    const root = flipRootEl();
+    if (!root) return;
+    whenCoverReady(() => {
+      if (state.coverPhase !== "closed") return;
+      const centerX = measureCoverCenterX();
+      document.body.classList.add("cover-centered");
+      if (animate) {
+        document.body.classList.add("cover-moving");
+        animateFlipTranslateX(root, coverSlideX || 0, centerX).then(() => {
+          document.body.classList.remove("cover-moving");
+        });
+      } else {
+        commitFlipTranslateX(root, centerX);
+      }
+    });
+  }
+
+  function dockCoverFromCenter() {
+    return new Promise((resolve) => {
+      if (!isDesktop()) {
+        clearCoverCenterClasses();
+        resolve();
+        return;
+      }
+      const root = flipRootEl();
+      if (!root) {
+        clearCoverCenterClasses();
+        resolve();
+        return;
+      }
+      const fromX = coverSlideX || measureCoverCenterX();
+      document.body.classList.add("cover-moving");
+      // Force the starting pose before tweening so we never snap from an unknown transform.
+      commitFlipTranslateX(root, fromX);
+      animateFlipTranslateX(root, fromX, 0).then(() => {
+        document.body.classList.remove("cover-centered", "cover-moving");
+        resolve();
+      });
+    });
+  }
+
+  function centerCoverAfterClose() {
+    if (!isDesktop()) {
+      clearCoverCenterClasses();
+      return;
+    }
+    const root = flipRootEl();
+    if (!root) return;
+    whenCoverReady(() => {
+      if (state.coverPhase !== "closed") return;
+      const centerX = measureCoverCenterX();
+      commitFlipTranslateX(root, 0);
+      document.body.classList.add("cover-moving", "cover-centered");
+      animateFlipTranslateX(root, 0, centerX).then(() => {
+        document.body.classList.remove("cover-moving");
+      });
+    });
+  }
+
+  function syncCoverLayout() {
+    if (state.coverPhase === "closed" && isDesktop()) {
+      setCoverCentered({ animate: false });
+    } else {
+      clearCoverCenterClasses();
+    }
+    requestAnimationFrame(() => {
+      syncFlipSpine();
+      requestAnimationFrame(syncFlipSpine);
+    });
+  }
+
   function measureFlipSize() {
     const stage = qs(".book__stage");
     const gatedCover = document.body.classList.contains("is-gated");
@@ -425,10 +659,7 @@
     // Prefer a taller ~2:3 page so the flip reads more like a book than a magazine.
     if (isDesktop()) {
       const height = Math.max(360, Math.floor(stageH));
-      const maxW = gatedCover
-        ? Math.min(Math.floor(stageW * 0.72), Math.floor(height * 0.72))
-        : Math.min(Math.floor(stageW / 2), Math.floor(height * 0.68));
-      const width = Math.max(280, maxW);
+      const width = Math.max(280, Math.min(Math.floor(stageW / 2), Math.floor(height * 0.68)));
       return { width, height, minWidth: 260 };
     }
     const width = Math.max(260, Math.floor(stageW));
@@ -501,6 +732,7 @@
   }
 
   function destroyPageFlipOnly() {
+    cancelCoverSlideAnim();
     if (!pageFlip) return;
     try {
       pageFlip.destroy();
@@ -588,6 +820,15 @@
     }
     bindOpenHandlers(qs("[data-flip-slot]"));
     if (flipHasCover && state.coverPhase === "closed") bindCoverAuth();
+    requestAnimationFrame(() => {
+      if (options.skipCoverCenter) {
+        // Stay docked at translateX(0); caller animates to center afterward.
+        clearCoverCenterClasses();
+      } else {
+        syncCoverLayout();
+        requestAnimationFrame(syncCoverLayout);
+      }
+    });
   }
 
   function refreshFlipBook(htmlPages, startIndex, options = {}) {
@@ -623,6 +864,10 @@
     }
     bindOpenHandlers(qs("[data-flip-slot]"));
     if (flipHasCover && state.coverPhase === "closed") bindCoverAuth();
+    requestAnimationFrame(() => {
+      syncCoverLayout();
+      requestAnimationFrame(syncCoverLayout);
+    });
   }
 
   function bindCoverAuth() {
@@ -638,17 +883,29 @@
     if (!pageFlip) return;
     state.coverPhase = "opening";
     updateChrome();
-    try {
-      pageFlip.flipNext("bottom");
-    } catch (_) {
-      finishCoverOpen();
+
+    const startFlip = () => {
+      if (state.coverPhase !== "opening" || !pageFlip) return;
+      try {
+        pageFlip.flipNext("bottom");
+      } catch (_) {
+        finishCoverOpen();
+      }
+    };
+
+    if (isDesktop()) {
+      dockCoverFromCenter().then(startFlip);
+      return;
     }
+    clearCoverCenterClasses();
+    startFlip();
   }
 
   function finishCoverOpen() {
     if (state.coverPhase !== "opening") return;
     state.coverPhase = "open";
     state.browseIndex = 0;
+    clearCoverCenterClasses();
     document.body.classList.remove("is-gated");
     render();
     window.CookbookUI?.mountShell?.({ active: "home" });
@@ -663,9 +920,12 @@
     // Rebuild full catalog under the cover (still on index 0) so the next open
     // flips onto page 1 instead of the leftover thin close page.
     const content = padEvenPages(browseContentHtmlPages());
-    mountFlipBook([COVER_PAGE, ...content], 0, { showCover: true });
+    mountFlipBook([COVER_PAGE, ...content], 0, { showCover: true, skipCoverCenter: true });
     updateChrome();
     window.CookbookUI?.mountShell?.({ active: "home" });
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => centerCoverAfterClose());
+    });
   }
 
   function closeToCover() {

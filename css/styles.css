@@ -3,13 +3,17 @@
 :root {
   --ink: #1c241c;
   --muted: #5d6a5d;
-  --paper: #f3efe6;
+  --paper: #f7f2e6;
   --panel: rgba(255, 252, 246, 0.88);
   --line: rgba(28, 36, 28, 0.12);
   --leaf: #2f5d3a;
   --leaf-deep: #1f3f28;
   --ember: #c45c26;
   --ember-soft: #e8a06a;
+  --sky: #cfe6f4;
+  --sky-soft: #e8f3fa;
+  --sun: #f7f2e6;
+  --grass: #d5e4c8;
   --shadow: 0 18px 50px rgba(28, 36, 28, 0.14);
   --radius: 18px;
   --font-display: "Fraunces", Georgia, serif;
@@ -32,9 +36,12 @@ body {
   font-family: var(--font-body);
   color: var(--ink);
   background:
-    radial-gradient(circle at top left, rgba(232, 160, 106, 0.28), transparent 34%),
-    radial-gradient(circle at 85% 15%, rgba(47, 93, 58, 0.18), transparent 28%),
-    linear-gradient(160deg, #efe8d8 0%, #d9e2d4 42%, #c9d4c4 100%);
+    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(255, 252, 246, 0.55), transparent 55%),
+    radial-gradient(circle at 12% 18%, rgba(207, 230, 244, 0.85), transparent 42%),
+    radial-gradient(circle at 88% 12%, rgba(232, 243, 250, 0.7), transparent 38%),
+    radial-gradient(circle at 70% 85%, rgba(213, 228, 200, 0.55), transparent 42%),
+    radial-gradient(circle at 20% 92%, rgba(213, 228, 200, 0.4), transparent 36%),
+    linear-gradient(180deg, var(--sky-soft) 0%, var(--sky) 38%, var(--grass) 100%);
   background-attachment: fixed;
 }
 
@@ -57,11 +64,6 @@ body.is-gated .book__flip-slot {
   justify-content: center;
 }
 
-body.is-gated .book__flip-slot:not([hidden]) .book__flip-spine {
-  left: 0;
-  width: 10px;
-  transform: none;
-}
 
 img {
   max-width: 100%;
@@ -85,8 +87,9 @@ textarea {
   top: 0;
   z-index: 20;
   backdrop-filter: blur(14px);
-  background: rgba(243, 239, 230, 0.72);
-  border-bottom: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(14px);
+  background: rgba(232, 243, 250, 0.72);
+  border-bottom: 1px solid rgba(47, 93, 58, 0.1);
 }
 
 .site-header__inner {
@@ -111,6 +114,7 @@ textarea {
   font-weight: 700;
   font-size: 1.25rem;
   letter-spacing: -0.02em;
+  color: var(--leaf-deep);
 }
 
 .site-nav {
@@ -610,7 +614,7 @@ textarea {
   letter-spacing: -0.03em;
   text-align: center;
   color: var(--leaf-deep);
-  text-wrap: balance;
+  white-space: nowrap;
   text-shadow:
     0 1px 0 rgba(255, 252, 246, 0.85),
     0 2px 10px rgba(255, 252, 246, 0.55);
@@ -766,8 +770,9 @@ body.is-shopping .site-header {
   gap: 0.35rem;
   padding: 0.25rem;
   border-radius: 999px;
-  background: rgba(255, 252, 246, 0.72);
-  border: 1px solid var(--line);
+  background: rgba(255, 252, 246, 0.82);
+  border: 1px solid rgba(47, 93, 58, 0.14);
+  box-shadow: 0 4px 14px rgba(28, 36, 28, 0.06);
 }
 
 .book__actions {
@@ -777,15 +782,22 @@ body.is-shopping .site-header {
 .book__search input {
   width: 100%;
   min-height: 2.5rem;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(47, 93, 58, 0.16);
   border-radius: 999px;
   padding: 0.55rem 1rem;
   background: rgba(255, 252, 246, 0.92);
   color: var(--ink);
+  box-shadow: 0 2px 10px rgba(28, 36, 28, 0.04);
 }
 
 .book__search input::placeholder {
   color: var(--muted);
+}
+
+.book__search input:focus {
+  outline: none;
+  border-color: rgba(47, 93, 58, 0.45);
+  box-shadow: 0 0 0 3px rgba(47, 93, 58, 0.12);
 }
 
 .visually-hidden {
@@ -893,13 +905,13 @@ body.is-shopping .site-header {
 }
 
 .book__mode-btn[aria-pressed="true"] {
-  background: var(--leaf);
-  color: #fff;
+  background: var(--leaf-deep);
+  color: #f7f2e6;
 }
 
 .book__mode-btn:hover:not([aria-pressed="true"]) {
   color: var(--leaf-deep);
-  background: rgba(47, 93, 58, 0.08);
+  background: rgba(47, 93, 58, 0.1);
 }
 
 .book__reading-bar {
@@ -927,8 +939,10 @@ body.is-shopping .site-header {
 .book__nav {
   position: absolute;
   z-index: 20;
-  background: rgba(255, 252, 246, 0.88);
-  box-shadow: 0 2px 10px rgba(28, 36, 28, 0.08);
+  background: rgba(255, 252, 246, 0.92);
+  border: 1px solid rgba(47, 93, 58, 0.14);
+  box-shadow: 0 4px 14px rgba(28, 36, 28, 0.08);
+  color: var(--leaf-deep);
 }
 
 .book__nav--prev {
@@ -974,9 +988,9 @@ body.is-shopping .site-header {
   position: absolute;
   left: 0;
   top: 0;
-  bottom: 0;
+  bottom: auto;
   width: 8px;
-  transform: none;
+  height: 0;
   z-index: 10;
   pointer-events: none;
   background:
@@ -1023,20 +1037,22 @@ body.is-shopping .site-header {
   padding: 1.15rem 1.1rem 1.35rem;
   overflow: hidden;
   background:
-    linear-gradient(90deg, rgba(28, 36, 28, 0.06), transparent 14px),
-    repeating-linear-gradient(
-      transparent,
-      transparent 27px,
-      rgba(47, 93, 58, 0.03) 28px
-    ),
-    #efe8dc;
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255, 252, 246, 0.55), transparent 55%),
+    radial-gradient(ellipse 90% 70% at 100% 100%, rgba(28, 36, 28, 0.04), transparent 50%),
+    linear-gradient(90deg, rgba(28, 36, 28, 0.07), transparent 16px),
+    linear-gradient(
+      165deg,
+      #faf6ec 0%,
+      var(--paper) 42%,
+      #f0e8d6 100%
+    );
   color: var(--ink);
 }
 
 .stf-page {
   height: 100%;
-  box-shadow: 0 1px 4px rgba(28, 36, 28, 0.06);
-  border: 1px solid rgba(28, 36, 28, 0.1);
+  box-shadow: 0 2px 10px rgba(28, 36, 28, 0.07);
+  border: 1px solid rgba(47, 93, 58, 0.12);
 }
 
 .stf-page .book-preview {
@@ -1061,7 +1077,7 @@ body.is-shopping .site-header {
 .book__page.is-blank {
   background:
     linear-gradient(90deg, rgba(28, 36, 28, 0.05), transparent 14px),
-    #e9e0d2;
+    linear-gradient(165deg, #f3ebe0 0%, #ebe2d2 100%);
 }
 
 .favorite-btn {
@@ -1127,9 +1143,10 @@ body.is-shopping .site-header {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  border-radius: 12px;
-  background: #d7cbb8;
-  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(145deg, var(--sky-soft), var(--grass));
+  border: 1px solid rgba(47, 93, 58, 0.12);
+  box-shadow: 0 6px 18px rgba(28, 36, 28, 0.06);
 }
 
 .book-preview__favorite {
@@ -1154,7 +1171,7 @@ body.is-shopping .site-header {
 
 .book-preview__category {
   margin: 0;
-  color: var(--ember);
+  color: var(--leaf);
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -1165,6 +1182,24 @@ body.is-shopping .site-header {
   font-family: var(--font-display);
   font-size: clamp(1.45rem, 4vw, 2rem);
   line-height: 1.15;
+  color: var(--leaf-deep);
+}
+
+.book-preview__title::after,
+.book-read__title::after {
+  content: "";
+  display: block;
+  width: 2.75rem;
+  height: 0.55rem;
+  margin-top: 0.45rem;
+  background:
+    radial-gradient(ellipse 55% 70% at 28% 55%, var(--leaf) 0 42%, transparent 44%),
+    radial-gradient(ellipse 50% 65% at 72% 45%, #4a7a52 0 40%, transparent 42%),
+    linear-gradient(90deg, transparent 8%, rgba(47, 93, 58, 0.45) 20%, rgba(47, 93, 58, 0.45) 80%, transparent 92%);
+  background-size: 0.55rem 0.45rem, 0.5rem 0.4rem, 100% 2px;
+  background-position: 0.15rem 55%, 2rem 40%, 0 55%;
+  background-repeat: no-repeat;
+  opacity: 0.85;
 }
 
 .book-list {
@@ -1181,14 +1216,14 @@ body.is-shopping .site-header {
   width: 100%;
   padding: 0.45rem;
   border: 1px solid transparent;
-  border-radius: 12px;
-  background: rgba(255, 252, 246, 0.55);
+  border-radius: 14px;
+  background: rgba(255, 252, 246, 0.45);
 }
 
 .book-list__row:hover,
 .book-list__row:focus-within {
-  border-color: rgba(47, 93, 58, 0.28);
-  background: rgba(255, 252, 246, 0.92);
+  border-color: rgba(47, 93, 58, 0.22);
+  background: rgba(255, 252, 246, 0.88);
 }
 
 .book-list__open {
@@ -1210,8 +1245,8 @@ body.is-shopping .site-header {
   width: 56px;
   height: 56px;
   object-fit: cover;
-  border-radius: 10px;
-  background: #d7cbb8;
+  border-radius: 12px;
+  background: linear-gradient(145deg, var(--sky-soft), var(--grass));
 }
 
 .book-list__meta {
@@ -1220,7 +1255,7 @@ body.is-shopping .site-header {
 
 .book-list__category {
   margin: 0;
-  color: var(--ember);
+  color: var(--leaf);
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -1258,7 +1293,7 @@ body.is-shopping .site-header {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--ember);
+  color: var(--leaf);
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -1274,15 +1309,17 @@ body.is-shopping .site-header {
   font-family: var(--font-display);
   font-size: clamp(1.6rem, 4vw, 2.2rem);
   line-height: 1.15;
+  color: var(--leaf-deep);
 }
 
 .book-read__media {
   width: 100%;
   max-height: 220px;
   object-fit: cover;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: #d7cbb8;
+  border-radius: 14px;
+  border: 1px solid rgba(47, 93, 58, 0.12);
+  background: linear-gradient(145deg, var(--sky-soft), var(--grass));
+  box-shadow: 0 6px 18px rgba(28, 36, 28, 0.06);
 }
 
 .book-read__section-title {
@@ -1400,10 +1437,13 @@ body.is-shopping .site-header {
     width: auto;
   }
 
+  .book__flip-spine,
   .book__flip-slot:not([hidden]) .book__flip-spine {
-    left: 50%;
-    width: 14px;
-    transform: translateX(-50%);
+    display: none !important;
+  }
+
+  body.is-gated.cover-moving .book-cover {
+    pointer-events: none;
   }
 
   .book__spread {
