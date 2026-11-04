@@ -839,6 +839,10 @@ body.is-shopping .site-header {
   margin: 0 auto;
 }
 
+.book__flip-spine {
+  display: none;
+}
+
 .book__spread {
   display: grid;
   grid-template-columns: 8px 1fr;
@@ -1242,6 +1246,26 @@ body.is-shopping .site-header {
 
   .book__flip-slot {
     min-height: min(72vh, 680px);
+  }
+
+  .book__flip-slot:not([hidden]) .book__flip-spine {
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 14px;
+    transform: translateX(-50%);
+    z-index: 10;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        90deg,
+        rgba(28, 36, 28, 0.28),
+        rgba(255, 252, 246, 0.35) 45%,
+        rgba(28, 36, 28, 0.2)
+      );
+    box-shadow: inset 0 0 12px rgba(28, 36, 28, 0.18);
   }
 
   .book__spread {

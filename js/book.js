@@ -28,6 +28,7 @@
   let pageFlip = null;
   let flipSyncing = false;
   let lastFlipSize = null;
+  let flipHtmlPages = [];
   let resizeTimer = null;
 
   function qs(sel, root = document) {
@@ -285,17 +286,32 @@
     return isDesktop() ? 2 : 1;
   }
 
+  function isBlankPageHtml(html) {
+    return !html || html === BLANK_PAGE;
+  }
+
   function padEvenPages(pages) {
     const list = pages.slice();
     if (!list.length) list.push(BLANK_PAGE);
-    if (list.length % 2 === 1) list.push(BLANK_PAGE);
+    if (isDesktop() && list.length % 2 === 1) list.push(BLANK_PAGE);
     return list;
+  }
+
+  function contentPageCount(pages) {
+    let n = pages.length;
+    while (n > 0 && isBlankPageHtml(pages[n - 1])) n -= 1;
+    return n;
   }
 
   function clampBrowseIndex() {
     const step = pagesPerSpread();
     if (state.mode === "reading") {
-      const max = Math.max(0, state.readingPages.length - step);
+      if (!isDesktop()) {
+        state.readingPageIndex = 0;
+        return;
+      }
+      const content = contentPageCount(state.readingPages);
+      const max = Math.max(0, content - step);
       let idx = Math.min(Math.max(0, state.readingPageIndex), max);
       idx -= idx % step;
       state.readingPageIndex = idx;
@@ -310,8 +326,8 @@
     }
     if (state.viewMode === "book") {
       const n = visibleRecipes().length;
-      const pageCount = n === 0 ? 2 : n % 2 === 1 ? n + 1 : n;
-      const max = Math.max(0, pageCount - step);
+      const content = n === 0 ? 1 : n;
+      const max = Math.max(0, content - step);
       let idx = Math.min(Math.max(0, state.browseIndex), max);
       if (isDesktop()) idx -= idx % step;
       state.browseIndex = idx;
@@ -332,7 +348,7 @@
       return pageFlip.getCurrentPageIndex() > 0;
     }
     if (state.mode === "reading") {
-      return state.readingPageIndex > 0;
+      return isDesktop() && state.readingPageIndex > 0;
     }
     if (state.viewMode === "list") {
       return isDesktop() && state.browseIndex > 0;
@@ -342,11 +358,12 @@
 
   function canFlipNext() {
     if (pageFlip && usesFlipBook()) {
-      return pageFlip.getCurrentPageIndex() + flipStep() < pageFlip.getPageCount();
+      const content = contentPageCount(flipHtmlPages);
+      return pageFlip.getCurrentPageIndex() + flipStep() < content;
     }
     const step = pagesPerSpread();
     if (state.mode === "reading") {
-      return state.readingPageIndex + step < state.readingPages.length;
+      return isDesktop() && state.readingPageIndex + step < contentPageCount(state.readingPages);
     }
     if (state.viewMode === "list") {
       return isDesktop() && state.browseIndex + step < state.listPages.length;
@@ -355,7 +372,10 @@
   }
 
   function usesFlipBook() {
-    return state.mode === "reading" || (state.mode === "browse" && state.viewMode === "book");
+    return (
+      (state.mode === "reading" && isDesktop()) ||
+      (state.mode === "browse" && state.viewMode === "book")
+    );
   }
 
   function setFlipHostsVisible(flipActive) {
@@ -407,7 +427,7 @@
     return htmlPages.map((html) => {
       const el = document.createElement("div");
       el.className = "book__page stf-page";
-      const blank = !html || html === BLANK_PAGE;
+      const blank = isBlankPageHtml(html);
       el.classList.toggle("is-blank", blank);
       el.innerHTML = html || BLANK_PAGE;
       return el;
@@ -435,6 +455,7 @@
 
   function teardownFlipBook() {
     destroyPageFlipOnly();
+    flipHtmlPages = [];
     setFlipHostsVisible(false);
     state.flipping = false;
   }
@@ -451,12 +472,14 @@
     const root = ensureFlipRoot();
     if (!root) return;
 
+    flipHtmlPages = htmlPages.slice();
     const size = measureFlipSize();
     const pages = buildFlipPageEls(htmlPages);
     root.innerHTML = "";
     pages.forEach((page) => root.appendChild(page));
 
     const reduced = reduceMotion();
+    const desktop = isDesktop();
     const maxIdx = Math.max(0, pages.length - 1);
     const start = Math.min(Math.max(0, startIndex || 0), maxIdx);
 
@@ -469,17 +492,17 @@
       minHeight: 360,
       maxHeight: 1200,
       drawShadow: !reduced,
-      flippingTime: reduced ? 1 : 800,
-      usePortrait: true,
+      flippingTime: reduced ? 1 : 1000,
+      usePortrait: !desktop,
       showCover: false,
       autoSize: true,
       clickEventForward: true,
-      disableFlipByClick: true,
+      disableFlipByClick: false,
       mobileScrollSupport: false,
       useMouseEvents: false,
       showPageCorners: false,
       startPage: start,
-      maxShadowOpacity: 0.45,
+      maxShadowOpacity: 0.8,
     });
 
     pageFlip.on("flip", (e) => {
@@ -492,7 +515,7 @@
     });
 
     pageFlip.loadFromHTML(pages);
-    lastFlipSize = { width: size.width, height: size.height, reduced };
+    lastFlipSize = { width: size.width, height: size.height, reduced, desktop };
     flipSyncing = true;
     try {
       pageFlip.turnToPage(start);
@@ -506,18 +529,21 @@
     setFlipHostsVisible(true);
     const size = measureFlipSize();
     const reduced = reduceMotion();
+    const desktop = isDesktop();
     const needRemount =
       !pageFlip ||
       !lastFlipSize ||
       lastFlipSize.width !== size.width ||
       lastFlipSize.height !== size.height ||
-      lastFlipSize.reduced !== reduced;
+      lastFlipSize.reduced !== reduced ||
+      lastFlipSize.desktop !== desktop;
 
     if (needRemount) {
       mountFlipBook(htmlPages, startIndex);
       return;
     }
 
+    flipHtmlPages = htmlPages.slice();
     const pages = buildFlipPageEls(htmlPages);
     const maxIdx = Math.max(0, pages.length - 1);
     const start = Math.min(Math.max(0, startIndex || 0), maxIdx);
@@ -758,7 +784,9 @@
     const visible = visibleRecipes();
     const showNav =
       !shopping &&
-      ((reading && state.readingPages.length > pagesPerSpread()) ||
+      ((reading &&
+        isDesktop() &&
+        contentPageCount(state.readingPages) > pagesPerSpread()) ||
         (!reading && state.viewMode === "book" && visible.length > 1) ||
         (!reading &&
           state.viewMode === "list" &&
@@ -896,6 +924,14 @@
     bindOpenHandlers(qs("[data-spread]"));
   }
 
+  function renderReadingPhone() {
+    const left = qs('[data-page="left"]');
+    const right = qs('[data-page="right"]');
+    const blocks = buildReadingBlocks(state.readingRecipe);
+    setPage(left, "", { blank: true });
+    setPage(right, `<div class="book-read">${blocks.join("")}</div>`, { scrollable: true });
+  }
+
   function renderReadingFlip() {
     if (!state.readingPages.length) {
       const measureTarget = createMeasurePageEl();
@@ -925,7 +961,12 @@
       teardownFlipBook();
       renderShopping();
     } else if (state.mode === "reading" && state.readingRecipe) {
-      renderReadingFlip();
+      if (isDesktop()) {
+        renderReadingFlip();
+      } else {
+        teardownFlipBook();
+        renderReadingPhone();
+      }
     } else if (state.viewMode === "list") {
       teardownFlipBook();
       renderBrowseList();
@@ -977,7 +1018,7 @@
   }
 
   function repackReadingSoon() {
-    if (state.mode !== "reading") return;
+    if (state.mode !== "reading" || !isDesktop()) return;
     requestAnimationFrame(() => {
       state.readingPages = [];
       render();
@@ -988,7 +1029,7 @@
           img.addEventListener(
             "load",
             () => {
-              if (state.mode !== "reading") return;
+              if (state.mode !== "reading" || !isDesktop()) return;
               state.readingPages = [];
               render();
             },
