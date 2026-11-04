@@ -64,7 +64,7 @@
         <div class="book-cover__body">
           <div class="book-cover__step" data-gate-step="choice">
             <h1 id="gate-title" class="book-cover__title">My Cookbook</h1>
-            <div class="book-cover__actions">
+            <div class="book-cover__panel book-cover__actions">
               <button type="button" class="btn btn--primary" data-gate="cook">Abrir livro</button>
               <button type="button" class="btn btn--ghost" data-gate="visitor">Dar uma espiada</button>
             </div>
@@ -76,7 +76,7 @@
               </svg>
             </button>
             <h1 id="gate-token-title" class="book-cover__title book-cover__title--sm">Abrir livro</h1>
-            <form class="book-cover__cook" data-gate-cook>
+            <form class="book-cover__panel book-cover__cook" data-gate-cook>
               <div class="field">
                 <input
                   type="password"

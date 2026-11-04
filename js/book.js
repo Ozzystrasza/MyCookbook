@@ -417,16 +417,25 @@
 
   function measureFlipSize() {
     const stage = qs(".book__stage");
+    const gatedCover = document.body.classList.contains("is-gated");
     const stageW = Math.max(260, stage?.clientWidth || window.innerWidth - 32);
-    const stageH = Math.min(window.innerHeight * (isDesktop() ? 0.72 : 0.7), isDesktop() ? 680 : 640);
+    const stageH = gatedCover
+      ? Math.min(window.innerHeight * (isDesktop() ? 0.86 : 0.82), isDesktop() ? 820 : 760)
+      : Math.min(window.innerHeight * (isDesktop() ? 0.72 : 0.7), isDesktop() ? 680 : 640);
     // Prefer a taller ~2:3 page so the flip reads more like a book than a magazine.
     if (isDesktop()) {
       const height = Math.max(360, Math.floor(stageH));
-      const width = Math.max(280, Math.min(Math.floor(stageW / 2), Math.floor(height * 0.68)));
+      const maxW = gatedCover
+        ? Math.min(Math.floor(stageW * 0.72), Math.floor(height * 0.72))
+        : Math.min(Math.floor(stageW / 2), Math.floor(height * 0.68));
+      const width = Math.max(280, maxW);
       return { width, height, minWidth: 260 };
     }
     const width = Math.max(260, Math.floor(stageW));
-    const height = Math.max(360, Math.min(Math.floor(stageH), Math.floor(width / 0.68)));
+    const height = Math.max(
+      360,
+      Math.min(Math.floor(stageH), Math.floor(width / (gatedCover ? 0.72 : 0.68)))
+    );
     return {
       width,
       height,
@@ -651,8 +660,10 @@
     clearTimeout(closeFallbackTimer);
     state.coverPhase = "closed";
     document.body.classList.add("is-gated");
-    // Stay on the already-flipped cover — remounting would snap and kill the animation.
-    bindCoverAuth();
+    // Rebuild full catalog under the cover (still on index 0) so the next open
+    // flips onto page 1 instead of the leftover thin close page.
+    const content = padEvenPages(browseContentHtmlPages());
+    mountFlipBook([COVER_PAGE, ...content], 0, { showCover: true });
     updateChrome();
     window.CookbookUI?.mountShell?.({ active: "home" });
   }
