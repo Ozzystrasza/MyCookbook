@@ -39,10 +39,6 @@
     return window.matchMedia(DESKTOP_MQ).matches;
   }
 
-  function reduceMotion() {
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }
-
   function categoryName(id) {
     return state.categories.find((c) => c.id === id)?.name || id || "Sem categoria";
   }
@@ -478,7 +474,6 @@
     root.innerHTML = "";
     pages.forEach((page) => root.appendChild(page));
 
-    const reduced = reduceMotion();
     const desktop = isDesktop();
     const maxIdx = Math.max(0, pages.length - 1);
     const start = Math.min(Math.max(0, startIndex || 0), maxIdx);
@@ -491,8 +486,8 @@
       maxWidth: 900,
       minHeight: 360,
       maxHeight: 1200,
-      drawShadow: !reduced,
-      flippingTime: reduced ? 1 : 1000,
+      drawShadow: true,
+      flippingTime: 1000,
       usePortrait: !desktop,
       showCover: false,
       autoSize: true,
@@ -515,7 +510,7 @@
     });
 
     pageFlip.loadFromHTML(pages);
-    lastFlipSize = { width: size.width, height: size.height, reduced, desktop };
+    lastFlipSize = { width: size.width, height: size.height, desktop };
     flipSyncing = true;
     try {
       pageFlip.turnToPage(start);
@@ -528,14 +523,12 @@
   function refreshFlipBook(htmlPages, startIndex) {
     setFlipHostsVisible(true);
     const size = measureFlipSize();
-    const reduced = reduceMotion();
     const desktop = isDesktop();
     const needRemount =
       !pageFlip ||
       !lastFlipSize ||
       lastFlipSize.width !== size.width ||
       lastFlipSize.height !== size.height ||
-      lastFlipSize.reduced !== reduced ||
       lastFlipSize.desktop !== desktop;
 
     if (needRemount) {
@@ -982,14 +975,8 @@
     if (direction === "next" && !canFlipNext()) return;
 
     if (pageFlip && usesFlipBook()) {
-      if (reduceMotion()) {
-        if (direction === "next") pageFlip.turnToNextPage();
-        else pageFlip.turnToPrevPage();
-      } else if (direction === "next") {
-        pageFlip.flipNext("top");
-      } else {
-        pageFlip.flipPrev("top");
-      }
+      if (direction === "next") pageFlip.flipNext("top");
+      else pageFlip.flipPrev("top");
       return;
     }
 
