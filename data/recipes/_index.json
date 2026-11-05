@@ -1,11 +1,5 @@
 [
   {
-    "id": "test",
-    "title": "test",
-    "categoryId": "desserts",
-    "image": ""
-  },
-  {
     "id": "chocolate-cake",
     "title": "Bolo de Chocolate",
     "categoryId": "desserts",

@@ -1,5 +1,5 @@
 (function () {
-  const { qs, showStatus, mountImagePicker, assertNameAvailable } = window.CookbookUI;
+  const { qs, showStatus, mountImagePicker, assertNameAvailable, escapeHtml } = window.CookbookUI;
   let categories = [];
   let measures = [];
   let ingredients = [];
@@ -32,12 +32,12 @@
               <span>Nome</span>
               <input id="category-name" required placeholder="Sobremesas" />
             </label>
-            <div class="actions">
+            <div class="actions actions--sticky">
               <button type="submit" class="btn btn--primary">Adicionar categoria</button>
               <button type="button" class="btn btn--ghost" data-reset-category>Limpar</button>
             </div>
           </form>
-          <div class="catalog-grid" data-category-list style="margin-top:1rem"></div>
+          <div class="catalog-grid" data-category-list></div>
         </div>
         <div data-panel-measures hidden>
           <form id="measure-form" class="stack">
@@ -51,12 +51,12 @@
                 <input id="measure-abbrev" placeholder="c.s." />
               </label>
             </div>
-            <div class="actions">
+            <div class="actions actions--sticky">
               <button type="submit" class="btn btn--primary">Adicionar medida</button>
               <button type="button" class="btn btn--ghost" data-reset-measure>Limpar</button>
             </div>
           </form>
-          <div class="catalog-grid" data-measure-list style="margin-top:1rem"></div>
+          <div class="catalog-grid" data-measure-list></div>
         </div>
         <div data-panel-ingredients hidden>
           <form id="ingredient-form" class="stack">
@@ -68,12 +68,12 @@
               <span>Foto</span>
               <div data-ingredient-image></div>
             </div>
-            <div class="actions">
+            <div class="actions actions--sticky">
               <button type="submit" class="btn btn--primary">Adicionar ingrediente</button>
               <button type="button" class="btn btn--ghost" data-reset-ingredient>Limpar</button>
             </div>
           </form>
-          <div class="catalog-grid" data-ingredient-list style="margin-top:1rem"></div>
+          <div class="catalog-grid" data-ingredient-list></div>
         </div>
       </div>
     `;
@@ -89,17 +89,78 @@
     qs("[data-panel-ingredients]").hidden = tab !== "ingredients";
   }
 
+  function formatUsageList(titles) {
+    const shown = titles.slice(0, 5);
+    const extra = titles.length - shown.length;
+    const label = shown.join(", ");
+    return extra > 0 ? `${label} e mais ${extra}` : label;
+  }
+
+  async function findRecipesUsing({ categoryId = null, measureId = null, ingredientId = null } = {}) {
+    const index = await window.CookbookData.loadRecipeIndex();
+    const hits = [];
+    const needFull = Boolean(measureId || ingredientId);
+
+    if (categoryId && !needFull) {
+      index.forEach((meta) => {
+        if (meta.categoryId === categoryId) hits.push(meta.title || meta.id);
+      });
+      return hits;
+    }
+
+    const recipes = await Promise.all(
+      index.map(async (meta) => {
+        try {
+          const recipe = await window.CookbookData.loadRecipe(meta.id);
+          return { meta, recipe };
+        } catch (_) {
+          return { meta, recipe: null };
+        }
+      })
+    );
+
+    recipes.forEach(({ meta, recipe }) => {
+      if (categoryId && (recipe?.categoryId || meta.categoryId) === categoryId) {
+        hits.push(meta.title || meta.id);
+        return;
+      }
+      if (!recipe?.groups || (!measureId && !ingredientId)) return;
+      const used = recipe.groups.some((group) =>
+        (group.ingredients || []).some((line) => {
+          if (ingredientId && line.ingredientId === ingredientId) return true;
+          if (measureId && line.measureId === measureId) return true;
+          return false;
+        })
+      );
+      if (used) hits.push(meta.title || meta.id);
+    });
+
+    return hits;
+  }
+
   function renderCategories() {
     const list = qs("[data-category-list]");
+    if (!categories.length) {
+      list.innerHTML = `<div class="empty empty--with-action catalog-empty">
+        <p>Nenhuma categoria ainda.</p>
+        <button type="button" class="btn btn--primary" data-focus-field="#category-name">Adicionar categoria</button>
+      </div>`;
+      list.querySelector("[data-focus-field]")?.addEventListener("click", () => {
+        const input = qs("#category-name");
+        input?.focus();
+        input?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      });
+      return;
+    }
     list.innerHTML = categories
       .map(
         (item) => `
       <div class="catalog-card">
         <div class="catalog-card__body">
-          <strong>${item.name}</strong>
+          <strong>${escapeHtml(item.name)}</strong>
           <div class="actions">
-            <button type="button" class="btn btn--ghost btn--small" data-edit-category="${item.id}">Editar</button>
-            <button type="button" class="btn btn--danger btn--small" data-delete-category="${item.id}">Excluir</button>
+            <button type="button" class="btn btn--ghost btn--small" data-edit-category="${escapeHtml(item.id)}">Editar</button>
+            <button type="button" class="btn btn--danger btn--small" data-delete-category="${escapeHtml(item.id)}">Excluir</button>
           </div>
         </div>
       </div>`
@@ -117,25 +178,52 @@
 
     list.querySelectorAll("[data-delete-category]").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        if (!window.confirm("Excluir esta categoria?")) return;
-        categories = categories.filter((c) => c.id !== btn.dataset.deleteCategory);
-        await saveCategories("Excluir categoria");
+        const id = btn.dataset.deleteCategory;
+        const status = qs("[data-status]");
+        try {
+          const refs = await findRecipesUsing({ categoryId: id });
+          if (refs.length) {
+            showStatus(
+              status,
+              `Não é possível excluir: usada em ${formatUsageList(refs)}.`,
+              "error"
+            );
+            return;
+          }
+          if (!window.confirm("Excluir esta categoria?")) return;
+          categories = categories.filter((c) => c.id !== id);
+          await saveCategories("Excluir categoria");
+        } catch (err) {
+          showStatus(status, err.message, "error");
+        }
       });
     });
   }
 
   function renderMeasures() {
     const list = qs("[data-measure-list]");
+    if (!measures.length) {
+      list.innerHTML = `<div class="empty empty--with-action catalog-empty">
+        <p>Nenhuma medida ainda.</p>
+        <button type="button" class="btn btn--primary" data-focus-field="#measure-name">Adicionar medida</button>
+      </div>`;
+      list.querySelector("[data-focus-field]")?.addEventListener("click", () => {
+        const input = qs("#measure-name");
+        input?.focus();
+        input?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      });
+      return;
+    }
     list.innerHTML = measures
       .map(
         (item) => `
       <div class="catalog-card">
         <div class="catalog-card__body">
-          <strong>${item.name}</strong>
-          <span class="hint">${item.abbrev || item.id}</span>
+          <strong>${escapeHtml(item.name)}</strong>
+          <span class="hint">${escapeHtml(item.abbrev || item.id)}</span>
           <div class="actions">
-            <button type="button" class="btn btn--ghost btn--small" data-edit-measure="${item.id}">Editar</button>
-            <button type="button" class="btn btn--danger btn--small" data-delete-measure="${item.id}">Excluir</button>
+            <button type="button" class="btn btn--ghost btn--small" data-edit-measure="${escapeHtml(item.id)}">Editar</button>
+            <button type="button" class="btn btn--danger btn--small" data-delete-measure="${escapeHtml(item.id)}">Excluir</button>
           </div>
         </div>
       </div>`
@@ -154,25 +242,53 @@
 
     list.querySelectorAll("[data-delete-measure]").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        if (!window.confirm("Excluir esta medida?")) return;
-        measures = measures.filter((m) => m.id !== btn.dataset.deleteMeasure);
-        await saveMeasures("Excluir medida");
+        const id = btn.dataset.deleteMeasure;
+        const status = qs("[data-status]");
+        try {
+          showStatus(status, "Verificando uso da medida…", "info");
+          const refs = await findRecipesUsing({ measureId: id });
+          if (refs.length) {
+            showStatus(
+              status,
+              `Não é possível excluir: usada em ${formatUsageList(refs)}.`,
+              "error"
+            );
+            return;
+          }
+          if (!window.confirm("Excluir esta medida?")) return;
+          measures = measures.filter((m) => m.id !== id);
+          await saveMeasures("Excluir medida");
+        } catch (err) {
+          showStatus(status, err.message, "error");
+        }
       });
     });
   }
 
   function renderIngredients() {
     const list = qs("[data-ingredient-list]");
+    if (!ingredients.length) {
+      list.innerHTML = `<div class="empty empty--with-action catalog-empty">
+        <p>Nenhum ingrediente no catálogo ainda.</p>
+        <button type="button" class="btn btn--primary" data-focus-field="#ingredient-name">Adicionar ingrediente</button>
+      </div>`;
+      list.querySelector("[data-focus-field]")?.addEventListener("click", () => {
+        const input = qs("#ingredient-name");
+        input?.focus();
+        input?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      });
+      return;
+    }
     list.innerHTML = ingredients
       .map(
         (item) => `
       <div class="catalog-card">
-        <img src="${item.image || ""}" alt="" />
+        <img src="${escapeHtml(item.image || "")}" alt="" loading="lazy" decoding="async" />
         <div class="catalog-card__body">
-          <strong>${item.name}</strong>
+          <strong>${escapeHtml(item.name)}</strong>
           <div class="actions">
-            <button type="button" class="btn btn--ghost btn--small" data-edit-ingredient="${item.id}">Editar</button>
-            <button type="button" class="btn btn--danger btn--small" data-delete-ingredient="${item.id}">Excluir</button>
+            <button type="button" class="btn btn--ghost btn--small" data-edit-ingredient="${escapeHtml(item.id)}">Editar</button>
+            <button type="button" class="btn btn--danger btn--small" data-delete-ingredient="${escapeHtml(item.id)}">Excluir</button>
           </div>
         </div>
       </div>`
@@ -197,11 +313,22 @@
 
     list.querySelectorAll("[data-delete-ingredient]").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        if (!window.confirm("Excluir este ingrediente do catálogo?")) return;
         const item = ingredients.find((i) => i.id === btn.dataset.deleteIngredient);
+        if (!item) return;
         const status = qs("[data-status]");
-        showStatus(status, "Excluindo ingrediente…", "info");
         try {
+          showStatus(status, "Verificando uso do ingrediente…", "info");
+          const refs = await findRecipesUsing({ ingredientId: item.id });
+          if (refs.length) {
+            showStatus(
+              status,
+              `Não é possível excluir: usado em ${formatUsageList(refs)}.`,
+              "error"
+            );
+            return;
+          }
+          if (!window.confirm("Excluir este ingrediente do catálogo?")) return;
+          showStatus(status, "Excluindo ingrediente…", "info");
           await window.CookbookSync.remove(
             `data/ingredients/${item.id}.json`,
             `Excluir ingrediente ${item.id}`

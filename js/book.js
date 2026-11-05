@@ -47,6 +47,7 @@
   let coverSlideX = 0;
   let coverSlideAnim = null;
   let pageFlipAudio = null;
+  let searchDebounceTimer = null;
 
   function playPageFlipSound() {
     try {
@@ -138,6 +139,8 @@
   async function loadCookFavorites() {
     const cacheKey = favoritesCookCacheKey();
 
+    // Pending IndexedDB edits win; never auto-stage a stale localStorage cache
+    // over GitHub when opening the book on an old device.
     if (await window.CookbookSync.hasLocalFile("data/favorites.json")) {
       const data = await window.CookbookSync.readJson("data/favorites.json");
       state.favoriteIds = new Set(parseFavoriteIds(data));
@@ -145,20 +148,18 @@
       return;
     }
 
-    if (hasLocalKey(cacheKey)) {
-      state.favoriteIds = new Set(readLocalFavoriteIds(cacheKey));
-      await window.CookbookSync.writeJson(
-        "data/favorites.json",
-        sortedFavoriteIds(state.favoriteIds),
-        "Atualizar favoritos"
-      );
-      return;
-    }
-
     try {
       const data = await window.CookbookSync.readJson("data/favorites.json");
       state.favoriteIds = new Set(parseFavoriteIds(data));
+      writeLocalFavoriteIds(cacheKey, state.favoriteIds);
+      return;
     } catch (_) {
+      /* fall through to offline caches — do not mark dirty */
+    }
+
+    if (hasLocalKey(cacheKey)) {
+      state.favoriteIds = new Set(readLocalFavoriteIds(cacheKey));
+    } else {
       state.favoriteIds = new Set(readLocalFavoriteIds(favoritesStorageKey()));
     }
     writeLocalFavoriteIds(cacheKey, state.favoriteIds);
@@ -247,9 +248,18 @@
       state.favoritesOnly || state.categoryFilters.length > 0 || state.searchQuery.trim();
     if (state.recipes.length && narrowed) {
       if (state.favoritesOnly && !state.favoriteIds.size) {
-        return `<div class="empty">Nenhuma receita favorita ainda.</div>`;
+        return `<div class="empty">Nenhuma receita favorita ainda. Toque no coração em uma receita para guardar.</div>`;
       }
-      return `<div class="empty">Nenhuma receita corresponde a estes filtros.</div>`;
+      return `<div class="empty empty--with-action">
+        <p>Nenhuma receita corresponde a estes filtros.</p>
+        <button type="button" class="btn btn--ghost" data-clear-browse-filters>Limpar filtros</button>
+      </div>`;
+    }
+    if (window.CookbookAuth?.isCook?.()) {
+      return `<div class="empty empty--with-action">
+        <p>Nenhuma receita ainda.</p>
+        <button type="button" class="btn btn--primary" data-empty-new-recipe>Nova receita</button>
+      </div>`;
     }
     return `<div class="empty">Nenhuma receita ainda.</div>`;
   }
@@ -1171,7 +1181,7 @@
       <div class="book-preview">
         <div class="book-preview__media-wrap">
           <button type="button" class="book-preview__media-btn" data-open-recipe="${id}" aria-label="Abrir ${title}">
-            <img class="book-preview__media" src="${escapeHtml(recipe.image || "")}" alt="" />
+            <img class="book-preview__media" src="${escapeHtml(recipe.image || "")}" alt="" loading="lazy" decoding="async" />
           </button>
           ${favoriteBtnHtml(recipe.id, "book-preview__favorite")}
         </div>
@@ -1187,7 +1197,7 @@
     return `
       <div class="book-list__row">
         <button type="button" class="book-list__open" data-open-recipe="${id}">
-          <img class="book-list__thumb" src="${escapeHtml(recipe.image || "")}" alt="" />
+          <img class="book-list__thumb" src="${escapeHtml(recipe.image || "")}" alt="" loading="lazy" decoding="async" />
           <div class="book-list__meta">
             <p class="book-list__category">${escapeHtml(categoryName(recipe.categoryId))}</p>
             <h3 class="book-list__title">${escapeHtml(recipe.title)}</h3>
@@ -1223,7 +1233,9 @@
       </div>`);
     blocks.push(`<h1 class="book-read__title">${escapeHtml(recipe.title)}</h1>`);
     if (recipe.image) {
-      blocks.push(`<img class="book-read__media" src="${escapeHtml(recipe.image)}" alt="" />`);
+      blocks.push(
+        `<img class="book-read__media" src="${escapeHtml(recipe.image)}" alt="" loading="lazy" decoding="async" />`
+      );
     }
 
     (recipe.groups || []).forEach((group) => {
@@ -1238,7 +1250,7 @@
           const measure = measures[line.measureId];
           blocks.push(`
             <div class="ingredient-item">
-              <img src="${escapeHtml(ingredient?.image || "")}" alt="" />
+              <img src="${escapeHtml(ingredient?.image || "")}" alt="" loading="lazy" decoding="async" />
               <div><strong>${escapeHtml(ingredient?.name || line.ingredientId)}</strong></div>
               <span>${escapeHtml(window.CookbookData.formatQuantity(line.quantity, measure))}</span>
             </div>`);
@@ -1586,7 +1598,10 @@
   async function packShoppingPages() {
     const units = (await window.CookbookShopping?.buildPageUnits?.()) || [
       `<h1 class="shopping-page__title">Lista de compras</h1>`,
-      `<p class="shopping-page__empty">Sua lista está vazia.</p>`,
+      `<div class="shopping-page__empty-block">
+        <p class="shopping-page__empty">Sua lista está vazia.</p>
+        <button type="button" class="btn btn--primary" data-shopping-empty-add>Adicionar ingrediente</button>
+      </div>`,
     ];
     const measureTarget = createMeasurePageEl();
     try {
@@ -1611,7 +1626,12 @@
     if (!listRoot) return;
     const units = (await window.CookbookShopping?.buildPageUnits?.()) || [];
     // units[0] is title; rest go in the list host
-    listRoot.innerHTML = units.slice(1).join("") || `<p class="shopping-page__empty">Sua lista está vazia.</p>`;
+    listRoot.innerHTML =
+      units.slice(1).join("") ||
+      `<div class="shopping-page__empty-block">
+        <p class="shopping-page__empty">Sua lista está vazia.</p>
+        <button type="button" class="btn btn--primary" data-shopping-empty-add>Adicionar ingrediente</button>
+      </div>`;
   }
 
   async function renderShoppingFlip() {
@@ -1802,8 +1822,13 @@
     });
   }
 
+  let recipeLoadGen = 0;
+
   async function openRecipe(id) {
     if (!id) return;
+    const gen = ++recipeLoadGen;
+    const stage = qs(".book__stage");
+    stage?.setAttribute("aria-busy", "true");
     try {
       if (state.mode === "editing") {
         window.CookbookEditRecipe?.unmountFromBook?.();
@@ -1816,7 +1841,22 @@
         state.shoppingPages = [];
         state.shoppingPageIndex = 0;
       }
+
+      const left = qs('[data-page="left"]');
+      const right = qs('[data-page="right"]');
+      if (state.mode !== "reading" || state.readingId !== id) {
+        teardownFlipBook();
+        setPage(left, "", { blank: true });
+        setPage(
+          right,
+          `<div class="empty" role="status" aria-live="polite">Carregando receita…</div>`,
+          { scrollable: true }
+        );
+        updateChrome();
+      }
+
       const recipe = await window.CookbookData.loadRecipe(id);
+      if (gen !== recipeLoadGen) return;
       state.mode = "reading";
       state.readingId = id;
       state.readingRecipe = recipe;
@@ -1826,10 +1866,13 @@
       render();
       repackReadingSoon();
     } catch (err) {
+      if (gen !== recipeLoadGen) return;
       teardownFlipBook();
       const host = qs('[data-page="right"]') || qs('[data-page="left"]');
       setPage(host, `<div class="empty">${escapeHtml(err.message)}</div>`);
       updateChrome();
+    } finally {
+      if (gen === recipeLoadGen) stage?.removeAttribute("aria-busy");
     }
   }
 
@@ -1922,6 +1965,12 @@
       return;
     }
     if (!window.CookbookAuth?.isCook?.()) return;
+    try {
+      await window.CookbookUI?.ensureCookEditors?.();
+    } catch (err) {
+      window.alert(err?.message || "Não foi possível carregar o editor.");
+      return;
+    }
     const animate = options.animate !== false && !state.skipModeBridge && state.coverPhase === "open";
     if (state.filterOpen) closeFilterPanel();
     if (state.mode === "shopping") {
@@ -1977,6 +2026,12 @@
       return;
     }
     if (!window.CookbookAuth?.isCook?.()) return;
+    try {
+      await window.CookbookUI?.ensureCookEditors?.();
+    } catch (err) {
+      window.alert(err?.message || "Não foi possível carregar o gerenciador.");
+      return;
+    }
     const animate = options.animate !== false && !state.skipModeBridge && state.coverPhase === "open";
     if (state.filterOpen) closeFilterPanel();
     if (state.mode === "shopping") {
@@ -2164,13 +2219,37 @@
     });
     qs("[data-spread]")?.addEventListener("click", onFavoriteClick);
     qs("[data-flip-slot]")?.addEventListener("click", onFavoriteClick);
+    document.addEventListener("click", (e) => {
+      if (e.target.closest("[data-empty-new-recipe]")) {
+        e.preventDefault();
+        void openEdit({ animate: true });
+        return;
+      }
+      if (e.target.closest("[data-clear-browse-filters]")) {
+        e.preventDefault();
+        state.categoryFilters = [];
+        state.favoritesOnly = false;
+        state.searchQuery = "";
+        const search = qs("[data-recipe-search]");
+        if (search) search.value = "";
+        state.browseIndex = 0;
+        state.listPages = [];
+        syncFilterCheckboxes();
+        closeFilterPanel();
+        render();
+        updateChrome();
+      }
+    });
     bindFlipGestures();
     qs("[data-filter-panel]")?.addEventListener("click", (e) => e.stopPropagation());
     qs("[data-recipe-search]")?.addEventListener("input", (e) => {
       state.searchQuery = e.target.value || "";
-      state.browseIndex = 0;
-      state.listPages = [];
-      render();
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        state.browseIndex = 0;
+        state.listPages = [];
+        render();
+      }, 200);
     });
 
     document.addEventListener("click", () => {

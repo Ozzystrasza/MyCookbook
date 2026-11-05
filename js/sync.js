@@ -53,9 +53,24 @@
     return idbRequest(db.transaction(STORE, "readwrite").objectStore(STORE).put(record));
   }
 
+  async function deleteRecord(path) {
+    if (!path) return;
+    revokeObjectUrl(path);
+    const db = await openDb();
+    return idbRequest(db.transaction(STORE, "readwrite").objectStore(STORE).delete(path));
+  }
+
   async function getAllRecords() {
     const db = await openDb();
     return idbRequest(db.transaction(STORE, "readonly").objectStore(STORE).getAll());
+  }
+
+  function fingerprint(rec) {
+    return JSON.stringify({
+      deleted: Boolean(rec?.deleted),
+      encoding: rec?.encoding || "utf-8",
+      content: rec?.content || "",
+    });
   }
 
   function readMetaNumber(key) {
@@ -189,20 +204,32 @@
     return res.text();
   }
 
+  async function decodeLocalText(local) {
+    if (local.encoding === "base64") {
+      const binary = atob(String(local.content || "").replace(/\n/g, ""));
+      const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+      return new TextDecoder().decode(bytes);
+    }
+    return String(local.content ?? "");
+  }
+
   async function readText(path) {
     const local = await getRecord(path);
     if (local) {
       if (local.deleted) {
-        const err = new Error(`Não foi possível carregar ${path}`);
-        err.code = "deleted";
-        throw err;
+        if (local.dirty) {
+          const err = new Error(`Não foi possível carregar ${path}`);
+          err.code = "deleted";
+          throw err;
+        }
+        await deleteRecord(path);
+        return fetchNetworkText(path);
       }
-      if (local.encoding === "base64") {
-        const binary = atob(String(local.content || "").replace(/\n/g, ""));
-        const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
-        return new TextDecoder().decode(bytes);
+      if (local.dirty) {
+        return decodeLocalText(local);
       }
-      return String(local.content ?? "");
+      // Clean local copies must not permanently shadow GitHub.
+      await deleteRecord(path);
     }
     return fetchNetworkText(path);
   }
@@ -217,6 +244,10 @@
     if (objectUrlCache.has(path)) return objectUrlCache.get(path);
     const local = await getRecord(path);
     if (!local || local.deleted) return path;
+    if (!local.dirty) {
+      await deleteRecord(path);
+      return path;
+    }
     if (local.encoding !== "base64" || !local.content) return path;
     try {
       const binary = atob(String(local.content).replace(/\n/g, ""));
@@ -242,12 +273,24 @@
     );
   }
 
-  async function clearDirtyFlags(paths) {
-    for (const path of paths) {
-      const rec = await getRecord(path);
+  async function finalizeSynced(snapshots) {
+    let remainingDirty = false;
+    for (const snap of snapshots) {
+      const rec = await getRecord(snap.path);
       if (!rec) continue;
-      await putRecord({ ...rec, dirty: false, message: "" });
+      if (fingerprint(rec) !== snap.fingerprint) {
+        remainingDirty = true;
+        continue;
+      }
+      // Drop synced local copy so future reads come from GitHub/Pages.
+      await deleteRecord(snap.path);
     }
+    if (remainingDirty) {
+      if (!readPendingSince()) writePendingSince(Date.now());
+    } else {
+      clearPendingSince();
+    }
+    return remainingDirty;
   }
 
   async function syncNow() {
@@ -262,15 +305,23 @@
       return { ok: true, count: 0 };
     }
 
+    const snapshots = dirty.map((rec) => ({
+      path: rec.path,
+      fingerprint: fingerprint(rec),
+      deleted: Boolean(rec.deleted),
+      encoding: rec.encoding === "base64" ? "base64" : "utf-8",
+      content: rec.content || "",
+    }));
+
     syncing = true;
     emitStatus({ pending: true });
     try {
-      const changes = dirty.map((rec) => {
-        if (rec.deleted) return { path: rec.path, deleted: true };
+      const changes = snapshots.map((snap) => {
+        if (snap.deleted) return { path: snap.path, deleted: true };
         return {
-          path: rec.path,
-          encoding: rec.encoding === "base64" ? "base64" : "utf-8",
-          content: rec.content || "",
+          path: snap.path,
+          encoding: snap.encoding,
+          content: snap.content,
         };
       });
       await window.CookbookGitHub.commitChanges(
@@ -278,11 +329,10 @@
         "Sincronizar alterações do cookbook",
         token
       );
-      await clearDirtyFlags(dirty.map((r) => r.path));
-      clearPendingSince();
+      const remainingDirty = await finalizeSynced(snapshots);
       writeLastSync();
-      emitStatus({ pending: false, synced: true });
-      return { ok: true, count: changes.length };
+      emitStatus({ pending: remainingDirty, synced: true });
+      return { ok: true, count: changes.length, remainingDirty };
     } catch (err) {
       emitStatus({ pending: true, error: err?.message || String(err) });
       throw err;

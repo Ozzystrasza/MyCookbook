@@ -1,0 +1,26 @@
+---
+description: Do not undo local-first sync, security, or Phase 1/2 audit fixes
+alwaysApply: true
+---
+
+# Architecture Invariants
+
+Keep these behaviors. Do not "simplify" them away.
+
+## Data & sync (`js/sync.js`, favorites, manage)
+
+- Edits are **local-first** (IndexedDB dirty queue → sync button / daily sync). Do not save straight to GitHub on every edit.
+- After sync, clear dirty **only** when the stored record still matches the committed snapshot; **drop** synced local copies so they cannot shadow GitHub.
+- Prefer dirty local, else network. Never treat a clean IndexedDB row as permanent source of truth.
+- Cook favorites: load pending local or remote `data/favorites.json`. Never auto-stage a stale `localStorage` cook cache for upload on open.
+- Catalog delete must check recipe usage and block when referenced (`js/manage.js`).
+
+## Security & a11y
+
+- Escape user/catalog strings in HTML (`CookbookUI.escapeHtml`). Do not add unescaped `innerHTML` for names, ids, or image paths.
+- Keep status `role="status"` / `aria-live`, modal focus trap/restore, and loading/`aria-busy` for catalog boot and recipe open.
+- Keep ~44px tap targets (`--tap-size`) and global `:focus-visible`.
+
+## Sticky form actions
+
+- In-book `.actions--sticky` must blend with **book page** paper tones. Do not restore the flat white `#fffcf6` slab on `.panel--in-book`.

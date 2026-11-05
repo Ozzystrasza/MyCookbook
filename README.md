@@ -46,7 +46,13 @@ Use **Sign out** / **Switch role** in the header to return to that gate.
 - **Manage** — categories, measures (cups, grams, …), and the ingredient catalog (name + picture).
 - Recipe lines pick ingredients and measures from those catalogs.
 
-After you save, GitHub stores the JSON and images in this repo. The public site updates when Pages finishes rebuilding (often under a minute).
+### Saving and sync
+
+Edits are **local-first**: they are stored in IndexedDB on your device and marked pending. Use the sync button in the header to push pending changes to GitHub in one commit. Pending changes older than a day also try a background sync when you open the site as cook.
+
+After a successful sync, GitHub Pages rebuilds the public site (often under a minute). Until you sync, other devices will not see your edits.
+
+Shopping lists stay on the device only (`localStorage`). Favorites for cooks sync through `data/favorites.json` when you change them and sync.
 
 ### Add to Home Screen
 
@@ -57,18 +63,20 @@ After you save, GitHub stores the JSON and images in this repo. The public site 
 
 | Path | Purpose |
 | --- | --- |
-| `index.html` | Home + cook/visitor gate |
-| `recipe.html` | Single recipe |
-| `edit.html` | Create/edit recipe (cook) |
-| `manage.html` | Categories, measures, ingredients (cook) |
+| `index.html` | Book UI + cook/visitor gate |
+| `recipe.html` | Compatibility redirect to `index.html?recipe=…` |
+| `edit.html` | Create/edit recipe (cook, desktop) |
+| `manage.html` | Categories, measures, ingredients (cook, desktop) |
+| `js/sync.js` | IndexedDB queue + sync to GitHub |
 | `vendor/page-flip.browser.js` | StPageFlip (page-turn) browser bundle |
 | `data/categories.json` | Category catalog |
 | `data/measures.json` | Measure catalog |
 | `data/ingredients/` | Ingredient catalog + `_index.json` |
 | `data/recipes/` | Recipes + `_index.json` |
-| `data/images/` | Ingredient and recipe images |
+| `data/favorites.json` | Shared cook favorites |
+| `data/images/` | Ingredient, recipe, and cover images |
 
-Book browse and recipe reading use [StPageFlip](https://nodlik.github.io/StPageFlip/) via the vendored script above (loaded in `index.html` before `js/book.js`). List view and shopping list do not use it.
+On narrow screens, edit and manage open inside the book instead of separate pages. Book browse and recipe reading use [StPageFlip](https://nodlik.github.io/StPageFlip/) via the vendored script above (loaded in `index.html` before `js/book.js`). List view and shopping list do not use it.
 
 ## Local preview
 

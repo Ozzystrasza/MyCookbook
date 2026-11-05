@@ -27,11 +27,7 @@
   }
 
   function escapeHtml(value) {
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+    return (window.CookbookUI?.escapeHtml || ((v) => String(v ?? "")))(value);
   }
 
   function loadList() {
@@ -205,7 +201,7 @@
     catalogEl.hidden = true;
     catalogEl.innerHTML = `
       <div class="shopping-modal__backdrop" data-catalog-close tabindex="-1"></div>
-      <div class="shopping-modal__panel" role="dialog" aria-label="Adicionar ingrediente">
+      <div class="shopping-modal__panel" role="dialog" aria-label="Adicionar ingrediente" aria-modal="true">
         <div class="shopping-modal__header">
           <h2 class="shopping-modal__title">Adicionar ingrediente</h2>
           <button type="button" class="icon-btn" data-catalog-close aria-label="Fechar">
@@ -228,7 +224,7 @@
     recipeEl.hidden = true;
     recipeEl.innerHTML = `
       <div class="shopping-modal__backdrop" data-recipe-close tabindex="-1"></div>
-      <div class="shopping-modal__panel" role="dialog" aria-label="Adicionar à lista">
+      <div class="shopping-modal__panel" role="dialog" aria-label="Adicionar à lista" aria-modal="true">
         <div class="shopping-modal__header">
           <h2 class="shopping-modal__title">Adicionar à lista</h2>
           <button type="button" class="icon-btn" data-recipe-close aria-label="Fechar">
@@ -382,6 +378,7 @@
 
   function closeCreateModal() {
     if (!createModal) return;
+    window.CookbookUI.deactivateModalFocus?.(createModal);
     createModal.hidden = true;
     createImageFile = null;
     createImagePicker?.setUrl("");
@@ -396,7 +393,7 @@
     ensureModals();
     if (!window.CookbookAuth?.isCook?.()) return;
     createModal.hidden = false;
-    window.setTimeout(() => createModal.querySelector("[data-create-name]")?.focus(), 30);
+    window.CookbookUI.activateModalFocus?.(createModal, "[data-create-name]");
   }
 
   async function saveNewIngredient(event) {
@@ -487,6 +484,11 @@
     if (listActionsBound) return;
     listActionsBound = true;
     document.addEventListener("click", (event) => {
+      if (event.target.closest("[data-shopping-empty-add]")) {
+        event.preventDefault();
+        openCatalogPicker();
+        return;
+      }
       const btn = event.target.closest("[data-shopping-action]");
       if (!btn || !btn.closest(".shopping-page")) return;
       const id = btn.getAttribute("data-id");
@@ -509,7 +511,10 @@
     const list = loadList();
     const units = [`<h1 class="shopping-page__title">Lista de compras</h1>`];
     if (!list.length) {
-      units.push(`<p class="shopping-page__empty">Sua lista está vazia.</p>`);
+      units.push(`<div class="shopping-page__empty-block">
+        <p class="shopping-page__empty">Sua lista está vazia.</p>
+        <button type="button" class="btn btn--primary" data-shopping-empty-add>Adicionar ingrediente</button>
+      </div>`);
       return units;
     }
     list.forEach((item) => {
@@ -536,7 +541,7 @@
         >
           ${checked ? CHECK_MARK_SVG : `<span class="shopping-check__box" aria-hidden="true"></span>`}
         </button>
-        <img class="shopping-row__icon" src="${escapeHtml(image)}" alt="" />
+        <img class="shopping-row__icon" src="${escapeHtml(image)}" alt="" loading="lazy" decoding="async" />
         <div class="shopping-row__meta">
           <span class="shopping-row__name">${escapeHtml(name)}</span>
           ${amountText ? `<span class="shopping-row__amount">${escapeHtml(amountText)}</span>` : ""}
@@ -563,7 +568,10 @@
     const { measures, ingredients } = await ensureData();
     const list = loadList();
     if (!list.length) {
-      listRoot.innerHTML = `<p class="shopping-page__empty">Sua lista está vazia.</p>`;
+      listRoot.innerHTML = `<div class="shopping-page__empty-block">
+        <p class="shopping-page__empty">Sua lista está vazia.</p>
+        <button type="button" class="btn btn--primary" data-shopping-empty-add>Adicionar ingrediente</button>
+      </div>`;
       return;
     }
     listRoot.innerHTML = list.map((item) => rowHtml(item, ingredients, measures)).join("");
@@ -611,7 +619,7 @@
           .map(
             (ing) => `
         <button type="button" class="shopping-catalog-item" data-catalog-pick="${escapeHtml(ing.id)}">
-          <img src="${escapeHtml(ing.image || "")}" alt="" />
+          <img src="${escapeHtml(ing.image || "")}" alt="" loading="lazy" decoding="async" />
           <span>${escapeHtml(ing.name || ing.id)}</span>
         </button>
       `
@@ -639,11 +647,12 @@
     const search = catalogEl.querySelector("[data-catalog-search]");
     if (search) search.value = "";
     await renderCatalogList();
-    search?.focus();
+    window.CookbookUI.activateModalFocus?.(catalogEl, "[data-catalog-search]");
   }
 
   function closeCatalogPicker() {
     if (!catalogEl) return;
+    window.CookbookUI.deactivateModalFocus?.(catalogEl);
     catalogEl.hidden = true;
   }
 
@@ -697,7 +706,7 @@
               <input type="checkbox" checked />
               <span class="shopping-check__box" aria-hidden="true"></span>
               <span class="shopping-recipe-line__qty">${escapeHtml(qtyLabel)}</span>
-              <img src="${escapeHtml(ing?.image || "")}" alt="" />
+              <img src="${escapeHtml(ing?.image || "")}" alt="" loading="lazy" decoding="async" />
               <span class="shopping-recipe-line__name">${escapeHtml(ing?.name || entry.ingredientId)}</span>
             </label>
           `;
@@ -710,10 +719,12 @@
       checkAll.indeterminate = false;
     }
     recipeEl.hidden = false;
+    window.CookbookUI.activateModalFocus?.(recipeEl, "[data-recipe-confirm]");
   }
 
   function closeRecipePicker() {
     if (!recipeEl) return;
+    window.CookbookUI.deactivateModalFocus?.(recipeEl);
     recipeEl.hidden = true;
   }
 

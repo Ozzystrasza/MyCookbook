@@ -3,7 +3,8 @@
     if (window.CookbookAuth?.isCook?.() && window.CookbookSync?.readJson) {
       return window.CookbookSync.readJson(path);
     }
-    const res = await fetch(path, { cache: "no-store" });
+    // Visitors can reuse short HTTP cache; cooks always go through sync/no-store.
+    const res = await fetch(path, { cache: "default" });
     if (!res.ok) throw new Error(`Não foi possível carregar ${path}`);
     return res.json();
   }

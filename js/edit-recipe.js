@@ -83,7 +83,7 @@
             </button>
           </div>
           <div class="stack" data-groups-editor></div>
-          <div class="actions">
+          <div class="actions actions--sticky">
             <button type="submit" class="btn btn--primary">Salvar receita</button>
             <button type="button" class="btn btn--danger" data-delete hidden>Excluir receita</button>
             <button type="button" class="btn btn--ghost" data-edit-cancel>Cancelar</button>
@@ -371,6 +371,7 @@
   }
 
   function closeLeaveModal() {
+    window.CookbookUI.deactivateModalFocus?.(leaveModal);
     leaveModal.hidden = true;
     pendingLeaveHref = "";
   }
@@ -379,9 +380,11 @@
     ensureModals();
     pendingLeaveHref = href;
     leaveModal.hidden = false;
+    window.CookbookUI.activateModalFocus?.(leaveModal, "[data-leave-stay]");
   }
 
   function closePickModal() {
+    window.CookbookUI.deactivateModalFocus?.(pickModal);
     pickModal.hidden = true;
     pickerTargetInput = null;
     pickKind = "ingredient";
@@ -401,11 +404,12 @@
     pickModal.querySelector(".shopping-modal__panel")?.setAttribute("aria-label", `Escolher ${meta.title.toLowerCase()}`);
     pickModal.hidden = false;
     renderPickList();
-    window.setTimeout(() => pickModal.querySelector("[data-pick-search]")?.focus(), 30);
+    window.CookbookUI.activateModalFocus?.(pickModal, "[data-pick-search]");
   }
 
   function resetCreateModal(modal) {
     if (!modal) return;
+    window.CookbookUI.deactivateModalFocus?.(modal);
     modal.hidden = true;
     const form = modal.querySelector("[data-create-form]");
     form?.reset();
@@ -434,7 +438,7 @@
           ? createMeasureModal
           : createIngredientModal;
     modal.hidden = false;
-    window.setTimeout(() => modal.querySelector("[data-create-name]")?.focus(), 30);
+    window.CookbookUI.activateModalFocus?.(modal, "[data-create-name]");
   }
 
   function finishCreate(id) {
@@ -470,7 +474,7 @@
         if (pickKind === "ingredient") {
           return `
         <button type="button" class="shopping-catalog-item" data-pick-id="${escapeHtml(item.id)}">
-          <img src="${escapeHtml(item.image || "")}" alt="" />
+          <img src="${escapeHtml(item.image || "")}" alt="" loading="lazy" decoding="async" />
           <span>${escapeHtml(item.name || item.id)}</span>
         </button>`;
         }

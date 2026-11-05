@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Outfit:wght@400;500;600&display=swap");
-
 :root {
   --ink: #1c241c;
   --muted: #5d6a5d;
@@ -16,6 +14,8 @@
   --grass: #d5e4c8;
   --shadow: 0 18px 50px rgba(28, 36, 28, 0.14);
   --radius: 18px;
+  --tap-size: 2.75rem;
+  --focus-ring: 0 0 0 3px rgba(47, 93, 58, 0.35);
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "Outfit", system-ui, sans-serif;
 }
@@ -454,6 +454,7 @@ textarea {
   gap: 0.4rem;
   border: 0;
   border-radius: 999px;
+  min-height: var(--tap-size);
   padding: 0.7rem 1.15rem;
   cursor: pointer;
   transition: transform 0.2s ease, background 0.2s ease;
@@ -461,6 +462,20 @@ textarea {
 
 .btn:hover {
   transform: translateY(-1px);
+}
+
+.btn:focus-visible,
+.icon-btn:focus-visible,
+.book__mode-btn:focus-visible,
+.ingredient-picker__trigger:focus-visible,
+.book-filter__option:focus-within,
+.field input:focus-visible,
+.field textarea:focus-visible,
+.field select:focus-visible,
+.shopping-catalog-item:focus-visible,
+.tabs .btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .btn:disabled {
@@ -490,7 +505,8 @@ textarea {
 }
 
 .btn--small {
-  padding: 0.4rem 0.75rem;
+  min-height: var(--tap-size);
+  padding: 0.45rem 0.85rem;
   font-size: 0.9rem;
 }
 
@@ -743,6 +759,7 @@ textarea.field-control {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 0.85rem;
+  margin-top: 1rem;
 }
 
 .catalog-card {
@@ -769,8 +786,10 @@ textarea.field-control {
 .book-cover__back {
   display: grid;
   place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: var(--tap-size);
+  height: var(--tap-size);
+  min-width: var(--tap-size);
+  min-height: var(--tap-size);
   padding: 0;
   border: 0;
   border-radius: 999px;
@@ -793,7 +812,7 @@ textarea.field-control {
   background-color: #7eb0d4;
   background-image:
     linear-gradient(90deg, rgba(0, 0, 0, 0.18), transparent 12px),
-    url("../data/images/cover.png");
+    url("../data/images/cover.webp");
   background-position: left top, center;
   background-size: auto, cover;
   background-repeat: no-repeat;
@@ -941,6 +960,20 @@ textarea.field-control {
   color: var(--muted);
   border: 1px dashed var(--line);
   border-radius: var(--radius);
+}
+
+.empty--with-action {
+  display: grid;
+  justify-items: center;
+  gap: 0.85rem;
+}
+
+.empty--with-action p {
+  margin: 0;
+}
+
+.catalog-empty {
+  grid-column: 1 / -1;
 }
 
 .tabs {
@@ -1154,10 +1187,11 @@ body.is-managing .book__actions {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  min-height: 2.25rem;
+  min-height: var(--tap-size);
   padding: 0.2rem 0.15rem;
   font-size: 0.95rem;
   cursor: pointer;
+  border-radius: 10px;
 }
 
 .book-filter__option input {
@@ -1183,8 +1217,10 @@ body.is-managing .book__actions {
 .book__mode-btn {
   display: grid;
   place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: var(--tap-size);
+  height: var(--tap-size);
+  min-width: var(--tap-size);
+  min-height: var(--tap-size);
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -1889,7 +1925,49 @@ body.is-managing .book__actions {
 }
 
 .book-form .actions .btn {
-  min-height: 2.75rem;
+  min-height: var(--tap-size);
+}
+
+.actions--sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  gap: 0.5rem;
+  padding: 0.75rem 0 0.35rem;
+  margin-top: 0.75rem;
+  background: linear-gradient(
+    180deg,
+    rgba(247, 242, 230, 0) 0%,
+    rgba(247, 242, 230, 0.92) 28%,
+    var(--paper) 100%
+  );
+}
+
+.panel .actions--sticky {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 252, 246, 0) 0%,
+    rgba(255, 252, 246, 0.94) 28%,
+    #fffcf6 100%
+  );
+}
+
+/* In-book forms: match page paper tones, avoid flat white slab */
+.book-form.panel--in-book .actions--sticky {
+  background: linear-gradient(
+    180deg,
+    rgba(250, 246, 236, 0) 0%,
+    rgba(247, 242, 230, 0.55) 40%,
+    rgba(240, 232, 214, 0.92) 100%
+  );
+}
+
+@media (min-width: 800px) {
+  .book-form .actions--sticky {
+    position: static;
+    padding: 0;
+    background: transparent;
+  }
 }
 
 @media (min-width: 700px) {
@@ -1919,6 +1997,13 @@ body.is-managing .book__actions {
   padding: 0.75rem 0.25rem;
   color: var(--muted);
   font-size: 0.95rem;
+}
+
+.shopping-page__empty-block {
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+  padding: 0.25rem 0 0.5rem;
 }
 
 .shopping-row {
@@ -1960,9 +2045,9 @@ body.is-managing .book__actions {
 }
 
 .shopping-step {
-  width: 2rem;
-  height: 2rem;
-  min-width: 2rem;
+  width: var(--tap-size);
+  height: var(--tap-size);
+  min-width: var(--tap-size);
   padding: 0;
   font-size: 1.1rem;
   line-height: 1;

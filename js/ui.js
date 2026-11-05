@@ -7,6 +7,73 @@
     return [...root.querySelectorAll(sel)];
   }
 
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  const FOCUSABLE_SEL =
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  const modalFocusState = new WeakMap();
+
+  function getFocusable(container) {
+    if (!container) return [];
+    return [...container.querySelectorAll(FOCUSABLE_SEL)].filter((node) => {
+      if (node.hasAttribute("disabled") || node.getAttribute("aria-hidden") === "true") return false;
+      if (node.closest("[hidden]")) return false;
+      return true;
+    });
+  }
+
+  function activateModalFocus(modal, focusSelector) {
+    if (!modal) return;
+    deactivateModalFocus(modal, false);
+    const panel = modal.querySelector('[role="dialog"]') || modal;
+    const prev = document.activeElement;
+    function onKeyDown(event) {
+      if (event.key !== "Tab") return;
+      const list = getFocusable(panel);
+      if (!list.length) {
+        event.preventDefault();
+        panel.focus();
+        return;
+      }
+      const first = list[0];
+      const last = list[list.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+    if (!panel.hasAttribute("tabindex")) panel.setAttribute("tabindex", "-1");
+    modal.addEventListener("keydown", onKeyDown);
+    modalFocusState.set(modal, { prev, onKeyDown });
+    const focusEl =
+      (focusSelector && modal.querySelector(focusSelector)) || getFocusable(panel)[0] || panel;
+    window.setTimeout(() => focusEl?.focus?.(), 30);
+  }
+
+  function deactivateModalFocus(modal, restore = true) {
+    const state = modalFocusState.get(modal);
+    if (!state) return;
+    modal.removeEventListener("keydown", state.onKeyDown);
+    modalFocusState.delete(modal);
+    if (
+      restore &&
+      state.prev &&
+      typeof state.prev.focus === "function" &&
+      document.contains(state.prev)
+    ) {
+      state.prev.focus();
+    }
+  }
+
   function el(tag, attrs = {}, children = []) {
     const node = document.createElement(tag);
     Object.entries(attrs).forEach(([key, value]) => {
@@ -209,6 +276,8 @@
     elNode.hidden = !message;
     elNode.textContent = message || "";
     elNode.className = `status status--${kind}`;
+    elNode.setAttribute("role", "status");
+    elNode.setAttribute("aria-live", kind === "error" ? "assertive" : "polite");
   }
 
   async function refreshSyncButton(root = document) {
@@ -304,6 +373,7 @@
       function finish(ok) {
         if (settled) return;
         settled = true;
+        deactivateModalFocus(modal);
         modal.remove();
         resolve(ok);
       }
@@ -313,7 +383,7 @@
       });
       modal.querySelector("[data-similar-confirm]")?.addEventListener("click", () => finish(true));
       document.body.appendChild(modal);
-      window.setTimeout(() => modal.querySelector("[data-similar-confirm]")?.focus(), 30);
+      activateModalFocus(modal, "[data-similar-confirm]");
     });
   }
 
@@ -460,15 +530,47 @@
     };
   }
 
+  const scriptLoadPromises = new Map();
+
+  function loadScript(src) {
+    if (scriptLoadPromises.has(src)) return scriptLoadPromises.get(src);
+    const existing = document.querySelector(`script[src="${src}"]`);
+    if (existing) {
+      const done = Promise.resolve();
+      scriptLoadPromises.set(src, done);
+      return done;
+    }
+    const done = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.async = false;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Falha ao carregar ${src}`));
+      document.body.appendChild(script);
+    });
+    scriptLoadPromises.set(src, done);
+    return done;
+  }
+
+  async function ensureCookEditors() {
+    await loadScript("js/edit-recipe.js");
+    await loadScript("js/manage.js");
+  }
+
   window.CookbookUI = {
     qs,
     qsa,
     el,
+    escapeHtml,
     mountShell,
     showStatus,
     mountImagePicker,
     confirmSimilarNames,
     assertNameAvailable,
     refreshSyncButton,
+    activateModalFocus,
+    deactivateModalFocus,
+    loadScript,
+    ensureCookEditors,
   };
 })();

@@ -1,0 +1,25 @@
+---
+description: Prefer load-time and UX performance patterns already established in Phase 2
+alwaysApply: true
+---
+
+# Performance Priorities
+
+When adding features or touching shared shells, keep (and extend) these patterns. Prefer them over convenience that regresses load or interaction cost.
+
+## Loading
+
+- Load Google Fonts via HTML `<link rel="preconnect">` + stylesheet — **never** CSS `@import`.
+- Do not eagerly load `edit-recipe.js` / `manage.js` on `index.html`. Use `CookbookUI.ensureCookEditors()` when opening edit/manage in-book.
+- Recipe/catalog/shopping images: prefer `loading="lazy"` and `decoding="async"`.
+- Cover asset is `data/images/cover.webp`. Do not reintroduce multi‑MB scenic PNG backups into the repo.
+
+## Runtime
+
+- Debounce search-driven book re-renders (~200ms). Do not re-render the full book on every keystroke.
+- Visitors: JSON `fetch` may use `cache: "default"`. Cooks stay on sync/`no-store` freshness.
+- Empty states should offer a primary action (add ingredient, new recipe, clear filters, focus catalog form) when one exists — not text-only dead ends.
+
+## Docs
+
+- Keep [README.md](README.md) aligned with local-first sync and `recipe.html` as a redirect. Do not revive "save goes straight to GitHub" wording.
