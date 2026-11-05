@@ -964,6 +964,23 @@ textarea.field-control {
   font-size: 0.85rem;
 }
 
+@media (min-width: 700px) {
+  .catalog-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  .catalog-card.is-editing .image-drop {
+    min-height: 5.5rem;
+    padding: 0.75rem;
+  }
+
+  .catalog-card.is-editing .image-drop__img {
+    width: 72px;
+    height: 72px;
+    max-width: 72px;
+  }
+}
+
 .catalog-add {
   margin: 0.35rem 0 0.85rem;
   padding: 0.85rem;
@@ -2180,7 +2197,7 @@ body.is-managing .book__actions {
   }
 
   .book-form .catalog-grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
 }
 

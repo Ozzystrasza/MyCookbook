@@ -447,8 +447,7 @@
     });
   }
 
-  function confirmSyncConflict({ paths = [] } = {}) {
-    const items = Array.isArray(paths) ? paths.filter(Boolean) : [];
+  function confirmSyncConflict() {
     return new Promise((resolve) => {
       const existing = document.querySelector("[data-sync-conflict]");
       existing?.remove();
@@ -466,30 +465,15 @@
             </button>
           </div>
           <div class="editor-modal__body">
-            <p class="hint" data-sync-conflict-hint></p>
-            <ul class="similar-confirm__list" data-sync-conflict-list></ul>
+            <p class="hint">O GitHub tem alterações mais novas. Descartar as daqui ou sobrescrever o GitHub?</p>
             <div class="editor-modal__footer">
               <button type="button" class="btn btn--ghost" data-sync-conflict-cancel>Cancelar</button>
-              <button type="button" class="btn btn--ghost" data-sync-conflict-remote>Descartar alterações locais</button>
-              <button type="button" class="btn btn--primary" data-sync-conflict-local>Manter minhas alterações</button>
+              <button type="button" class="btn btn--ghost" data-sync-conflict-remote>Descartar locais</button>
+              <button type="button" class="btn btn--primary" data-sync-conflict-local>Sobrescrever GitHub</button>
             </div>
           </div>
         </div>
       `;
-
-      const hint = modal.querySelector("[data-sync-conflict-hint]");
-      const count = items.length;
-      hint.textContent =
-        count === 1
-          ? "O GitHub tem alterações mais novas neste arquivo. O que deseja fazer?"
-          : `O GitHub tem alterações mais novas em ${count} arquivos. O que deseja fazer?`;
-
-      const list = modal.querySelector("[data-sync-conflict-list]");
-      items.forEach((path) => {
-        const li = document.createElement("li");
-        li.textContent = String(path);
-        list.append(li);
-      });
 
       let settled = false;
       function finish(choice) {
