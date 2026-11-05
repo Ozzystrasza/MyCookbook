@@ -207,7 +207,7 @@ textarea {
 }
 
 @media (min-width: 800px) {
-  .site-nav__menu-toggle {
+  .site-nav .site-nav__menu-toggle {
     display: none;
   }
 
