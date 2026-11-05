@@ -23,28 +23,40 @@
     return node;
   }
 
+  function syncPageChrome(standalone) {
+    let bar = qs("[data-page-chrome]");
+    if (!standalone) {
+      document.body.classList.remove("is-standalone-form");
+      if (bar) bar.remove();
+      return;
+    }
+
+    document.body.classList.add("is-standalone-form");
+    const header = qs("[data-site-header]");
+    if (!header) return;
+
+    if (!bar) {
+      bar = document.createElement("div");
+      bar.className = "page-chrome";
+      bar.setAttribute("data-page-chrome", "");
+      header.after(bar);
+    }
+
+    bar.innerHTML = `
+      <a href="index.html?home=1" class="icon-btn" aria-label="Voltar">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M12.5 4.5L7 10l5.5 5.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    `;
+  }
+
   function mountShell({ active } = {}) {
     const header = qs("[data-site-header]");
     if (!header) return;
 
     const cook = window.CookbookAuth.isCook();
-    const showBack = active === "edit" || active === "manage";
-
-    if (showBack) {
-      header.innerHTML = `
-        <div class="site-header__inner">
-          <div class="site-header__brand-row">
-            <a href="index.html?home=1" class="icon-btn" aria-label="Voltar">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path d="M12.5 4.5L7 10l5.5 5.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </a>
-          </div>
-        </div>
-      `;
-      window.CookbookAuth.applyCookUi(document);
-      return;
-    }
+    const standalone = active === "edit" || active === "manage";
 
     header.innerHTML = `
       <div class="site-header__inner">
@@ -85,6 +97,8 @@
         </nav>
       </div>
     `;
+
+    syncPageChrome(standalone);
 
     window.CookbookShopping?.bindHeaderToggle(header);
     window.CookbookAuth.applyCookUi(document);

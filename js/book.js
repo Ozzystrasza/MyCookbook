@@ -1419,8 +1419,8 @@
     document.body.classList.toggle("is-managing", managing && !coverClosed);
     document.body.classList.toggle("is-gated", showGateShell);
 
-    if (modes) modes.hidden = immersed || coverClosed;
-    if (actions) actions.hidden = immersed || coverClosed;
+    if (modes) modes.hidden = coverClosed;
+    if (actions) actions.hidden = coverClosed;
     if (search) search.hidden = immersed || coverClosed;
     if (readingBar) readingBar.hidden = !reading || coverClosed;
     if (shoppingBar) shoppingBar.hidden = !shopping || coverClosed;

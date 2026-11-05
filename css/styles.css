@@ -955,11 +955,30 @@ textarea.field-control {
 }
 
 /* —— Book shell —— */
-body.is-reading .site-header,
-body.is-shopping .site-header,
-body.is-editing .site-header,
-body.is-managing .site-header {
-  display: none;
+body.is-reading .site-nav,
+body.is-shopping .site-nav,
+body.is-editing .site-nav,
+body.is-managing .site-nav,
+body.is-standalone-form .site-nav {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.page-chrome {
+  display: flex;
+  align-items: center;
+  min-height: 2.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.75rem 1.25rem 0;
+}
+
+.page-chrome .icon-btn {
+  color: var(--muted);
+}
+
+.page-chrome .icon-btn:hover {
+  color: var(--leaf-deep);
 }
 
 .page--book {
@@ -1005,6 +1024,19 @@ body.is-managing .site-header {
 .book__shopping-bar {
   grid-column: 1 / -1;
   grid-row: 1;
+  min-height: 2.5rem;
+}
+
+body.is-reading .book__modes,
+body.is-reading .book__actions,
+body.is-shopping .book__modes,
+body.is-shopping .book__actions,
+body.is-editing .book__modes,
+body.is-editing .book__actions,
+body.is-managing .book__modes,
+body.is-managing .book__actions {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .book__modes,
@@ -1609,16 +1641,44 @@ body.is-managing .site-header {
     padding-right: 1.25rem;
   }
 
-  .book__chrome {
-    padding-left: 1.25rem;
-    padding-right: 0;
-  }
-
   .book {
+    grid-template-columns: 1fr 1fr;
     gap: 1.15rem;
   }
 
+  .book__chrome {
+    display: contents;
+  }
+
+  .book__search,
+  .book__reading-bar,
+  .book__shopping-bar {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    padding-left: 1.25rem;
+  }
+
+  .book__stage {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .book__modes {
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: start;
+    margin-left: 1.25rem;
+  }
+
+  .book__actions {
+    grid-column: 2;
+    grid-row: 3;
+    justify-self: end;
+  }
+
   .book-filter {
+    top: auto;
+    bottom: calc(100% + 0.5rem);
     right: 0;
     width: min(16.5rem, calc(100vw - 2rem));
   }
@@ -1667,7 +1727,24 @@ body.is-managing .site-header {
   .book__shopping-bar {
     grid-column: 1 / -1;
     grid-row: 1;
-    justify-self: stretch;
+  }
+
+  body.is-reading .book__chrome,
+  body.is-shopping .book__chrome,
+  body.is-editing .book__chrome,
+  body.is-managing .book__chrome {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.is-reading .book__modes,
+  body.is-reading .book__actions,
+  body.is-shopping .book__modes,
+  body.is-shopping .book__actions,
+  body.is-editing .book__modes,
+  body.is-editing .book__actions,
+  body.is-managing .book__modes,
+  body.is-managing .book__actions {
+    display: none !important;
   }
 
   .book__flip-slot {
@@ -1748,8 +1825,6 @@ body.is-managing .site-header {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  grid-column: 1 / -1;
-  grid-row: 1;
 }
 
 .book__shopping-bar .icon-btn {
