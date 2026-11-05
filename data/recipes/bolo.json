@@ -1,0 +1,140 @@
+{
+  "id": "bolo",
+  "title": "Bolo",
+  "categoryId": "doces",
+  "image": "data/images/recipes/bolo.png",
+  "groups": [
+    {
+      "id": "massa",
+      "name": "Massa",
+      "ingredients": [
+        {
+          "ingredientId": "eggs",
+          "measureId": "piece",
+          "quantity": "3"
+        },
+        {
+          "ingredientId": "leo",
+          "measureId": "cup",
+          "quantity": "1/2"
+        },
+        {
+          "ingredientId": "suco",
+          "measureId": "cup",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "salt",
+          "measureId": "pinch",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "sugar",
+          "measureId": "cup",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "flour",
+          "measureId": "cup",
+          "quantity": "2"
+        },
+        {
+          "ingredientId": "fermento",
+          "measureId": "colher",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "butter",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Prepare o suco, esse será o sabor do bolo. Opções de frutas são: Laranja, limão, maracujá. Também pode fazer com cenoura batida ou chocolate em pó (com água)"
+        },
+        {
+          "description": "Bata todos os ingredientes no liquidificador (exceto farinha e fermento)"
+        },
+        {
+          "description": "Adicione a farinha aos poucos (se ficar muito grosso, adicione um pouco de água para ajudar a bater, sem exagerar)"
+        },
+        {
+          "description": "Adicione o fermento por último"
+        },
+        {
+          "description": "Assim que terminar de bater, ligue o forno para pré-aquecer"
+        },
+        {
+          "description": "Unte a forma com manteiga e farinha"
+        },
+        {
+          "description": "Asse por 40-45 minutos"
+        },
+        {
+          "description": "Para desenformar espere esfriar um pouco e passe uma faca grande nas laterais (movimento contínuo, sem ser de tirar e colocar), use a faca para tirar o bolo do fundo fazendo movimento de alavanca"
+        },
+        {
+          "description": "Se for colocar cobertura, faça furos em todo o bolo para que a cobertura entre no meio"
+        }
+      ]
+    },
+    {
+      "id": "cobertura-de-calda-de-frutas-opcional-vai-bem-com-bolos-do-m",
+      "name": "Cobertura de calda de frutas (opcional, vai bem com bolos do mesmo sabor)",
+      "ingredients": [
+        {
+          "ingredientId": "suco",
+          "measureId": "cup",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "sugar",
+          "measureId": "colher",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "amido-de-milho",
+          "measureId": "colher",
+          "quantity": "1"
+        }
+      ],
+      "steps": [
+        {
+          "description": "O suco pode ser de laranja, limão ou maracujá"
+        },
+        {
+          "description": "Misture todos os ingredientes em uma vasilha"
+        },
+        {
+          "description": "Leve ao fogo até pegar o ponto cremoso e desgrudando da panela"
+        }
+      ]
+    },
+    {
+      "id": "cobertura-de-chocolate-opcional-vai-bem-com-bolos-de-chocola",
+      "name": "Cobertura de chocolate (opcional, vai bem com bolos de chocolate, laranja e cenoura)",
+      "ingredients": [
+        {
+          "ingredientId": "chocolate",
+          "measureId": "colher",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "leite-condensado",
+          "measureId": "caixa",
+          "quantity": "1"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Em uma panela coloque o leite condensado e misture o chocolate em pó"
+        },
+        {
+          "description": "Misture bem e retire do fogo antes de pegar o ponto de brigadeiro para ficar mais líquido"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-05T18:04:02.030Z"
+}

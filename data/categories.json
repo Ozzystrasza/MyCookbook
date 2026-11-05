@@ -1,14 +1,6 @@
 [
   {
-    "id": "desserts",
-    "name": "Sobremesas"
-  },
-  {
-    "id": "mains",
-    "name": "Pratos principais"
-  },
-  {
-    "id": "breakfast",
-    "name": "Café da manhã"
+    "id": "doces",
+    "name": "Doces"
   }
 ]

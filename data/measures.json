@@ -1,12 +1,62 @@
 [
-  { "id": "tsp", "name": "colher de chá", "abbrev": "c.c." },
-  { "id": "tbsp", "name": "colher de sopa", "abbrev": "c.s." },
-  { "id": "cup", "name": "xícara", "abbrev": "xíc." },
-  { "id": "g", "name": "grama", "abbrev": "g" },
-  { "id": "kg", "name": "quilograma", "abbrev": "kg" },
-  { "id": "ml", "name": "mililitro", "abbrev": "ml" },
-  { "id": "l", "name": "litro", "abbrev": "l" },
-  { "id": "piece", "name": "unidade", "abbrev": "un." },
-  { "id": "pinch", "name": "pitada", "abbrev": "pitada" },
-  { "id": "to-taste", "name": "a gosto", "abbrev": "a gosto" }
+  {
+    "id": "tsp",
+    "name": "colher de chá",
+    "abbrev": "c.c."
+  },
+  {
+    "id": "tbsp",
+    "name": "colher de sopa",
+    "abbrev": "c.s."
+  },
+  {
+    "id": "cup",
+    "name": "xícara",
+    "abbrev": "xíc."
+  },
+  {
+    "id": "g",
+    "name": "grama",
+    "abbrev": "g"
+  },
+  {
+    "id": "kg",
+    "name": "quilograma",
+    "abbrev": "kg"
+  },
+  {
+    "id": "ml",
+    "name": "mililitro",
+    "abbrev": "ml"
+  },
+  {
+    "id": "l",
+    "name": "litro",
+    "abbrev": "l"
+  },
+  {
+    "id": "piece",
+    "name": "unidade",
+    "abbrev": "un."
+  },
+  {
+    "id": "pinch",
+    "name": "pitada",
+    "abbrev": "pitada"
+  },
+  {
+    "id": "to-taste",
+    "name": "a gosto",
+    "abbrev": "a gosto"
+  },
+  {
+    "id": "caixa",
+    "name": "caixa",
+    "abbrev": "cx"
+  },
+  {
+    "id": "colher",
+    "name": "colher",
+    "abbrev": "col"
+  }
 ]

@@ -1,14 +1,8 @@
 [
   {
-    "id": "chocolate-cake",
-    "title": "Bolo de Chocolate",
-    "categoryId": "desserts",
-    "image": "data/images/recipes/chocolate-cake.svg"
-  },
-  {
-    "id": "scrambled-eggs",
-    "title": "Ovos Mexidos Macios",
-    "categoryId": "breakfast",
-    "image": "data/images/recipes/scrambled-eggs.svg"
+    "id": "bolo",
+    "title": "Bolo",
+    "categoryId": "doces",
+    "image": "data/images/recipes/bolo.png"
   }
 ]

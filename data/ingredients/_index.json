@@ -1,18 +1,38 @@
 [
   {
-    "id": "flour",
-    "name": "Farinha de trigo",
-    "image": "data/images/ingredients/flour.png"
-  },
-  {
     "id": "sugar",
     "name": "Açúcar cristal",
     "image": "data/images/ingredients/sugar.png"
   },
   {
-    "id": "eggs",
-    "name": "Ovos",
-    "image": "data/images/ingredients/eggs.png"
+    "id": "amido-de-milho",
+    "name": "Amido de milho",
+    "image": "data/images/ingredients/amido-de-milho.png"
+  },
+  {
+    "id": "chocolate",
+    "name": "Chocolate em pó",
+    "image": "data/images/ingredients/chocolate.png"
+  },
+  {
+    "id": "flour",
+    "name": "Farinha de trigo",
+    "image": "data/images/ingredients/flour.png"
+  },
+  {
+    "id": "fermento",
+    "name": "Fermento",
+    "image": "data/images/ingredients/fermento.png"
+  },
+  {
+    "id": "milk",
+    "name": "Leite",
+    "image": "data/images/ingredients/milk.png"
+  },
+  {
+    "id": "leite-condensado",
+    "name": "Leite condensado",
+    "image": "data/images/ingredients/leite-condensado.png"
   },
   {
     "id": "butter",
@@ -20,18 +40,23 @@
     "image": "data/images/ingredients/butter.png"
   },
   {
-    "id": "milk",
-    "name": "Leite",
-    "image": "data/images/ingredients/milk.svg"
+    "id": "leo",
+    "name": "Óleo",
+    "image": "data/images/ingredients/leo.png"
   },
   {
-    "id": "chocolate",
-    "name": "Chocolate amargo",
-    "image": "data/images/ingredients/chocolate.svg"
+    "id": "eggs",
+    "name": "Ovos",
+    "image": "data/images/ingredients/eggs.png"
   },
   {
     "id": "salt",
     "name": "Sal",
-    "image": "data/images/ingredients/salt.svg"
+    "image": "data/images/ingredients/salt.png"
+  },
+  {
+    "id": "suco",
+    "name": "Suco",
+    "image": "data/images/ingredients/suco.png"
   }
 ]
