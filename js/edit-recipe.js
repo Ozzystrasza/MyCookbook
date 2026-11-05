@@ -27,7 +27,7 @@
     return {
       id: `group-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       name: "",
-      ingredients: [{ ingredientId: "", measureId: "", quantity: "" }],
+      ingredients: [],
       steps: [{ description: "" }],
     };
   }
@@ -392,10 +392,7 @@
       `;
 
       const ingredientHost = wrap.querySelector("[data-ingredient-lines]");
-      const ingredientLines = group.ingredients?.length
-        ? group.ingredients
-        : [{ ingredientId: "", measureId: "", quantity: "" }];
-      ingredientLines.forEach((line, lineIndex) => {
+      (group.ingredients || []).forEach((line, lineIndex) => {
         const row = document.createElement("div");
         row.className = "line-row ingredients";
         const selectedLabel = ingredientLabel(line.ingredientId);
@@ -422,9 +419,6 @@
         row.querySelector("[data-remove-ingredient]").addEventListener("click", () => {
           const current = readGroupsFromDom({ keepEmpty: true });
           current[groupIndex].ingredients.splice(lineIndex, 1);
-          if (!current[groupIndex].ingredients.length) {
-            current[groupIndex].ingredients.push({ ingredientId: "", measureId: "", quantity: "" });
-          }
           markDirty();
           renderGroups(current);
         });
@@ -532,6 +526,10 @@
     const groups = readGroupsFromDom().filter((g) => g.name || g.ingredients.length || g.steps.length);
     if (!groups.length) {
       showStatus(status, "Adicione pelo menos um grupo.", "error");
+      return;
+    }
+    if (groups.some((g) => !g.steps.length)) {
+      showStatus(status, "Cada grupo precisa de pelo menos um passo.", "error");
       return;
     }
 
