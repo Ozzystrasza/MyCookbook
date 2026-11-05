@@ -45,7 +45,7 @@
         },
         {
           "ingredientId": "butter",
-          "measureId": "to-taste",
+          "measureId": "untar",
           "quantity": ""
         }
       ],
@@ -54,7 +54,7 @@
           "description": "Prepare o suco, esse será o sabor do bolo. Opções de frutas são: Laranja, limão, maracujá. Também pode fazer com cenoura batida ou chocolate em pó (com água)"
         },
         {
-          "description": "Bata todos os ingredientes no liquidificador (exceto farinha e fermento)"
+          "description": "Bata todos os ingredientes no liquidificador (exceto farinha, fermento e manteiga)"
         },
         {
           "description": "Adicione a farinha aos poucos (se ficar muito grosso, adicione um pouco de água para ajudar a bater, sem exagerar)"
@@ -136,5 +136,5 @@
       ]
     }
   ],
-  "updatedAt": "2026-11-05T18:04:02.030Z"
+  "updatedAt": "2026-11-05T19:47:18.984Z"
 }
