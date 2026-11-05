@@ -118,6 +118,74 @@
     `;
   }
 
+  function closeOpenNavMenu({ restoreFocus = false } = {}) {
+    const menu = qs("[data-nav-menu].is-open");
+    if (!menu) return;
+    const nav = menu.closest(".site-nav");
+    const toggle = nav?.querySelector("[data-nav-menu-toggle]");
+    menu.classList.remove("is-open");
+    toggle?.setAttribute("aria-expanded", "false");
+    menu.setAttribute("aria-hidden", "true");
+    if (restoreFocus) toggle?.focus();
+  }
+
+  function syncNavMenuAria(menu, toggle) {
+    if (!menu || !toggle) return;
+    if (window.matchMedia("(min-width: 800px)").matches) {
+      menu.classList.remove("is-open");
+      toggle.setAttribute("aria-expanded", "false");
+      menu.removeAttribute("aria-hidden");
+      return;
+    }
+    const open = menu.classList.contains("is-open");
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    menu.setAttribute("aria-hidden", open ? "false" : "true");
+  }
+
+  function bindNavMenu(header) {
+    const toggle = header.querySelector("[data-nav-menu-toggle]");
+    const menu = header.querySelector("[data-nav-menu]");
+    if (!toggle || !menu) return;
+
+    syncNavMenuAria(menu, toggle);
+
+    toggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (window.matchMedia("(min-width: 800px)").matches) return;
+      const open = !menu.classList.contains("is-open");
+      menu.classList.toggle("is-open", open);
+      syncNavMenuAria(menu, toggle);
+      if (open) getFocusable(menu)[0]?.focus();
+      else toggle.focus();
+    });
+
+    menu.addEventListener("click", (event) => {
+      if (!event.target.closest("a.icon-btn, button.icon-btn")) return;
+      closeOpenNavMenu();
+    });
+  }
+
+  if (!window.__cookbookNavMenuDocBound) {
+    window.__cookbookNavMenuDocBound = true;
+    document.addEventListener("pointerdown", (event) => {
+      const menu = qs("[data-nav-menu].is-open");
+      if (!menu) return;
+      const nav = menu.closest(".site-nav");
+      if (nav?.contains(event.target)) return;
+      closeOpenNavMenu();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      closeOpenNavMenu({ restoreFocus: true });
+    });
+    window.matchMedia("(min-width: 800px)").addEventListener("change", () => {
+      qsa("[data-nav-menu]").forEach((menu) => {
+        const toggle = menu.closest(".site-nav")?.querySelector("[data-nav-menu-toggle]");
+        syncNavMenuAria(menu, toggle);
+      });
+    });
+  }
+
   function mountShell({ active } = {}) {
     const header = qs("[data-site-header]");
     if (!header) return;
@@ -131,42 +199,49 @@
           <a class="brand" href="index.html?home=1">My Cookbook</a>
         </div>
         <nav class="site-nav" aria-label="Principal">
-          ${cook ? `<a href="edit.html" class="icon-btn${active === "edit" ? " is-active" : ""}" data-cook-only title="Nova receita" aria-label="Nova receita">
+          <button type="button" class="icon-btn site-nav__menu-toggle" data-nav-menu-toggle title="Menu" aria-label="Menu" aria-expanded="false" aria-controls="site-nav-menu">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-            </svg>
-          </a>` : ""}
-          ${cook ? `<a href="manage.html" class="icon-btn${active === "manage" ? " is-active" : ""}" data-cook-only title="Gerenciar" aria-label="Gerenciar">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M3.5 5.5h9M3.5 10h13M3.5 14.5h9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-              <circle cx="15.5" cy="5.5" r="1.75" stroke="currentColor" stroke-width="1.5"/>
-              <circle cx="8.5" cy="10" r="1.75" stroke="currentColor" stroke-width="1.5"/>
-              <circle cx="15.5" cy="14.5" r="1.75" stroke="currentColor" stroke-width="1.5"/>
-            </svg>
-          </a>` : ""}
-          ${cook ? `<button type="button" class="icon-btn" data-sync-pending hidden title="Sincronizar com GitHub" aria-label="Sincronizar com GitHub">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M5.5 13.5A3.5 3.5 0 0 1 6 6.6 4.5 4.5 0 0 1 14.7 8 3 3 0 0 1 14.5 14H6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M10 9.5V15M10 9.5l-2.25 2.25M10 9.5l2.25 2.25" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>` : ""}
-          <button type="button" class="icon-btn" data-shopping-toggle title="Lista de compras" aria-label="Lista de compras">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M3.5 4.5h1.2l1.1 8.2a1.5 1.5 0 0 0 1.5 1.3h6.9a1.5 1.5 0 0 0 1.5-1.2l1.1-5.3H6.2" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="8.2" cy="16.2" r="1.1" fill="currentColor"/>
-              <circle cx="14" cy="16.2" r="1.1" fill="currentColor"/>
+              <path d="M4 6h12M4 10h12M4 14h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
             </svg>
           </button>
-          <button type="button" class="icon-btn" data-sign-out title="${cook ? "Sair" : "Trocar perfil"}" aria-label="${cook ? "Sair" : "Trocar perfil"}">
-            ${cook
-              ? `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                  <path d="M8 4.5H5.5A1.5 1.5 0 0 0 4 6v8a1.5 1.5 0 0 0 1.5 1.5H8M11.5 13.5 15.5 10 11.5 6.5M15.5 10H8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>`
-              : `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                  <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.75"/>
-                  <path d="M4.5 16.5c.9-2.6 2.9-4 5.5-4s4.6 1.4 5.5 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-                </svg>`}
-          </button>
+          <div class="site-nav__menu" id="site-nav-menu" data-nav-menu aria-label="Ações">
+            ${cook ? `<a href="edit.html" class="icon-btn${active === "edit" ? " is-active" : ""}" data-cook-only title="Nova receita" aria-label="Nova receita">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+              </svg>
+            </a>` : ""}
+            ${cook ? `<a href="manage.html" class="icon-btn${active === "manage" ? " is-active" : ""}" data-cook-only title="Gerenciar" aria-label="Gerenciar">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M3.5 5.5h9M3.5 10h13M3.5 14.5h9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                <circle cx="15.5" cy="5.5" r="1.75" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="8.5" cy="10" r="1.75" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="15.5" cy="14.5" r="1.75" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+            </a>` : ""}
+            ${cook ? `<button type="button" class="icon-btn" data-sync-pending hidden title="Sincronizar com GitHub" aria-label="Sincronizar com GitHub">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M5.5 13.5A3.5 3.5 0 0 1 6 6.6 4.5 4.5 0 0 1 14.7 8 3 3 0 0 1 14.5 14H6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10 9.5V15M10 9.5l-2.25 2.25M10 9.5l2.25 2.25" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>` : ""}
+            <button type="button" class="icon-btn" data-shopping-toggle title="Lista de compras" aria-label="Lista de compras">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M3.5 4.5h1.2l1.1 8.2a1.5 1.5 0 0 0 1.5 1.3h6.9a1.5 1.5 0 0 0 1.5-1.2l1.1-5.3H6.2" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="8.2" cy="16.2" r="1.1" fill="currentColor"/>
+                <circle cx="14" cy="16.2" r="1.1" fill="currentColor"/>
+              </svg>
+            </button>
+            <button type="button" class="icon-btn" data-sign-out title="${cook ? "Sair" : "Trocar perfil"}" aria-label="${cook ? "Sair" : "Trocar perfil"}">
+              ${cook
+                ? `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <path d="M8 4.5H5.5A1.5 1.5 0 0 0 4 6v8a1.5 1.5 0 0 0 1.5 1.5H8M11.5 13.5 15.5 10 11.5 6.5M15.5 10H8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>`
+                : `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.75"/>
+                    <path d="M4.5 16.5c.9-2.6 2.9-4 5.5-4s4.6 1.4 5.5 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                  </svg>`}
+            </button>
+          </div>
         </nav>
       </div>
     `;
@@ -177,6 +252,7 @@
     window.CookbookAuth.applyCookUi(document);
     bindSyncButton(header);
     void refreshSyncButton(header);
+    bindNavMenu(header);
 
     if (!window.matchMedia("(min-width: 800px)").matches) {
       header.querySelectorAll('a[href="edit.html"], a[href^="edit.html?"]').forEach((link) => {
