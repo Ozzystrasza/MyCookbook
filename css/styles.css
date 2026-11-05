@@ -16,8 +16,9 @@
   --radius: 18px;
   --tap-size: 2.75rem;
   --focus-ring: 0 0 0 3px rgba(47, 93, 58, 0.35);
-  --font-display: "Fraunces", Georgia, serif;
-  --font-body: "Outfit", system-ui, sans-serif;
+  --font-brand: "Italianno", cursive;
+  --font-display: "Marck Script", cursive;
+  --font-body: "Playwrite HU", cursive;
   --ingredient-icon-inset: 0.35rem;
 }
 
@@ -111,11 +112,14 @@ textarea {
 }
 
 .brand {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.25rem;
+  font-family: var(--font-brand);
+  font-weight: 400;
+  font-size: 2rem;
+  line-height: 1;
   letter-spacing: -0.02em;
   color: var(--leaf-deep);
+  -webkit-text-stroke: 0.4px currentColor;
+  paint-order: stroke fill;
 }
 
 .site-nav {
@@ -163,6 +167,7 @@ textarea {
   background: transparent;
   color: var(--muted);
   font: inherit;
+  font-family: var(--font-display);
   font-size: 0.95rem;
   text-align: left;
   text-decoration: none;
@@ -1095,15 +1100,17 @@ textarea.field-control {
 }
 
 .book-cover__title {
-  font-family: var(--font-display);
-  font-size: clamp(2.4rem, 8vw, 3.4rem);
-  font-weight: 700;
+  font-family: var(--font-brand);
+  font-size: clamp(3.2rem, 11vw, 4.6rem);
+  font-weight: 400;
   line-height: 1.05;
   margin: 0;
   letter-spacing: -0.03em;
   text-align: center;
   color: var(--leaf-deep);
   white-space: nowrap;
+  -webkit-text-stroke: 0.55px currentColor;
+  paint-order: stroke fill;
   text-shadow:
     0 1px 0 rgba(255, 252, 246, 0.85),
     0 2px 10px rgba(255, 252, 246, 0.55);
@@ -1113,6 +1120,10 @@ textarea.field-control {
 .book-cover__cook {
   display: grid;
   gap: 0.65rem;
+}
+
+.book-cover .btn {
+  font-family: var(--font-display);
 }
 
 .book-cover .btn--primary {
@@ -1139,6 +1150,7 @@ textarea.field-control {
 }
 
 .book-cover .field input {
+  font-family: var(--font-display);
   background: rgba(255, 252, 246, 0.85);
   border-color: rgba(31, 63, 40, 0.22);
   color: var(--ink);

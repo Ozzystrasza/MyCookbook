@@ -26,7 +26,6 @@
     return `
       <div class="book-form panel panel--in-book">
         <h1>Gerenciar catálogos</h1>
-        <p class="hint">Categorias, medidas e ingredientes reutilizáveis com fotos.</p>
         <p class="status" data-status hidden></p>
         <div class="tabs" data-tabs>
           <button type="button" class="btn btn--ghost is-active" data-tab="categories">Categorias</button>

@@ -707,6 +707,7 @@
           `;
         })
         .join("");
+      await window.CookbookSync?.hydrateImages?.(listRoot);
     }
     const checkAll = recipeEl.querySelector("[data-recipe-check-all]");
     if (checkAll) {

@@ -51,7 +51,6 @@
     return `
       <div class="book-form panel panel--in-book">
         <h1 id="page-title">Nova receita</h1>
-        <p class="hint">Salva direto no seu repositório público do GitHub.</p>
         <p class="status" data-status hidden></p>
         <form id="recipe-form" class="stack">
           <div class="row row--2">
