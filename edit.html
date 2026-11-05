@@ -23,10 +23,16 @@
               <span>Título</span>
               <input id="title" name="title" required />
             </label>
-            <label class="field">
+            <div class="field">
               <span>Categoria</span>
-              <select id="categoryId" name="categoryId" required></select>
-            </label>
+              <div class="catalog-picker">
+                <input type="hidden" id="categoryId" name="categoryId" value="" />
+                <button type="button" class="ingredient-picker__trigger" data-category-trigger data-picker-trigger aria-haspopup="dialog">
+                  <span class="ingredient-picker__value is-placeholder">Selecione…</span>
+                  <svg class="ingredient-picker__chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+            </div>
           </div>
           <div class="field">
             <span>Imagem da receita</span>

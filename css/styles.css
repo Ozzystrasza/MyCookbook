@@ -648,8 +648,14 @@ textarea.field-control {
   }
 }
 
-.line-row__ipicker {
+.line-row__ipicker,
+.line-row__mctrl,
+.catalog-picker {
   min-width: 0;
+}
+
+.catalog-picker {
+  width: 100%;
 }
 
 .ingredient-picker__trigger {
@@ -711,19 +717,21 @@ textarea.field-control {
   margin: 0;
 }
 
-.shopping-catalog-item--action {
-  font-weight: 600;
+.shopping-catalog-item__icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(47, 93, 58, 0.08);
   color: var(--leaf-deep);
 }
 
-.shopping-catalog-item__icon {
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  background: rgba(47, 93, 58, 0.08);
-  color: var(--leaf-deep);
+.shopping-catalog-item__icon svg {
+  display: block;
+  width: 1rem;
+  height: 1rem;
 }
 
 .catalog-grid {
@@ -1109,7 +1117,7 @@ body.is-managing .book__actions {
   position: absolute;
   top: calc(100% + 0.5rem);
   right: 0;
-  z-index: 20;
+  z-index: 30;
   width: min(16.5rem, calc(100vw - 2.5rem));
   padding: 0.85rem;
   border-radius: 14px;
@@ -2045,6 +2053,14 @@ body.is-managing .book__actions {
   grid-template-columns: auto minmax(0, 1fr);
 }
 
+body:has(.shopping-modal:not([hidden])) {
+  overflow: hidden;
+}
+
+body:has(.shopping-modal:not([hidden])) .book__page.is-scrollable {
+  overflow: hidden;
+}
+
 .shopping-modal {
   position: fixed;
   inset: 0;
@@ -2104,10 +2120,12 @@ body.is-managing .book__actions {
 
 .shopping-modal__list {
   overflow: auto;
+  overscroll-behavior: contain;
   display: grid;
   gap: 0.4rem;
   min-height: 0;
   flex: 1;
+  align-content: start;
 }
 
 .shopping-modal__footer {
@@ -2133,6 +2151,19 @@ body.is-managing .book__actions {
   min-height: 3rem;
   cursor: pointer;
   color: inherit;
+}
+
+.shopping-catalog-item.shopping-catalog-item--action {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.65rem;
+  font-weight: 600;
+  color: var(--leaf-deep);
+}
+
+.shopping-catalog-item--text {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .shopping-catalog-item:hover {
