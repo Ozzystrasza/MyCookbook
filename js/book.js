@@ -1182,7 +1182,7 @@
       <div class="book-preview">
         <div class="book-preview__media-wrap">
           <button type="button" class="book-preview__media-btn" data-open-recipe="${id}" aria-label="Abrir ${title}">
-            <img class="book-preview__media" src="${escapeHtml(recipe.image || "")}" alt="" loading="lazy" decoding="async" />
+            ${window.CookbookUI.thumbHtml(recipe.image, "book-preview__media")}
           </button>
           ${favoriteBtnHtml(recipe.id, "book-preview__favorite")}
         </div>
@@ -1198,7 +1198,7 @@
     return `
       <div class="book-list__row">
         <button type="button" class="book-list__open" data-open-recipe="${id}">
-          <img class="book-list__thumb" src="${escapeHtml(recipe.image || "")}" alt="" loading="lazy" decoding="async" />
+          ${window.CookbookUI.thumbHtml(recipe.image, "book-list__thumb")}
           <div class="book-list__meta">
             <p class="book-list__category">${escapeHtml(categoryName(recipe.categoryId))}</p>
             <h3 class="book-list__title">${escapeHtml(recipe.title)}</h3>
@@ -1251,7 +1251,7 @@
           const measure = measures[line.measureId];
           blocks.push(`
             <div class="ingredient-item">
-              <img src="${escapeHtml(ingredient?.image || "")}" alt="" loading="lazy" decoding="async" />
+              ${window.CookbookUI.thumbHtml(ingredient?.image, "ingredient-item__thumb")}
               <div><strong>${escapeHtml(ingredient?.name || line.ingredientId)}</strong></div>
               <span>${escapeHtml(window.CookbookData.formatQuantity(line.quantity, measure))}</span>
             </div>`);
@@ -1448,7 +1448,9 @@
       edit.hidden = !showEdit;
       if (showEdit) {
         if (isDesktop()) {
-          edit.href = `edit.html?id=${encodeURIComponent(state.readingId)}`;
+          // Use `edit?id=` (not `edit.html?id=`) so local `serve` cleanUrls
+          // does not 301 to `/edit` and drop the query string.
+          edit.href = `edit?id=${encodeURIComponent(state.readingId)}`;
         } else {
           edit.removeAttribute("href");
           edit.setAttribute("role", "button");
@@ -1986,7 +1988,7 @@
   async function openEdit(options = {}) {
     if (isDesktop()) {
       const id = options.id;
-      window.location.href = id ? `edit.html?id=${encodeURIComponent(id)}` : "edit.html";
+      window.location.href = id ? `edit?id=${encodeURIComponent(id)}` : "edit.html";
       return;
     }
     if (!window.CookbookAuth?.isCook?.()) return;
@@ -2371,10 +2373,8 @@
   }
 
   async function start({ recipes, categories }) {
-    state.recipes = (recipes || []).slice().sort((a, b) =>
-      String(a.title || "").localeCompare(String(b.title || ""), undefined, { sensitivity: "base" })
-    );
-    state.categories = categories || [];
+    state.recipes = window.CookbookData.sortByName(recipes || [], "title");
+    state.categories = window.CookbookData.sortByName(categories || []);
     try {
       const saved = localStorage.getItem(VIEW_KEY);
       if (saved === "book" || saved === "list") state.viewMode = saved;

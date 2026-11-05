@@ -459,18 +459,21 @@
     const query = (pickModal.querySelector("[data-pick-search]")?.value || "").trim().toLowerCase();
     const meta = PICK_META[pickKind] || PICK_META.ingredient;
     const items = catalogItems(pickKind);
-    const filtered = items.filter((item) => {
-      if (!query) return true;
-      const name = String(item.name || "").toLowerCase();
-      const abbrev = String(item.abbrev || "").toLowerCase();
-      return name.includes(query) || abbrev.includes(query);
-    });
+    const filtered = items
+      .filter((item) => {
+        if (!query) return true;
+        const name = String(item.name || "").toLowerCase();
+        const abbrev = String(item.abbrev || "").toLowerCase();
+        return name.includes(query) || abbrev.includes(query);
+      })
+      .slice()
+      .sort(window.CookbookData.compareByName);
     const rows = filtered
       .map((item) => {
         if (pickKind === "ingredient") {
           return `
         <button type="button" class="shopping-catalog-item" data-pick-id="${escapeHtml(item.id)}">
-          <img src="${escapeHtml(item.image || "")}" alt="" loading="lazy" decoding="async" />
+          ${window.CookbookUI.thumbHtml(item.image, "shopping-catalog-item__thumb")}
           <span>${escapeHtml(item.name || item.id)}</span>
         </button>`;
         }
@@ -516,7 +519,7 @@
     submit.disabled = true;
     showStatus(status, "Salvando…", "info");
     try {
-      categories.push({ id, name });
+      categories = window.CookbookData.sortByName([...categories, { id, name }]);
       await window.CookbookSync.writeJson(
         "data/categories.json",
         categories,
@@ -553,7 +556,7 @@
     submit.disabled = true;
     showStatus(status, "Salvando…", "info");
     try {
-      measures.push({ id, name, abbrev });
+      measures = window.CookbookData.sortByName([...measures, { id, name, abbrev }]);
       await window.CookbookSync.writeJson(
         "data/measures.json",
         measures,
@@ -607,7 +610,7 @@
         record,
         `Adicionar ingrediente: ${name}`
       );
-      ingredients.push(record);
+      ingredients = window.CookbookData.sortByName([...ingredients, record]);
       await window.CookbookSync.writeJson(
         "data/ingredients/_index.json",
         ingredients,
@@ -700,13 +703,28 @@
       stepLines.forEach((step, stepIndex) => {
         const row = document.createElement("div");
         row.className = "line-row steps";
+        const atStart = stepIndex === 0;
+        const atEnd = stepIndex === stepLines.length - 1;
         row.innerHTML = `
-          <span class="field-label line-row__slabel">Passo</span>
+          <span class="field-label line-row__slabel">Passo ${stepIndex + 1}</span>
           <div class="actions actions--row">
+            <button type="button" class="icon-btn" data-move-step-up aria-label="Mover para cima" title="Mover para cima" ${atStart ? "disabled" : ""}>${window.CookbookIcons.keyboardArrowUp()}</button>
+            <button type="button" class="icon-btn" data-move-step-down aria-label="Mover para baixo" title="Mover para baixo" ${atEnd ? "disabled" : ""}>${window.CookbookIcons.keyboardArrowDown()}</button>
             <button type="button" class="icon-btn" data-remove-step aria-label="Remover passo" title="Remover">${minusIcon()}</button>
           </div>
           <textarea class="field-control line-row__sctrl" data-field="description" placeholder="O que fazer…">${escapeHtml(step.description || "")}</textarea>
         `;
+        const moveStep = (delta) => {
+          const current = readGroupsFromDom({ keepEmpty: true });
+          const steps = current[groupIndex].steps;
+          const next = stepIndex + delta;
+          if (next < 0 || next >= steps.length) return;
+          [steps[stepIndex], steps[next]] = [steps[next], steps[stepIndex]];
+          markDirty();
+          renderGroups(current);
+        };
+        row.querySelector("[data-move-step-up]").addEventListener("click", () => moveStep(-1));
+        row.querySelector("[data-move-step-down]").addEventListener("click", () => moveStep(1));
         row.querySelector("[data-remove-step]").addEventListener("click", () => {
           const current = readGroupsFromDom({ keepEmpty: true });
           current[groupIndex].steps.splice(stepIndex, 1);
@@ -868,13 +886,19 @@
         `${editingId ? "Atualizar" : "Adicionar"} receita: ${title}`
       );
 
-      const nextIndex = recipeIndex.filter((r) => r.id !== id);
-      nextIndex.unshift({
-        id,
-        title,
-        categoryId,
-        image: imagePath,
-      });
+      const nextIndex = window.CookbookData.sortByName(
+        [
+          ...recipeIndex.filter((r) => r.id !== id),
+          {
+            id,
+            title,
+            categoryId,
+            image: imagePath,
+          },
+        ],
+        "title"
+      );
+      recipeIndex = nextIndex;
       await window.CookbookSync.writeJson(
         "data/recipes/_index.json",
         nextIndex,
@@ -917,7 +941,11 @@
           `Excluir imagem da receita ${editingId}`
         );
       }
-      const nextIndex = recipeIndex.filter((r) => r.id !== editingId);
+      const nextIndex = window.CookbookData.sortByName(
+        recipeIndex.filter((r) => r.id !== editingId),
+        "title"
+      );
+      recipeIndex = nextIndex;
       await window.CookbookSync.writeJson(
         "data/recipes/_index.json",
         nextIndex,

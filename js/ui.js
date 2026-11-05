@@ -15,6 +15,13 @@
       .replace(/"/g, "&quot;");
   }
 
+  function thumbHtml(src, className) {
+    const url = String(src || "").trim();
+    const cls = escapeHtml(className);
+    if (!url) return `<span class="${cls}" aria-hidden="true"></span>`;
+    return `<img class="${cls}" src="${escapeHtml(url)}" alt="" loading="lazy" decoding="async" />`;
+  }
+
   const FOCUSABLE_SEL =
     'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
   const modalFocusState = new WeakMap();
@@ -235,20 +242,22 @@
     bindNavMenu(header);
 
     if (!window.matchMedia("(min-width: 800px)").matches) {
-      header.querySelectorAll('a[href="edit.html"], a[href^="edit.html?"]').forEach((link) => {
-        link.addEventListener("click", (event) => {
-          if (!window.CookbookBook?.openEdit) return;
-          event.preventDefault();
-          event.stopPropagation();
-          let id = null;
-          try {
-            id = new URL(link.getAttribute("href"), window.location.href).searchParams.get("id");
-          } catch (_) {
-            /* ignore */
-          }
-          void window.CookbookBook.openEdit({ id, animate: true });
+      header
+        .querySelectorAll('a[href="edit.html"], a[href^="edit.html?"], a[href="edit"], a[href^="edit?"]')
+        .forEach((link) => {
+          link.addEventListener("click", (event) => {
+            if (!window.CookbookBook?.openEdit) return;
+            event.preventDefault();
+            event.stopPropagation();
+            let id = null;
+            try {
+              id = new URL(link.getAttribute("href"), window.location.href).searchParams.get("id");
+            } catch (_) {
+              /* ignore */
+            }
+            void window.CookbookBook.openEdit({ id, animate: true });
+          });
         });
-      });
       header.querySelectorAll('a[href="manage.html"]').forEach((link) => {
         link.addEventListener("click", (event) => {
           if (!window.CookbookBook?.openManage) return;
@@ -667,6 +676,7 @@
     qsa,
     el,
     escapeHtml,
+    thumbHtml,
     mountShell,
     showStatus,
     mountImagePicker,

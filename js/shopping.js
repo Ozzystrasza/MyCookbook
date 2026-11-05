@@ -450,7 +450,7 @@
       ingredientsCache[id] = record;
       await window.CookbookSync.writeJson(
         "data/ingredients/_index.json",
-        Object.values(ingredientsCache),
+        window.CookbookData.sortByName(Object.values(ingredientsCache)),
         `Atualizar índice de ingredientes após ${name}`
       );
 
@@ -508,9 +508,17 @@
     });
   }
 
+  function sortShoppingItems(list, ingredients) {
+    return (list || []).slice().sort((a, b) => {
+      const left = ingredients?.[a.ingredientId]?.name || a.ingredientId || "";
+      const right = ingredients?.[b.ingredientId]?.name || b.ingredientId || "";
+      return String(left).localeCompare(String(right), "pt", { sensitivity: "base" });
+    });
+  }
+
   async function buildPageUnits() {
     const { measures, ingredients } = await ensureData();
-    const list = loadList();
+    const list = sortShoppingItems(loadList(), ingredients);
     const units = [`<h1 class="shopping-page__title">Lista de compras</h1>`];
     if (!list.length) {
       units.push(`<div class="shopping-page__empty-block">
@@ -543,7 +551,7 @@
         >
           ${checked ? CHECK_MARK_SVG() : window.CookbookIcons.checkBoxOutlineBlank({ size: 28, className: "shopping-check__mark" })}
         </button>
-        <img class="shopping-row__icon" src="${escapeHtml(image)}" alt="" loading="lazy" decoding="async" />
+        ${window.CookbookUI.thumbHtml(image, "shopping-row__icon")}
         <div class="shopping-row__meta">
           <span class="shopping-row__name">${escapeHtml(name)}</span>
           ${amountText ? `<span class="shopping-row__amount">${escapeHtml(amountText)}</span>` : ""}
@@ -568,7 +576,7 @@
     const listRoot = document.querySelector("[data-shopping-list]");
     if (!listRoot) return;
     const { measures, ingredients } = await ensureData();
-    const list = loadList();
+    const list = sortShoppingItems(loadList(), ingredients);
     if (!list.length) {
       listRoot.innerHTML = `<div class="shopping-page__empty-block">
         <p class="shopping-page__empty">Sua lista está vazia.</p>
@@ -613,15 +621,17 @@
     const { ingredients } = await ensureData();
     const listRoot = catalogEl.querySelector("[data-catalog-list]");
     const query = (catalogEl.querySelector("[data-catalog-search]")?.value || "").trim().toLowerCase();
-    const items = Object.values(ingredients)
-      .filter((ing) => !query || String(ing.name || "").toLowerCase().includes(query))
-      .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "pt"));
+    const items = window.CookbookData.sortByName(
+      Object.values(ingredients).filter(
+        (ing) => !query || String(ing.name || "").toLowerCase().includes(query)
+      )
+    );
     const rows = items.length
       ? items
           .map(
             (ing) => `
         <button type="button" class="shopping-catalog-item" data-catalog-pick="${escapeHtml(ing.id)}">
-          <img src="${escapeHtml(ing.image || "")}" alt="" loading="lazy" decoding="async" />
+          ${window.CookbookUI.thumbHtml(ing.image, "shopping-catalog-item__thumb")}
           <span>${escapeHtml(ing.name || ing.id)}</span>
         </button>
       `
@@ -688,7 +698,8 @@
     if (!merged.length) {
       listRoot.innerHTML = `<p class="shopping-page__empty">Esta receita não tem ingredientes.</p>`;
     } else {
-      listRoot.innerHTML = merged
+      const sorted = sortShoppingItems(merged, ingredientsCache || {});
+      listRoot.innerHTML = sorted
         .map((entry) => {
           const ing = (ingredientsCache || {})[entry.ingredientId];
           const qtyLabel = formatAmounts(entry.amounts, measuresCache || {});
@@ -700,7 +711,7 @@
             >
               <input type="checkbox" checked />
               ${window.CookbookIcons.checkboxIcon(true)}
-              <img src="${escapeHtml(ing?.image || "")}" alt="" loading="lazy" decoding="async" />
+              ${window.CookbookUI.thumbHtml(ing?.image, "shopping-recipe-line__thumb")}
               <span class="shopping-recipe-line__name">${escapeHtml(ing?.name || entry.ingredientId)}</span>
               <span class="shopping-recipe-line__qty">${escapeHtml(qtyLabel)}</span>
             </label>

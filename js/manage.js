@@ -143,8 +143,11 @@
   }
 
   function formatUsageList(titles) {
-    const shown = titles.slice(0, 5);
-    const extra = titles.length - shown.length;
+    const sorted = titles.slice().sort((a, b) =>
+      String(a || "").localeCompare(String(b || ""), "pt", { sensitivity: "base" })
+    );
+    const shown = sorted.slice(0, 5);
+    const extra = sorted.length - shown.length;
     const label = shown.join(", ");
     return extra > 0 ? `${label} e mais ${extra}` : label;
   }
@@ -242,7 +245,7 @@
   }
 
   function byName(a, b) {
-    return String(a.name || "").localeCompare(String(b.name || ""), "pt", { sensitivity: "base" });
+    return window.CookbookData.compareByName(a, b);
   }
 
   function renderCategories() {
@@ -541,7 +544,7 @@
         }
         return `
       <div class="catalog-card">
-        <img src="${escapeHtml(item.image || "")}" alt="" loading="lazy" decoding="async" />
+        ${window.CookbookUI.thumbHtml(item.image, "catalog-card__thumb")}
         <div class="catalog-card__body">
           <div class="catalog-card__meta">
             <strong>${escapeHtml(item.name)}</strong>
@@ -630,6 +633,7 @@
         );
         existing.name = name;
         existing.image = imagePath;
+        ingredients = window.CookbookData.sortByName(ingredients);
         await window.CookbookSync.writeJson(
           "data/ingredients/_index.json",
           ingredients,
@@ -679,7 +683,9 @@
             editingIngredientId = null;
             clearInlineIngredientPicker();
           }
-          ingredients = ingredients.filter((i) => i.id !== item.id);
+          ingredients = window.CookbookData.sortByName(
+            ingredients.filter((i) => i.id !== item.id)
+          );
           await window.CookbookSync.writeJson(
             "data/ingredients/_index.json",
             ingredients,
@@ -705,6 +711,7 @@
     const status = qs("[data-status]");
     showStatus(status, "Salvando categorias…", "info");
     try {
+      categories = window.CookbookData.sortByName(categories);
       await window.CookbookSync.writeJson(
         "data/categories.json",
         categories,
@@ -721,6 +728,7 @@
     const status = qs("[data-status]");
     showStatus(status, "Salvando medidas…", "info");
     try {
+      measures = window.CookbookData.sortByName(measures);
       await window.CookbookSync.writeJson(
         "data/measures.json",
         measures,
@@ -866,7 +874,7 @@
           record,
           `Adicionar ingrediente: ${name}`
         );
-        ingredients.push(record);
+        ingredients = window.CookbookData.sortByName([...ingredients, record]);
 
         await window.CookbookSync.writeJson(
           "data/ingredients/_index.json",

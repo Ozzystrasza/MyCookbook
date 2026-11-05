@@ -9,16 +9,26 @@
     return res.json();
   }
 
+  function compareByName(a, b, nameKey = "name") {
+    return String(a?.[nameKey] || "").localeCompare(String(b?.[nameKey] || ""), "pt", {
+      sensitivity: "base",
+    });
+  }
+
+  function sortByName(items, nameKey = "name") {
+    return (items || []).slice().sort((a, b) => compareByName(a, b, nameKey));
+  }
+
   async function loadCategories() {
-    return fetchJson("data/categories.json");
+    return sortByName(await fetchJson("data/categories.json"));
   }
 
   async function loadMeasures() {
-    return fetchJson("data/measures.json");
+    return sortByName(await fetchJson("data/measures.json"));
   }
 
   async function loadIngredientIndex() {
-    return fetchJson("data/ingredients/_index.json");
+    return sortByName(await fetchJson("data/ingredients/_index.json"));
   }
 
   async function loadIngredient(id) {
@@ -26,7 +36,7 @@
   }
 
   async function loadRecipeIndex() {
-    return fetchJson("data/recipes/_index.json");
+    return sortByName(await fetchJson("data/recipes/_index.json"), "title");
   }
 
   async function loadRecipe(id) {
@@ -125,12 +135,16 @@
         scored.push({ item, distance });
       }
     }
-    scored.sort((a, b) => a.distance - b.distance || String(a.item[nameKey]).localeCompare(String(b.item[nameKey])));
+    scored.sort(
+      (a, b) => a.distance - b.distance || compareByName(a.item, b.item, nameKey)
+    );
     return scored.slice(0, limit).map((entry) => entry.item);
   }
 
   window.CookbookData = {
     fetchJson,
+    compareByName,
+    sortByName,
     loadCategories,
     loadMeasures,
     loadIngredientIndex,
