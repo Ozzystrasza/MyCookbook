@@ -241,6 +241,10 @@
     `;
   }
 
+  function byName(a, b) {
+    return String(a.name || "").localeCompare(String(b.name || ""), "pt", { sensitivity: "base" });
+  }
+
   function renderCategories() {
     const list = qs("[data-category-list]");
     if (!categories.length) {
@@ -255,6 +259,8 @@
       return;
     }
     list.innerHTML = categories
+      .slice()
+      .sort(byName)
       .map((item) => {
         const editing = editingCategoryId === item.id;
         if (editing) {
@@ -368,6 +374,8 @@
       return;
     }
     list.innerHTML = measures
+      .slice()
+      .sort(byName)
       .map((item) => {
         const editing = editingMeasureId === item.id;
         if (editing) {
@@ -510,6 +518,8 @@
 
     const editingId = editingIngredientId;
     list.innerHTML = ingredients
+      .slice()
+      .sort(byName)
       .map((item) => {
         const editing = editingId === item.id;
         if (editing) {
