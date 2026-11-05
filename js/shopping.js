@@ -9,18 +9,23 @@
   let chromeBound = false;
   let listActionsBound = false;
 
-  const CHECK_MARK_SVG = `
-    <svg class="shopping-check__mark" width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-      <path
-        d="M6 15.2 11.2 20.5 22 7.5"
-        fill="none"
-        stroke="#1f8f4e"
-        stroke-width="3.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-    </svg>
-  `;
+  const CHECK_MARK_SVG = () =>
+    window.CookbookIcons.check({
+      size: 36,
+      fill: window.CookbookIcons.leaf,
+      className: "shopping-check__mark",
+    });
+
+  function refreshShoppingCheckIcon(input) {
+    const icon = input?.parentElement?.querySelector(".shopping-check__icon");
+    if (!icon || !input) return;
+    icon.outerHTML = window.CookbookIcons.checkboxIcon(input.checked);
+  }
+
+  function syncRecipeCheckIcons() {
+    if (!recipeEl) return;
+    recipeEl.querySelectorAll(".shopping-check input[type='checkbox']").forEach(refreshShoppingCheckIcon);
+  }
 
   function storageKey() {
     return window.CookbookConfig.storageKeys.shoppingList;
@@ -205,9 +210,7 @@
         <div class="shopping-modal__header">
           <h2 class="shopping-modal__title">Adicionar ingrediente</h2>
           <button type="button" class="icon-btn" data-catalog-close aria-label="Fechar">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-            </svg>
+            ${window.CookbookIcons.closeSmall()}
           </button>
         </div>
         <label class="shopping-modal__search">
@@ -228,14 +231,12 @@
         <div class="shopping-modal__header">
           <h2 class="shopping-modal__title">Adicionar à lista</h2>
           <button type="button" class="icon-btn" data-recipe-close aria-label="Fechar">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-            </svg>
+            ${window.CookbookIcons.closeSmall()}
           </button>
         </div>
         <label class="shopping-check shopping-check--all">
           <input type="checkbox" data-recipe-check-all checked />
-          <span class="shopping-check__box" aria-hidden="true"></span>
+          ${window.CookbookIcons.checkboxIcon(true)}
           <span>Selecionar todos</span>
         </label>
         <div class="shopping-modal__list" data-recipe-list></div>
@@ -276,9 +277,7 @@
         <div class="shopping-modal__header">
           <h2 class="shopping-modal__title" id="shopping-create-ingredient-title">Novo ingrediente</h2>
           <button type="button" class="icon-btn" data-create-close aria-label="Fechar">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-            </svg>
+            ${window.CookbookIcons.closeSmall()}
           </button>
         </div>
         <form class="editor-modal__body" data-create-form>
@@ -320,8 +319,12 @@
       recipeEl.querySelectorAll('[data-recipe-list] input[type="checkbox"]').forEach((input) => {
         input.checked = on;
       });
+      syncRecipeCheckIcons();
     });
-    recipeEl.querySelector("[data-recipe-list]")?.addEventListener("change", () => {
+    recipeEl.querySelector("[data-recipe-list]")?.addEventListener("change", (event) => {
+      if (event.target?.matches?.('input[type="checkbox"]')) {
+        refreshShoppingCheckIcon(event.target);
+      }
       syncRecipeCheckAll();
     });
     recipeEl.querySelector("[data-recipe-confirm]")?.addEventListener("click", () => {
@@ -539,7 +542,7 @@
           aria-pressed="${checked ? "true" : "false"}"
           aria-label="${checked ? "Desmarcar" : "Marcar"} ${escapeHtml(name)}"
         >
-          ${checked ? CHECK_MARK_SVG : `<span class="shopping-check__box" aria-hidden="true"></span>`}
+          ${checked ? CHECK_MARK_SVG() : window.CookbookIcons.checkBoxOutlineBlank({ size: 28, className: "shopping-check__mark" })}
         </button>
         <img class="shopping-row__icon" src="${escapeHtml(image)}" alt="" loading="lazy" decoding="async" />
         <div class="shopping-row__meta">
@@ -547,9 +550,9 @@
           ${amountText ? `<span class="shopping-row__amount">${escapeHtml(amountText)}</span>` : ""}
         </div>
         <div class="shopping-row__stepper">
-          <button type="button" class="icon-btn shopping-step" data-shopping-action="dec" data-id="${escapeHtml(item.ingredientId)}" aria-label="Diminuir">−</button>
+          <button type="button" class="icon-btn shopping-step" data-shopping-action="dec" data-id="${escapeHtml(item.ingredientId)}" aria-label="Diminuir">${window.CookbookIcons.remove()}</button>
           <span class="shopping-row__qty">${item.quantity}x</span>
-          <button type="button" class="icon-btn shopping-step" data-shopping-action="inc" data-id="${escapeHtml(item.ingredientId)}" aria-label="Aumentar">+</button>
+          <button type="button" class="icon-btn shopping-step" data-shopping-action="inc" data-id="${escapeHtml(item.ingredientId)}" aria-label="Aumentar">${window.CookbookIcons.add()}</button>
         </div>
       </div>
     `;
@@ -630,9 +633,7 @@
       ? `
       <button type="button" class="shopping-catalog-item shopping-catalog-item--action" data-catalog-create>
         <span class="shopping-catalog-item__icon" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-          </svg>
+          ${window.CookbookIcons.add()}
         </span>
         <span>Novo Ingrediente</span>
       </button>`
@@ -662,6 +663,7 @@
     if (!all || !boxes.length) return;
     all.checked = boxes.every((box) => box.checked);
     all.indeterminate = !all.checked && boxes.some((box) => box.checked);
+    refreshShoppingCheckIcon(all);
   }
 
   async function openRecipePicker(recipe, ingredientsMap, measuresMap) {
@@ -704,7 +706,7 @@
               data-amounts="${amountsJson}"
             >
               <input type="checkbox" checked />
-              <span class="shopping-check__box" aria-hidden="true"></span>
+              ${window.CookbookIcons.checkboxIcon(true)}
               <span class="shopping-recipe-line__qty">${escapeHtml(qtyLabel)}</span>
               <img src="${escapeHtml(ing?.image || "")}" alt="" loading="lazy" decoding="async" />
               <span class="shopping-recipe-line__name">${escapeHtml(ing?.name || entry.ingredientId)}</span>
@@ -717,6 +719,7 @@
     if (checkAll) {
       checkAll.checked = merged.length > 0;
       checkAll.indeterminate = false;
+      refreshShoppingCheckIcon(checkAll);
     }
     recipeEl.hidden = false;
     window.CookbookUI.activateModalFocus?.(recipeEl, "[data-recipe-confirm]");

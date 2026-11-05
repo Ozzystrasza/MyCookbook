@@ -157,10 +157,12 @@
         (item) => `
       <div class="catalog-card">
         <div class="catalog-card__body">
-          <strong>${escapeHtml(item.name)}</strong>
-          <div class="actions">
-            <button type="button" class="btn btn--ghost btn--small" data-edit-category="${escapeHtml(item.id)}">Editar</button>
-            <button type="button" class="btn btn--danger btn--small" data-delete-category="${escapeHtml(item.id)}">Excluir</button>
+          <div class="catalog-card__meta">
+            <strong>${escapeHtml(item.name)}</strong>
+          </div>
+          <div class="catalog-card__actions">
+            <button type="button" class="icon-btn" data-edit-category="${escapeHtml(item.id)}" aria-label="Editar" title="Editar">${window.CookbookIcons.edit()}</button>
+            <button type="button" class="icon-btn" data-delete-category="${escapeHtml(item.id)}" aria-label="Excluir" title="Excluir">${window.CookbookIcons.delete()}</button>
           </div>
         </div>
       </div>`
@@ -219,11 +221,13 @@
         (item) => `
       <div class="catalog-card">
         <div class="catalog-card__body">
-          <strong>${escapeHtml(item.name)}</strong>
-          <span class="hint">${escapeHtml(item.abbrev || item.id)}</span>
-          <div class="actions">
-            <button type="button" class="btn btn--ghost btn--small" data-edit-measure="${escapeHtml(item.id)}">Editar</button>
-            <button type="button" class="btn btn--danger btn--small" data-delete-measure="${escapeHtml(item.id)}">Excluir</button>
+          <div class="catalog-card__meta">
+            <strong>${escapeHtml(item.name)}</strong>
+            <span class="hint">${escapeHtml(item.abbrev || item.id)}</span>
+          </div>
+          <div class="catalog-card__actions">
+            <button type="button" class="icon-btn" data-edit-measure="${escapeHtml(item.id)}" aria-label="Editar" title="Editar">${window.CookbookIcons.edit()}</button>
+            <button type="button" class="icon-btn" data-delete-measure="${escapeHtml(item.id)}" aria-label="Excluir" title="Excluir">${window.CookbookIcons.delete()}</button>
           </div>
         </div>
       </div>`
@@ -285,10 +289,12 @@
       <div class="catalog-card">
         <img src="${escapeHtml(item.image || "")}" alt="" loading="lazy" decoding="async" />
         <div class="catalog-card__body">
-          <strong>${escapeHtml(item.name)}</strong>
-          <div class="actions">
-            <button type="button" class="btn btn--ghost btn--small" data-edit-ingredient="${escapeHtml(item.id)}">Editar</button>
-            <button type="button" class="btn btn--danger btn--small" data-delete-ingredient="${escapeHtml(item.id)}">Excluir</button>
+          <div class="catalog-card__meta">
+            <strong>${escapeHtml(item.name)}</strong>
+          </div>
+          <div class="catalog-card__actions">
+            <button type="button" class="icon-btn" data-edit-ingredient="${escapeHtml(item.id)}" aria-label="Editar" title="Editar">${window.CookbookIcons.edit()}</button>
+            <button type="button" class="icon-btn" data-delete-ingredient="${escapeHtml(item.id)}" aria-label="Excluir" title="Excluir">${window.CookbookIcons.delete()}</button>
           </div>
         </div>
       </div>`

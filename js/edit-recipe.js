@@ -77,9 +77,7 @@
           <div class="toolbar toolbar--compact">
             <h2 class="toolbar__label">Grupos</h2>
             <button type="button" class="icon-btn" data-add-group aria-label="Adicionar grupo" title="Adicionar grupo">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-              </svg>
+              ${plusIcon()}
             </button>
           </div>
           <div class="stack" data-groups-editor></div>
@@ -128,19 +126,19 @@
   }
 
   function plusIcon() {
-    return `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`;
+    return window.CookbookIcons.add();
   }
 
   function minusIcon() {
-    return `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`;
+    return window.CookbookIcons.remove();
   }
 
   function chevronIcon() {
-    return `<svg class="ingredient-picker__chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    return window.CookbookIcons.keyboardArrowDown({ size: 16, className: "ingredient-picker__chevron" });
   }
 
   function closeIcon() {
-    return `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`;
+    return window.CookbookIcons.closeSmall();
   }
 
   function kindFromInput(input) {
@@ -489,9 +487,7 @@
       ${rows}
       <button type="button" class="shopping-catalog-item shopping-catalog-item--action" data-pick-create>
         <span class="shopping-catalog-item__icon" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-          </svg>
+          ${plusIcon()}
         </span>
         <span>${escapeHtml(meta.createLabel)}</span>
       </button>

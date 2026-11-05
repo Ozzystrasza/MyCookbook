@@ -3,7 +3,7 @@
   const DESKTOP_MQ = "(min-width: 800px)";
   const BLANK_PAGE = `<div class="book-read book-read--blank" aria-hidden="true"></div>`;
   const COVER_PAGE = "<!--book-cover-->";
-  const HEART_SVG = `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
+  const HEART_SVG = (on) => (on ? window.CookbookIcons.favoriteFilled() : window.CookbookIcons.favorite());
 
   const state = {
     recipes: [],
@@ -181,7 +181,7 @@
     const on = isFavorite(recipeId);
     const label = on ? "Remover dos favoritos" : "Adicionar aos favoritos";
     const cls = extraClass ? `favorite-btn ${extraClass}` : "favorite-btn";
-    return `<button type="button" class="${cls}" data-favorite-toggle="${escapeHtml(recipeId)}" aria-pressed="${on ? "true" : "false"}" title="${label}" aria-label="${label}">${HEART_SVG}</button>`;
+    return `<button type="button" class="${cls}" data-favorite-toggle="${escapeHtml(recipeId)}" aria-pressed="${on ? "true" : "false"}" title="${label}" aria-label="${label}">${HEART_SVG(on)}</button>`;
   }
 
   function syncFavoriteButtons() {
@@ -193,6 +193,7 @@
       btn.setAttribute("aria-label", label);
       btn.setAttribute("title", label);
       btn.title = label;
+      btn.innerHTML = HEART_SVG(on);
     });
   }
 
@@ -1400,8 +1401,12 @@
 
     if (filterToggle) {
       const filtered = state.categoryFilters.length > 0;
+      const filterOn = filtered || state.filterOpen;
       filterToggle.setAttribute("aria-pressed", filtered ? "true" : "false");
       filterToggle.setAttribute("aria-expanded", state.filterOpen ? "true" : "false");
+      filterToggle.innerHTML = filterOn
+        ? window.CookbookIcons.filterAltFilled({ size: 22 })
+        : window.CookbookIcons.filterAlt({ size: 22 });
     }
 
     const favoritesBtn = qs("[data-favorites]");
@@ -1410,6 +1415,9 @@
       const favLabel = state.favoritesOnly ? "Mostrar todas as receitas" : "Mostrar favoritos";
       favoritesBtn.setAttribute("aria-label", favLabel);
       favoritesBtn.title = favLabel;
+      favoritesBtn.innerHTML = state.favoritesOnly
+        ? window.CookbookIcons.favoriteFilled({ size: 22 })
+        : window.CookbookIcons.favorite({ size: 22 });
     }
 
     const visible = visibleRecipes();
@@ -1456,12 +1464,19 @@
     return [...document.querySelectorAll("[data-book-modes] [data-view]")];
   }
 
+  function refreshFilterCheckIcon(input) {
+    const icon = input?.parentElement?.querySelector(".shopping-check__icon");
+    if (!icon || !input) return;
+    icon.outerHTML = window.CookbookIcons.checkboxIcon(input.checked);
+  }
+
   function syncFilterCheckboxes() {
     const list = qs("[data-filter-list]");
     if (!list) return;
     const selected = new Set(state.categoryFilters);
     list.querySelectorAll('input[type="checkbox"][data-category-id]').forEach((input) => {
       input.checked = selected.has(input.getAttribute("data-category-id"));
+      refreshFilterCheckIcon(input);
     });
   }
 
@@ -1475,17 +1490,24 @@
     const selected = new Set(state.categoryFilters);
     list.innerHTML = state.categories
       .map(
-        (category) => `
-      <label class="book-filter__option">
+        (category) => {
+          const on = selected.has(category.id);
+          return `
+      <label class="shopping-check book-filter__option">
         <input
           type="checkbox"
           data-category-id="${escapeHtml(category.id)}"
-          ${selected.has(category.id) ? "checked" : ""}
+          ${on ? "checked" : ""}
         />
+        ${window.CookbookIcons.checkboxIcon(on)}
         <span>${escapeHtml(category.name)}</span>
-      </label>`
+      </label>`;
+        }
       )
       .join("");
+    list.querySelectorAll('input[type="checkbox"][data-category-id]').forEach((input) => {
+      input.addEventListener("change", () => refreshFilterCheckIcon(input));
+    });
   }
 
   function openFilterPanel() {

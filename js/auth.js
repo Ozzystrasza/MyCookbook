@@ -71,9 +71,7 @@
           </div>
           <div class="book-cover__step" data-gate-step="token" hidden>
             <button type="button" class="book-cover__back" data-gate-back aria-label="Voltar">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path d="M12.5 4.5L7 10l5.5 5.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
+              ${window.CookbookIcons.chevronLeft()}
             </button>
             <form class="book-cover__panel book-cover__cook" data-gate-cook>
               <div class="field">
