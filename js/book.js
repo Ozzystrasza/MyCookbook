@@ -892,6 +892,7 @@
     window.CookbookAuth.bindCoverGate(root, () => {
       openFromCover();
     });
+    window.CookbookAuth.restoreGateStep?.();
   }
 
   function openFromCover() {
@@ -1731,6 +1732,17 @@
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
+        const gatedCover =
+          document.body.classList.contains("is-gated") &&
+          (state.coverPhase === "closed" || state.coverPhase === "opening");
+        // Soft keyboard changes height only; skip remount so the gate token step stays.
+        if (gatedCover && lastFlipSize && usesFlipBook()) {
+          const size = measureFlipSize();
+          const desktop = isDesktop();
+          if (size.width === lastFlipSize.width && desktop === lastFlipSize.desktop) {
+            return;
+          }
+        }
         if (state.mode === "reading") state.readingPages = [];
         if (state.viewMode === "list") state.listPages = [];
         if (usesFlipBook()) lastFlipSize = null;

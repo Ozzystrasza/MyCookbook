@@ -96,44 +96,59 @@
     `;
   }
 
+  let gateStep = "choice";
+
+  function covers() {
+    return [...document.querySelectorAll(".book-cover")];
+  }
+
+  function showChoiceStep() {
+    gateStep = "choice";
+    covers().forEach((cover) => {
+      const choiceStep = cover.querySelector('[data-gate-step="choice"]');
+      const tokenStep = cover.querySelector('[data-gate-step="token"]');
+      const cookForm = cover.querySelector("[data-gate-cook]");
+      const errorEl = cover.querySelector("[data-gate-error]");
+      cookForm?.reset();
+      if (errorEl) errorEl.hidden = true;
+      if (tokenStep) tokenStep.hidden = true;
+      if (choiceStep) choiceStep.hidden = false;
+    });
+  }
+
+  function showTokenStep({ focus = true } = {}) {
+    gateStep = "token";
+    covers().forEach((cover) => {
+      const choiceStep = cover.querySelector('[data-gate-step="choice"]');
+      const tokenStep = cover.querySelector('[data-gate-step="token"]');
+      if (choiceStep) choiceStep.hidden = true;
+      if (tokenStep) tokenStep.hidden = false;
+    });
+    if (focus) {
+      document.querySelector('.book-cover [data-gate-step="token"]:not([hidden]) input[name="token"]')?.focus();
+    }
+  }
+
+  function restoreGateStep() {
+    if (gateStep === "token") showTokenStep({ focus: true });
+    else showChoiceStep();
+  }
+
   function bindCoverGate(root, onUnlocked) {
     if (!root) return;
     root._coverUnlocked = onUnlocked;
-    if (window.__cookbookCoverGateBound) return;
+    if (window.__cookbookCoverGateBound) {
+      restoreGateStep();
+      return;
+    }
     window.__cookbookCoverGateBound = true;
 
     function activeRoot() {
       return document.querySelector("[data-flip-slot]") || root;
     }
 
-    function covers() {
-      return [...document.querySelectorAll(".book-cover")];
-    }
-
-    function showChoiceStep() {
-      covers().forEach((cover) => {
-        const choiceStep = cover.querySelector('[data-gate-step="choice"]');
-        const tokenStep = cover.querySelector('[data-gate-step="token"]');
-        const cookForm = cover.querySelector("[data-gate-cook]");
-        const errorEl = cover.querySelector("[data-gate-error]");
-        cookForm?.reset();
-        if (errorEl) errorEl.hidden = true;
-        if (tokenStep) tokenStep.hidden = true;
-        if (choiceStep) choiceStep.hidden = false;
-      });
-    }
-
-    function showTokenStep() {
-      covers().forEach((cover) => {
-        const choiceStep = cover.querySelector('[data-gate-step="choice"]');
-        const tokenStep = cover.querySelector('[data-gate-step="token"]');
-        if (choiceStep) choiceStep.hidden = true;
-        if (tokenStep) tokenStep.hidden = false;
-      });
-      document.querySelector('.book-cover [data-gate-step="token"]:not([hidden]) input[name="token"]')?.focus();
-    }
-
     function unlock() {
+      gateStep = "choice";
       activeRoot()?._coverUnlocked?.();
     }
 
@@ -228,5 +243,6 @@
     ensureSession,
     coverFaceHtml,
     bindCoverGate,
+    restoreGateStep,
   };
 })();
