@@ -212,6 +212,65 @@
     );
   }
 
+  function hasOpenedEntryFlag() {
+    try {
+      return (
+        sessionStorage.getItem(storageKeys.enterOpened) === "1" ||
+        sessionStorage.getItem(storageKeys.openShopping) === "1"
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  function referrerIsAppReturn() {
+    try {
+      const ref = document.referrer;
+      if (!ref) return false;
+      const url = new URL(ref);
+      if (url.origin !== window.location.origin) return false;
+      return /(?:^|\/)(edit|manage)\.html$/i.test(url.pathname);
+    } catch {
+      return false;
+    }
+  }
+
+  function wantsOpenedEntry() {
+    if (!hasChosenRole()) return false;
+    const params = new URLSearchParams(window.location.search);
+    if (
+      params.get("home") === "1" ||
+      params.get("shopping") === "1" ||
+      Boolean(params.get("recipe"))
+    ) {
+      return true;
+    }
+    if (hasOpenedEntryFlag()) return true;
+    return referrerIsAppReturn();
+  }
+
+  function markOpenedEntry({ shopping = false } = {}) {
+    try {
+      sessionStorage.setItem(storageKeys.enterOpened, "1");
+      if (shopping) sessionStorage.setItem(storageKeys.openShopping, "1");
+      else sessionStorage.removeItem(storageKeys.openShopping);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function consumeOpenedEntry() {
+    let shopping = false;
+    try {
+      shopping = sessionStorage.getItem(storageKeys.openShopping) === "1";
+      sessionStorage.removeItem(storageKeys.enterOpened);
+      sessionStorage.removeItem(storageKeys.openShopping);
+    } catch {
+      /* ignore */
+    }
+    return { shopping };
+  }
+
   function ensureSession() {
     if (!isBookAppPage()) {
       if (!hasChosenRole()) {
@@ -223,7 +282,11 @@
       return;
     }
 
-    document.body.classList.add("is-gated");
+    if (wantsOpenedEntry()) {
+      document.body.classList.remove("is-gated");
+    } else {
+      document.body.classList.add("is-gated");
+    }
     const host = document.getElementById("auth-gate");
     if (host) host.replaceChildren();
     window.dispatchEvent(new CustomEvent("cookbook:ready"));
@@ -235,6 +298,9 @@
     isCook,
     isVisitor,
     hasChosenRole,
+    wantsOpenedEntry,
+    markOpenedEntry,
+    consumeOpenedEntry,
     setVisitor,
     setCook,
     signOut,

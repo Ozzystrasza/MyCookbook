@@ -10,5 +10,7 @@ window.CookbookConfig = {
     favoritesCookCache: "mycookbook_favorites_cook",
     favoritesLastSync: "mycookbook_favorites_last_sync",
     shoppingList: "mycookbook_shopping_list",
+    enterOpened: "mycookbook_enter_opened",
+    openShopping: "mycookbook_open_shopping",
   },
 };

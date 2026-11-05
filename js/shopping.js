@@ -3,6 +3,9 @@
   let ingredientsCache = null;
   let catalogEl = null;
   let recipeEl = null;
+  let createModal = null;
+  let createImagePicker = null;
+  let createImageFile = null;
   let chromeBound = false;
   let listActionsBound = false;
 
@@ -254,12 +257,63 @@
       renderCatalogList();
     });
     catalogEl.querySelector("[data-catalog-list]")?.addEventListener("click", (event) => {
+      const createBtn = event.target.closest("[data-catalog-create]");
+      if (createBtn) {
+        closeCatalogPicker();
+        openCreateModal();
+        return;
+      }
       const btn = event.target.closest("[data-catalog-pick]");
       if (!btn) return;
       addManual(btn.getAttribute("data-catalog-pick"));
       closeCatalogPicker();
       open();
       renderPage();
+    });
+
+    createModal = document.createElement("div");
+    createModal.className = "shopping-modal";
+    createModal.hidden = true;
+    createModal.innerHTML = `
+      <div class="shopping-modal__backdrop" data-create-close tabindex="-1"></div>
+      <div class="shopping-modal__panel" role="dialog" aria-labelledby="shopping-create-ingredient-title" aria-modal="true">
+        <div class="shopping-modal__header">
+          <h2 class="shopping-modal__title" id="shopping-create-ingredient-title">Novo ingrediente</h2>
+          <button type="button" class="icon-btn" data-create-close aria-label="Fechar">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <form class="editor-modal__body" data-create-form>
+          <label class="field">
+            <span>Nome</span>
+            <input data-create-name required placeholder="Farinha de trigo" autocomplete="off" />
+          </label>
+          <div class="field">
+            <span>Foto (opcional)</span>
+            <div data-create-image></div>
+          </div>
+          <p class="status editor-modal__status" data-create-status hidden></p>
+          <div class="editor-modal__footer">
+            <button type="button" class="btn btn--ghost" data-create-close>Cancelar</button>
+            <button type="submit" class="btn btn--primary">Salvar</button>
+          </div>
+        </form>
+      </div>
+    `;
+    document.body.appendChild(createModal);
+    createModal.querySelectorAll("[data-create-close]").forEach((el) => {
+      el.addEventListener("click", (event) => {
+        event.preventDefault();
+        closeCreateModal();
+      });
+    });
+    createModal.querySelector("[data-create-form]").addEventListener("submit", saveNewIngredient);
+    createImagePicker = window.CookbookUI.mountImagePicker(createModal.querySelector("[data-create-image]"), {
+      onChange: (file) => {
+        createImageFile = file;
+      },
     });
 
     recipeEl.querySelectorAll("[data-recipe-close]").forEach((el) => {
@@ -308,7 +362,11 @@
       "keydown",
       (event) => {
         if (event.key !== "Escape") return;
-        if (catalogEl && !catalogEl.hidden) {
+        if (createModal && !createModal.hidden) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          closeCreateModal();
+        } else if (catalogEl && !catalogEl.hidden) {
           event.preventDefault();
           event.stopImmediatePropagation();
           closeCatalogPicker();
@@ -320,6 +378,85 @@
       },
       true
     );
+  }
+
+  function closeCreateModal() {
+    if (!createModal) return;
+    createModal.hidden = true;
+    createImageFile = null;
+    createImagePicker?.setUrl("");
+    const form = createModal.querySelector("[data-create-form]");
+    form?.reset();
+    window.CookbookUI.showStatus(createModal.querySelector("[data-create-status]"), "", "info");
+    const submit = form?.querySelector('[type="submit"]');
+    if (submit) submit.disabled = false;
+  }
+
+  function openCreateModal() {
+    ensureModals();
+    if (!window.CookbookAuth?.isCook?.()) return;
+    createModal.hidden = false;
+    window.setTimeout(() => createModal.querySelector("[data-create-name]")?.focus(), 30);
+  }
+
+  async function saveNewIngredient(event) {
+    event.preventDefault();
+    const status = createModal.querySelector("[data-create-status]");
+    const submit = createModal.querySelector('[type="submit"]');
+    const name = createModal.querySelector("[data-create-name]").value.trim();
+    const file = createImageFile || createImagePicker?.getFile() || null;
+    if (!name) {
+      window.CookbookUI.showStatus(status, "Informe o nome do ingrediente.", "error");
+      return;
+    }
+
+    const token = window.CookbookAuth.getToken();
+    await ensureData();
+    const existingIds = new Set(Object.keys(ingredientsCache || {}));
+    const id = window.CookbookData.uniqueId(name, existingIds);
+    let imagePath = "";
+
+    submit.disabled = true;
+    window.CookbookUI.showStatus(status, "Salvando ingrediente…", "info");
+
+    try {
+      if (file) {
+        const ext = window.CookbookGitHub.extensionForFile(file);
+        imagePath = `data/images/ingredients/${id}${ext}`;
+        const base64 = await window.CookbookGitHub.fileToBase64(file);
+        await window.CookbookGitHub.putFile(
+          imagePath,
+          base64,
+          `Atualizar imagem do ingrediente: ${name}`,
+          token,
+          (await window.CookbookGitHub.getFile(imagePath, token))?.sha
+        );
+      }
+
+      const record = { id, name, image: imagePath };
+      await window.CookbookGitHub.putJsonFile(
+        `data/ingredients/${id}.json`,
+        record,
+        `Adicionar ingrediente: ${name}`,
+        token
+      );
+
+      ingredientsCache[id] = record;
+      await window.CookbookGitHub.putJsonFile(
+        "data/ingredients/_index.json",
+        Object.values(ingredientsCache),
+        `Atualizar índice de ingredientes após ${name}`,
+        token
+      );
+
+      closeCreateModal();
+      addManual(id);
+      open();
+      renderPage();
+    } catch (err) {
+      window.CookbookUI.showStatus(status, err.message || "Falha ao salvar ingrediente.", "error");
+      submit.disabled = false;
+    }
   }
 
   function bindChrome() {
@@ -424,6 +561,7 @@
       window.CookbookBook.openShopping();
       return;
     }
+    window.CookbookAuth.markOpenedEntry({ shopping: true });
     window.location.href = "index.html?shopping=1";
   }
 
@@ -432,7 +570,8 @@
       window.CookbookBook.closeShopping();
       return;
     }
-    window.location.href = "index.html";
+    window.CookbookAuth.markOpenedEntry();
+    window.location.href = "index.html?home=1";
   }
 
   async function renderCatalogList() {
@@ -442,20 +581,30 @@
     const items = Object.values(ingredients)
       .filter((ing) => !query || String(ing.name || "").toLowerCase().includes(query))
       .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "pt"));
-    if (!items.length) {
-      listRoot.innerHTML = `<p class="shopping-page__empty">Nenhum ingrediente encontrado.</p>`;
-      return;
-    }
-    listRoot.innerHTML = items
-      .map(
-        (ing) => `
+    const rows = items.length
+      ? items
+          .map(
+            (ing) => `
         <button type="button" class="shopping-catalog-item" data-catalog-pick="${escapeHtml(ing.id)}">
           <img src="${escapeHtml(ing.image || "")}" alt="" />
           <span>${escapeHtml(ing.name || ing.id)}</span>
         </button>
       `
-      )
-      .join("");
+          )
+          .join("")
+      : `<p class="shopping-page__empty">Nenhum ingrediente encontrado.</p>`;
+    const createAction = window.CookbookAuth?.isCook?.()
+      ? `
+      <button type="button" class="shopping-catalog-item shopping-catalog-item--action" data-catalog-create>
+        <span class="shopping-catalog-item__icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span>Novo Ingrediente</span>
+      </button>`
+      : "";
+    listRoot.innerHTML = `${rows}${createAction}`;
   }
 
   async function openCatalogPicker() {
@@ -543,7 +692,11 @@
   }
 
   function hasOpenModal() {
-    return Boolean((catalogEl && !catalogEl.hidden) || (recipeEl && !recipeEl.hidden));
+    return Boolean(
+      (catalogEl && !catalogEl.hidden) ||
+        (recipeEl && !recipeEl.hidden) ||
+        (createModal && !createModal.hidden)
+    );
   }
 
   function bindHeaderToggle(root = document) {

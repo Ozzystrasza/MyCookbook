@@ -2,6 +2,9 @@
   const { qs } = window.CookbookUI;
 
   async function boot() {
+    if (window.CookbookAuth.wantsOpenedEntry()) {
+      document.body.classList.remove("is-gated");
+    }
     window.CookbookUI.mountShell({ active: "home" });
     try {
       const [categories, recipes] = await Promise.all([

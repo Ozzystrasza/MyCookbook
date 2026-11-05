@@ -29,19 +29,27 @@
 
     const cook = window.CookbookAuth.isCook();
     const showBack = active === "edit" || active === "manage";
-    const backLink = showBack
-      ? `<a href="index.html" class="icon-btn" aria-label="Voltar">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <path d="M12.5 4.5L7 10l5.5 5.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </a>`
-      : "";
+
+    if (showBack) {
+      header.innerHTML = `
+        <div class="site-header__inner">
+          <div class="site-header__brand-row">
+            <a href="index.html?home=1" class="icon-btn" aria-label="Voltar">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M12.5 4.5L7 10l5.5 5.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      `;
+      window.CookbookAuth.applyCookUi(document);
+      return;
+    }
 
     header.innerHTML = `
       <div class="site-header__inner">
         <div class="site-header__brand-row">
-          ${backLink}
-          <a class="brand" href="index.html">My Cookbook</a>
+          <a class="brand" href="index.html?home=1">My Cookbook</a>
         </div>
         <nav class="site-nav" aria-label="Principal">
           ${cook ? `<a href="edit.html" class="icon-btn${active === "edit" ? " is-active" : ""}" data-cook-only title="Nova receita" aria-label="Nova receita">
@@ -80,6 +88,53 @@
 
     window.CookbookShopping?.bindHeaderToggle(header);
     window.CookbookAuth.applyCookUi(document);
+  }
+
+  if (!window.__cookbookBrandHomeBound) {
+    window.__cookbookBrandHomeBound = true;
+    document.addEventListener(
+      "click",
+      (e) => {
+        const brand = e.target.closest("a.brand");
+        if (!brand) return;
+        if (!window.CookbookBook?.goHome) return;
+        if (window.CookbookBook.goHome()) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      },
+      true
+    );
+  }
+
+  if (!window.__cookbookOpenedEntryBound) {
+    window.__cookbookOpenedEntryBound = true;
+    document.addEventListener(
+      "click",
+      (e) => {
+        if (document.querySelector("[data-book]")) return;
+        const link = e.target.closest("a[href]");
+        if (!link) return;
+        let url;
+        try {
+          url = new URL(link.getAttribute("href"), window.location.href);
+        } catch {
+          return;
+        }
+        const path = url.pathname.replace(/\\/g, "/");
+        const isIndex =
+          path.endsWith("/index.html") ||
+          path.endsWith("index.html") ||
+          path.endsWith("/") ||
+          /\/MyCookbook\/?$/i.test(path);
+        if (!isIndex) return;
+        if (url.origin !== window.location.origin) return;
+        window.CookbookAuth.markOpenedEntry({
+          shopping: url.searchParams.get("shopping") === "1",
+        });
+      },
+      true
+    );
   }
 
   if (!window.__cookbookSignOutBound) {

@@ -129,9 +129,12 @@
     leaveModal.querySelector("[data-leave-discard]").addEventListener("click", () => {
       allowLeave = true;
       clearDirty();
-      const href = pendingLeaveHref || "index.html";
+      const href = pendingLeaveHref || "index.html?home=1";
       pendingLeaveHref = "";
       closeLeaveModal();
+      window.CookbookAuth.markOpenedEntry({
+        shopping: /[?&]shopping=1(?:&|$)/.test(href),
+      });
       window.location.href = href;
     });
 
@@ -643,7 +646,8 @@
       );
       clearDirty();
       allowLeave = true;
-      window.location.href = "index.html";
+      window.CookbookAuth.markOpenedEntry();
+      window.location.href = "index.html?home=1";
     } catch (err) {
       showStatus(status, err.message || "Falha ao excluir.", "error");
     }

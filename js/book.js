@@ -921,6 +921,10 @@
 
   function finishCoverOpen() {
     if (state.coverPhase !== "opening") return;
+    enterOpenedHome();
+  }
+
+  function enterOpenedHome() {
     state.coverPhase = "open";
     state.browseIndex = 0;
     clearCoverCenterClasses();
@@ -928,6 +932,7 @@
     render();
     window.CookbookUI?.mountShell?.({ active: "home" });
     applyPendingDeepLink();
+    syncUrl();
   }
 
   function finishCoverClose() {
@@ -1504,6 +1509,7 @@
 
   function syncUrl() {
     const url = new URL(window.location.href);
+    url.searchParams.delete("home");
     if (state.mode === "shopping") {
       url.searchParams.delete("recipe");
       url.searchParams.set("shopping", "1");
@@ -1587,6 +1593,24 @@
     state.mode = "browse";
     syncUrl();
     render();
+  }
+
+  function goHome() {
+    if (state.coverPhase !== "open") return false;
+    if (state.filterOpen) closeFilterPanel();
+    if (state.mode === "shopping") {
+      state.mode = "browse";
+    } else if (state.mode === "reading") {
+      state.mode = "browse";
+      state.readingId = null;
+      state.readingRecipe = null;
+      state.readingPages = [];
+      state.readingPageIndex = 0;
+    }
+    state.browseIndex = 0;
+    syncUrl();
+    render();
+    return true;
   }
 
   function setViewMode(mode) {
@@ -1777,10 +1801,18 @@
     bindUi();
 
     const params = new URLSearchParams(window.location.search);
+    const skipCover = window.CookbookAuth.wantsOpenedEntry();
+    const opened = window.CookbookAuth.consumeOpenedEntry();
     state.pendingDeepLink = {
       recipeId: params.get("recipe"),
-      shopping: params.get("shopping") === "1",
+      shopping: params.get("shopping") === "1" || opened.shopping,
     };
+
+    if (skipCover) {
+      enterOpenedHome();
+      return;
+    }
+
     state.coverPhase = "closed";
     document.body.classList.add("is-gated");
     render();
@@ -1797,6 +1829,7 @@
     closeReading,
     openShopping,
     closeShopping,
+    goHome,
     closeToCover,
     openFromCover,
   };
