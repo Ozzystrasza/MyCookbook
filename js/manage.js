@@ -10,12 +10,19 @@
   let ingredientImagePicker = null;
   let ingredientImageFile = null;
   let ingredientImageCleared = false;
-  let ingredientSavedImage = "";
+  let inlineIngredientImagePicker = null;
+  let inlineIngredientImageFile = null;
+  let inlineIngredientImageCleared = false;
+  let inlineIngredientSavedImage = "";
   let inBookMode = false;
   let onCloseCb = null;
   let formHandlersBound = false;
+  let addingTab = null;
 
   function formShellHtml() {
+    const add = window.CookbookIcons.add();
+    const check = window.CookbookIcons.check();
+    const close = window.CookbookIcons.closeSmall();
     return `
       <div class="book-form panel panel--in-book">
         <h1>Gerenciar catálogos</h1>
@@ -27,59 +34,106 @@
           <button type="button" class="btn btn--ghost" data-tab="ingredients">Ingredientes</button>
         </div>
         <div data-panel-categories>
-          <form id="category-form" class="stack">
-            <label class="field">
-              <span>Nome</span>
-              <input id="category-name" required placeholder="Sobremesas" />
-            </label>
-            <div class="actions actions--sticky">
-              <button type="submit" class="btn btn--primary">Adicionar categoria</button>
-              <button type="button" class="btn btn--ghost" data-reset-category>Limpar</button>
-            </div>
-          </form>
+          <div class="actions actions--sticky">
+            <button type="button" class="icon-btn icon-btn--primary" data-open-add="categories" aria-label="Adicionar categoria" title="Adicionar categoria">${add}</button>
+          </div>
+          <div class="catalog-add" data-add-panel="categories" hidden>
+            <form id="category-form" class="stack">
+              <label class="field">
+                <span>Nome</span>
+                <input id="category-name" required placeholder="Sobremesas" />
+              </label>
+              <div class="catalog-add__actions">
+                <button type="submit" class="icon-btn icon-btn--primary" aria-label="Confirmar" title="Confirmar">${check}</button>
+                <button type="button" class="icon-btn" data-cancel-add="categories" aria-label="Cancelar" title="Cancelar">${close}</button>
+              </div>
+            </form>
+          </div>
           <div class="catalog-grid" data-category-list></div>
         </div>
         <div data-panel-measures hidden>
-          <form id="measure-form" class="stack">
-            <div class="row row--2">
-              <label class="field">
-                <span>Nome</span>
-                <input id="measure-name" required placeholder="colher de sopa" />
-              </label>
-              <label class="field">
-                <span>Abreviação</span>
-                <input id="measure-abbrev" placeholder="c.s." />
-              </label>
-            </div>
-            <div class="actions actions--sticky">
-              <button type="submit" class="btn btn--primary">Adicionar medida</button>
-              <button type="button" class="btn btn--ghost" data-reset-measure>Limpar</button>
-            </div>
-          </form>
+          <div class="actions actions--sticky">
+            <button type="button" class="icon-btn icon-btn--primary" data-open-add="measures" aria-label="Adicionar medida" title="Adicionar medida">${add}</button>
+          </div>
+          <div class="catalog-add" data-add-panel="measures" hidden>
+            <form id="measure-form" class="stack">
+              <div class="row row--2">
+                <label class="field">
+                  <span>Nome</span>
+                  <input id="measure-name" required placeholder="colher de sopa" />
+                </label>
+                <label class="field">
+                  <span>Abreviação</span>
+                  <input id="measure-abbrev" placeholder="c.s." />
+                </label>
+              </div>
+              <div class="catalog-add__actions">
+                <button type="submit" class="icon-btn icon-btn--primary" aria-label="Confirmar" title="Confirmar">${check}</button>
+                <button type="button" class="icon-btn" data-cancel-add="measures" aria-label="Cancelar" title="Cancelar">${close}</button>
+              </div>
+            </form>
+          </div>
           <div class="catalog-grid" data-measure-list></div>
         </div>
         <div data-panel-ingredients hidden>
-          <form id="ingredient-form" class="stack">
-            <label class="field">
-              <span>Nome</span>
-              <input id="ingredient-name" required placeholder="Farinha de trigo" />
-            </label>
-            <div class="field">
-              <span>Foto</span>
-              <div data-ingredient-image></div>
-            </div>
-            <div class="actions actions--sticky">
-              <button type="submit" class="btn btn--primary">Adicionar ingrediente</button>
-              <button type="button" class="btn btn--ghost" data-reset-ingredient>Limpar</button>
-            </div>
-          </form>
+          <div class="actions actions--sticky">
+            <button type="button" class="icon-btn icon-btn--primary" data-open-add="ingredients" aria-label="Adicionar ingrediente" title="Adicionar ingrediente">${add}</button>
+          </div>
+          <div class="catalog-add" data-add-panel="ingredients" hidden>
+            <form id="ingredient-form" class="stack">
+              <label class="field">
+                <span>Nome</span>
+                <input id="ingredient-name" required placeholder="Farinha de trigo" />
+              </label>
+              <div class="field">
+                <span>Foto</span>
+                <div data-ingredient-image></div>
+              </div>
+              <div class="catalog-add__actions">
+                <button type="submit" class="icon-btn icon-btn--primary" aria-label="Confirmar" title="Confirmar">${check}</button>
+                <button type="button" class="icon-btn" data-cancel-add="ingredients" aria-label="Cancelar" title="Cancelar">${close}</button>
+              </div>
+            </form>
+          </div>
           <div class="catalog-grid" data-ingredient-list></div>
         </div>
       </div>
     `;
   }
 
+  function nameInputForTab(tab) {
+    if (tab === "categories") return qs("#category-name");
+    if (tab === "measures") return qs("#measure-name");
+    return qs("#ingredient-name");
+  }
+
+  function openAddPanel(tab) {
+    if (addingTab && addingTab !== tab) closeAddPanel(addingTab);
+    addingTab = tab;
+    const panel = qs(`[data-add-panel="${tab}"]`);
+    if (panel) panel.hidden = false;
+    requestAnimationFrame(() => {
+      const input = nameInputForTab(tab);
+      input?.focus();
+      input?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    });
+  }
+
+  function closeAddPanel(tab = addingTab) {
+    if (!tab) return;
+    const panel = qs(`[data-add-panel="${tab}"]`);
+    if (panel) panel.hidden = true;
+    if (tab === "categories") resetCategoryForm();
+    else if (tab === "measures") resetMeasureForm();
+    else if (tab === "ingredients") resetIngredientForm();
+    if (addingTab === tab) addingTab = null;
+  }
+
   function setTab(tab) {
+    if (tab !== activeTab) {
+      cancelInlineEdits({ reRender: true });
+      closeAddPanel();
+    }
     activeTab = tab;
     qs("[data-tabs]").querySelectorAll("button").forEach((btn) => {
       btn.classList.toggle("is-active", btn.dataset.tab === tab);
@@ -138,45 +192,143 @@
     return hits;
   }
 
+  function clearInlineIngredientPicker() {
+    inlineIngredientImagePicker = null;
+    inlineIngredientImageFile = null;
+    inlineIngredientImageCleared = false;
+    inlineIngredientSavedImage = "";
+  }
+
+  function cancelInlineEdits({ reRender = true } = {}) {
+    const hadCategory = editingCategoryId;
+    const hadMeasure = editingMeasureId;
+    const hadIngredient = editingIngredientId;
+    editingCategoryId = null;
+    editingMeasureId = null;
+    editingIngredientId = null;
+    clearInlineIngredientPicker();
+    if (!reRender) return;
+    if (hadCategory) renderCategories();
+    if (hadMeasure) renderMeasures();
+    if (hadIngredient) renderIngredients();
+  }
+
+  function focusInlineName(list) {
+    requestAnimationFrame(() => {
+      list?.querySelector("[data-inline-name]")?.focus();
+    });
+  }
+
+  function bindInlineEnterConfirm(list, confirmFn) {
+    list.querySelectorAll("[data-inline-name], [data-inline-abbrev]").forEach((input) => {
+      input.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        void confirmFn();
+      });
+    });
+  }
+
+  function actionButtons({ editAttr, editId, deleteAttr, deleteId, editing }) {
+    if (editing) {
+      return `
+        <button type="button" class="icon-btn" data-confirm-${editAttr}="${escapeHtml(editId)}" aria-label="Confirmar" title="Confirmar">${window.CookbookIcons.check()}</button>
+        <button type="button" class="icon-btn" data-cancel-${editAttr}="${escapeHtml(editId)}" aria-label="Cancelar" title="Cancelar">${window.CookbookIcons.closeSmall()}</button>
+      `;
+    }
+    return `
+      <button type="button" class="icon-btn" data-edit-${editAttr}="${escapeHtml(editId)}" aria-label="Editar" title="Editar">${window.CookbookIcons.edit()}</button>
+      <button type="button" class="icon-btn" data-delete-${deleteAttr}="${escapeHtml(deleteId)}" aria-label="Excluir" title="Excluir">${window.CookbookIcons.delete()}</button>
+    `;
+  }
+
   function renderCategories() {
     const list = qs("[data-category-list]");
     if (!categories.length) {
+      editingCategoryId = null;
       list.innerHTML = `<div class="empty empty--with-action catalog-empty">
         <p>Nenhuma categoria ainda.</p>
-        <button type="button" class="btn btn--primary" data-focus-field="#category-name">Adicionar categoria</button>
+        <button type="button" class="btn btn--primary" data-open-add-cta="categories">Adicionar categoria</button>
       </div>`;
-      list.querySelector("[data-focus-field]")?.addEventListener("click", () => {
-        const input = qs("#category-name");
-        input?.focus();
-        input?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      list.querySelector("[data-open-add-cta]")?.addEventListener("click", () => {
+        openAddPanel("categories");
       });
       return;
     }
     list.innerHTML = categories
-      .map(
-        (item) => `
+      .map((item) => {
+        const editing = editingCategoryId === item.id;
+        if (editing) {
+          return `
+      <div class="catalog-card is-editing">
+        <div class="catalog-card__body">
+          <div class="catalog-card__meta">
+            <label class="field">
+              <span class="visually-hidden">Nome</span>
+              <input data-inline-name type="text" required value="${escapeHtml(item.name)}" aria-label="Nome da categoria" />
+            </label>
+          </div>
+          <div class="catalog-card__actions">
+            ${actionButtons({ editAttr: "category", editId: item.id, deleteAttr: "category", deleteId: item.id, editing: true })}
+          </div>
+        </div>
+      </div>`;
+        }
+        return `
       <div class="catalog-card">
         <div class="catalog-card__body">
           <div class="catalog-card__meta">
             <strong>${escapeHtml(item.name)}</strong>
           </div>
           <div class="catalog-card__actions">
-            <button type="button" class="icon-btn" data-edit-category="${escapeHtml(item.id)}" aria-label="Editar" title="Editar">${window.CookbookIcons.edit()}</button>
-            <button type="button" class="icon-btn" data-delete-category="${escapeHtml(item.id)}" aria-label="Excluir" title="Excluir">${window.CookbookIcons.delete()}</button>
+            ${actionButtons({ editAttr: "category", editId: item.id, deleteAttr: "category", deleteId: item.id, editing: false })}
           </div>
         </div>
-      </div>`
-      )
+      </div>`;
+      })
       .join("");
 
     list.querySelectorAll("[data-edit-category]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const item = categories.find((c) => c.id === btn.dataset.editCategory);
-        editingCategoryId = item.id;
-        qs("#category-name").value = item.name;
-        qs("#category-form [type='submit']").textContent = "Atualizar categoria";
+        editingCategoryId = btn.dataset.editCategory;
+        renderCategories();
+        focusInlineName(list);
       });
     });
+
+    list.querySelectorAll("[data-cancel-category]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        editingCategoryId = null;
+        renderCategories();
+      });
+    });
+
+    const confirmCategory = async () => {
+      const status = qs("[data-status]");
+      const id = editingCategoryId;
+      if (!id) return;
+      const name = list.querySelector("[data-inline-name]")?.value.trim() || "";
+      if (!name) return;
+      try {
+        const ok = await assertNameAvailable(categories, name, {
+          excludeId: id,
+          label: "uma categoria",
+        });
+        if (!ok) return;
+        const existing = categories.find((c) => c.id === id);
+        if (!existing) return;
+        existing.name = name;
+        editingCategoryId = null;
+        await saveCategories(`Atualizar categoria ${id}`);
+      } catch (err) {
+        showStatus(status, err.message, "error");
+      }
+    };
+
+    list.querySelectorAll("[data-confirm-category]").forEach((btn) => {
+      btn.addEventListener("click", () => void confirmCategory());
+    });
+    bindInlineEnterConfirm(list, confirmCategory);
 
     list.querySelectorAll("[data-delete-category]").forEach((btn) => {
       btn.addEventListener("click", async () => {
@@ -193,6 +345,7 @@
             return;
           }
           if (!window.confirm("Excluir esta categoria?")) return;
+          if (editingCategoryId === id) editingCategoryId = null;
           categories = categories.filter((c) => c.id !== id);
           await saveCategories("Excluir categoria");
         } catch (err) {
@@ -205,20 +358,40 @@
   function renderMeasures() {
     const list = qs("[data-measure-list]");
     if (!measures.length) {
+      editingMeasureId = null;
       list.innerHTML = `<div class="empty empty--with-action catalog-empty">
         <p>Nenhuma medida ainda.</p>
-        <button type="button" class="btn btn--primary" data-focus-field="#measure-name">Adicionar medida</button>
+        <button type="button" class="btn btn--primary" data-open-add-cta="measures">Adicionar medida</button>
       </div>`;
-      list.querySelector("[data-focus-field]")?.addEventListener("click", () => {
-        const input = qs("#measure-name");
-        input?.focus();
-        input?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      list.querySelector("[data-open-add-cta]")?.addEventListener("click", () => {
+        openAddPanel("measures");
       });
       return;
     }
     list.innerHTML = measures
-      .map(
-        (item) => `
+      .map((item) => {
+        const editing = editingMeasureId === item.id;
+        if (editing) {
+          return `
+      <div class="catalog-card is-editing">
+        <div class="catalog-card__body">
+          <div class="catalog-card__meta">
+            <label class="field">
+              <span class="visually-hidden">Nome</span>
+              <input data-inline-name type="text" required value="${escapeHtml(item.name)}" aria-label="Nome da medida" />
+            </label>
+            <label class="field">
+              <span class="visually-hidden">Abreviação</span>
+              <input data-inline-abbrev type="text" value="${escapeHtml(item.abbrev || "")}" placeholder="Abreviação" aria-label="Abreviação" />
+            </label>
+          </div>
+          <div class="catalog-card__actions">
+            ${actionButtons({ editAttr: "measure", editId: item.id, deleteAttr: "measure", deleteId: item.id, editing: true })}
+          </div>
+        </div>
+      </div>`;
+        }
+        return `
       <div class="catalog-card">
         <div class="catalog-card__body">
           <div class="catalog-card__meta">
@@ -226,23 +399,56 @@
             <span class="hint">${escapeHtml(item.abbrev || item.id)}</span>
           </div>
           <div class="catalog-card__actions">
-            <button type="button" class="icon-btn" data-edit-measure="${escapeHtml(item.id)}" aria-label="Editar" title="Editar">${window.CookbookIcons.edit()}</button>
-            <button type="button" class="icon-btn" data-delete-measure="${escapeHtml(item.id)}" aria-label="Excluir" title="Excluir">${window.CookbookIcons.delete()}</button>
+            ${actionButtons({ editAttr: "measure", editId: item.id, deleteAttr: "measure", deleteId: item.id, editing: false })}
           </div>
         </div>
-      </div>`
-      )
+      </div>`;
+      })
       .join("");
 
     list.querySelectorAll("[data-edit-measure]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const item = measures.find((m) => m.id === btn.dataset.editMeasure);
-        editingMeasureId = item.id;
-        qs("#measure-name").value = item.name;
-        qs("#measure-abbrev").value = item.abbrev || "";
-        qs("#measure-form [type='submit']").textContent = "Atualizar medida";
+        editingMeasureId = btn.dataset.editMeasure;
+        renderMeasures();
+        focusInlineName(list);
       });
     });
+
+    list.querySelectorAll("[data-cancel-measure]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        editingMeasureId = null;
+        renderMeasures();
+      });
+    });
+
+    const confirmMeasure = async () => {
+      const status = qs("[data-status]");
+      const id = editingMeasureId;
+      if (!id) return;
+      const name = list.querySelector("[data-inline-name]")?.value.trim() || "";
+      const abbrev = list.querySelector("[data-inline-abbrev]")?.value.trim() || "";
+      if (!name) return;
+      try {
+        const ok = await assertNameAvailable(measures, name, {
+          excludeId: id,
+          label: "uma medida",
+        });
+        if (!ok) return;
+        const existing = measures.find((m) => m.id === id);
+        if (!existing) return;
+        existing.name = name;
+        existing.abbrev = abbrev || name;
+        editingMeasureId = null;
+        await saveMeasures(`Atualizar medida ${id}`);
+      } catch (err) {
+        showStatus(status, err.message, "error");
+      }
+    };
+
+    list.querySelectorAll("[data-confirm-measure]").forEach((btn) => {
+      btn.addEventListener("click", () => void confirmMeasure());
+    });
+    bindInlineEnterConfirm(list, confirmMeasure);
 
     list.querySelectorAll("[data-delete-measure]").forEach((btn) => {
       btn.addEventListener("click", async () => {
@@ -260,6 +466,7 @@
             return;
           }
           if (!window.confirm("Excluir esta medida?")) return;
+          if (editingMeasureId === id) editingMeasureId = null;
           measures = measures.filter((m) => m.id !== id);
           await saveMeasures("Excluir medida");
         } catch (err) {
@@ -269,23 +476,61 @@
     });
   }
 
+  async function mountInlineIngredientImage(item) {
+    const host = qs("[data-inline-ingredient-image]");
+    if (!host) return;
+    inlineIngredientSavedImage = item.image || "";
+    inlineIngredientImageFile = null;
+    inlineIngredientImageCleared = false;
+    inlineIngredientImagePicker = mountImagePicker(host, {
+      onChange: (file) => {
+        inlineIngredientImageFile = file;
+        inlineIngredientImageCleared = !file;
+      },
+    });
+    const preview = inlineIngredientSavedImage
+      ? await window.CookbookSync.objectUrl(inlineIngredientSavedImage)
+      : "";
+    inlineIngredientImagePicker?.setUrl(preview);
+  }
+
   function renderIngredients() {
     const list = qs("[data-ingredient-list]");
     if (!ingredients.length) {
+      editingIngredientId = null;
+      clearInlineIngredientPicker();
       list.innerHTML = `<div class="empty empty--with-action catalog-empty">
         <p>Nenhum ingrediente no catálogo ainda.</p>
-        <button type="button" class="btn btn--primary" data-focus-field="#ingredient-name">Adicionar ingrediente</button>
+        <button type="button" class="btn btn--primary" data-open-add-cta="ingredients">Adicionar ingrediente</button>
       </div>`;
-      list.querySelector("[data-focus-field]")?.addEventListener("click", () => {
-        const input = qs("#ingredient-name");
-        input?.focus();
-        input?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      list.querySelector("[data-open-add-cta]")?.addEventListener("click", () => {
+        openAddPanel("ingredients");
       });
       return;
     }
+
+    const editingId = editingIngredientId;
     list.innerHTML = ingredients
-      .map(
-        (item) => `
+      .map((item) => {
+        const editing = editingId === item.id;
+        if (editing) {
+          return `
+      <div class="catalog-card is-editing">
+        <div class="catalog-card__image-edit" data-inline-ingredient-image></div>
+        <div class="catalog-card__body">
+          <div class="catalog-card__meta">
+            <label class="field">
+              <span class="visually-hidden">Nome</span>
+              <input data-inline-name type="text" required value="${escapeHtml(item.name)}" aria-label="Nome do ingrediente" />
+            </label>
+          </div>
+          <div class="catalog-card__actions">
+            ${actionButtons({ editAttr: "ingredient", editId: item.id, deleteAttr: "ingredient", deleteId: item.id, editing: true })}
+          </div>
+        </div>
+      </div>`;
+        }
+        return `
       <div class="catalog-card">
         <img src="${escapeHtml(item.image || "")}" alt="" loading="lazy" decoding="async" />
         <div class="catalog-card__body">
@@ -293,29 +538,108 @@
             <strong>${escapeHtml(item.name)}</strong>
           </div>
           <div class="catalog-card__actions">
-            <button type="button" class="icon-btn" data-edit-ingredient="${escapeHtml(item.id)}" aria-label="Editar" title="Editar">${window.CookbookIcons.edit()}</button>
-            <button type="button" class="icon-btn" data-delete-ingredient="${escapeHtml(item.id)}" aria-label="Excluir" title="Excluir">${window.CookbookIcons.delete()}</button>
+            ${actionButtons({ editAttr: "ingredient", editId: item.id, deleteAttr: "ingredient", deleteId: item.id, editing: false })}
           </div>
         </div>
-      </div>`
-      )
+      </div>`;
+      })
       .join("");
 
     list.querySelectorAll("[data-edit-ingredient]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const item = ingredients.find((i) => i.id === btn.dataset.editIngredient);
-        editingIngredientId = item.id;
-        qs("#ingredient-name").value = item.name;
-        qs("#ingredient-form [type='submit']").textContent = "Atualizar ingrediente";
-        ingredientSavedImage = item.image || "";
-        ingredientImageFile = null;
-        ingredientImageCleared = false;
-        const preview = ingredientSavedImage
-          ? await window.CookbookSync.objectUrl(ingredientSavedImage)
-          : "";
-        ingredientImagePicker?.setUrl(preview);
+      btn.addEventListener("click", () => {
+        editingIngredientId = btn.dataset.editIngredient;
+        renderIngredients();
+        focusInlineName(list);
       });
     });
+
+    list.querySelectorAll("[data-cancel-ingredient]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        editingIngredientId = null;
+        clearInlineIngredientPicker();
+        renderIngredients();
+      });
+    });
+
+    const confirmIngredient = async () => {
+      const status = qs("[data-status]");
+      const id = editingIngredientId;
+      if (!id) return;
+      const name = list.querySelector("[data-inline-name]")?.value.trim() || "";
+      if (!name) return;
+      try {
+        const ok = await assertNameAvailable(ingredients, name, {
+          excludeId: id,
+          label: "um ingrediente",
+        });
+        if (!ok) return;
+
+        const existing = ingredients.find((i) => i.id === id);
+        if (!existing) return;
+
+        const file =
+          inlineIngredientImageFile || inlineIngredientImagePicker?.getFile() || null;
+        const previousImagePath = existing.image || inlineIngredientSavedImage || "";
+        let imagePath = inlineIngredientImageCleared ? "" : previousImagePath;
+
+        showStatus(status, "Salvando ingrediente…", "info");
+
+        if (file) {
+          const ext = window.CookbookGitHub.extensionForFile(file);
+          imagePath = `data/images/ingredients/${id}${ext}`;
+          const base64 = await window.CookbookGitHub.fileToBase64(file);
+          await window.CookbookSync.writeBase64(
+            imagePath,
+            base64,
+            `Atualizar imagem do ingrediente: ${name}`
+          );
+          if (
+            previousImagePath &&
+            previousImagePath !== imagePath &&
+            previousImagePath.startsWith("data/images/ingredients/")
+          ) {
+            await window.CookbookSync.remove(
+              previousImagePath,
+              `Remover imagem anterior do ingrediente ${id}`
+            );
+          }
+        } else if (
+          inlineIngredientImageCleared &&
+          previousImagePath.startsWith("data/images/ingredients/")
+        ) {
+          await window.CookbookSync.remove(
+            previousImagePath,
+            `Remover imagem do ingrediente ${id}`
+          );
+        }
+
+        const record = { id, name, image: imagePath };
+        await window.CookbookSync.writeJson(
+          `data/ingredients/${id}.json`,
+          record,
+          `Atualizar ingrediente: ${name}`
+        );
+        existing.name = name;
+        existing.image = imagePath;
+        await window.CookbookSync.writeJson(
+          "data/ingredients/_index.json",
+          ingredients,
+          `Atualizar índice de ingredientes após ${name}`
+        );
+
+        editingIngredientId = null;
+        clearInlineIngredientPicker();
+        renderIngredients();
+        showStatus(status, "Ingrediente salvo neste dispositivo.", "ok");
+      } catch (err) {
+        showStatus(status, err.message, "error");
+      }
+    };
+
+    list.querySelectorAll("[data-confirm-ingredient]").forEach((btn) => {
+      btn.addEventListener("click", () => void confirmIngredient());
+    });
+    bindInlineEnterConfirm(list, confirmIngredient);
 
     list.querySelectorAll("[data-delete-ingredient]").forEach((btn) => {
       btn.addEventListener("click", async () => {
@@ -342,6 +666,10 @@
           if (item.image && item.image.startsWith("data/images/ingredients/")) {
             await window.CookbookSync.remove(item.image, `Excluir imagem do ingrediente ${item.id}`);
           }
+          if (editingIngredientId === item.id) {
+            editingIngredientId = null;
+            clearInlineIngredientPicker();
+          }
           ingredients = ingredients.filter((i) => i.id !== item.id);
           await window.CookbookSync.writeJson(
             "data/ingredients/_index.json",
@@ -356,6 +684,11 @@
       });
     });
 
+    if (editingId) {
+      const item = ingredients.find((i) => i.id === editingId);
+      if (item) void mountInlineIngredientImage(item);
+    }
+
     void window.CookbookSync.hydrateImages(list);
   }
 
@@ -369,7 +702,6 @@
         message || "Atualizar categorias"
       );
       renderCategories();
-      resetCategoryForm();
       showStatus(status, "Categorias salvas neste dispositivo.", "ok");
     } catch (err) {
       showStatus(status, err.message, "error");
@@ -386,7 +718,6 @@
         message || "Atualizar medidas"
       );
       renderMeasures();
-      resetMeasureForm();
       showStatus(status, "Medidas salvas neste dispositivo.", "ok");
     } catch (err) {
       showStatus(status, err.message, "error");
@@ -394,25 +725,33 @@
   }
 
   function resetCategoryForm() {
-    qs("#category-form").reset();
-    editingCategoryId = null;
-    qs("#category-form [type='submit']").textContent = "Adicionar categoria";
+    qs("#category-form")?.reset();
   }
 
   function resetMeasureForm() {
-    qs("#measure-form").reset();
-    editingMeasureId = null;
-    qs("#measure-form [type='submit']").textContent = "Adicionar medida";
+    qs("#measure-form")?.reset();
   }
 
   function resetIngredientForm() {
-    qs("#ingredient-form").reset();
-    editingIngredientId = null;
-    qs("#ingredient-form [type='submit']").textContent = "Adicionar ingrediente";
-    ingredientSavedImage = "";
+    qs("#ingredient-form")?.reset();
     ingredientImageFile = null;
     ingredientImageCleared = false;
     ingredientImagePicker?.setUrl("");
+  }
+
+  function decorateFormActionIcons() {
+    const add = window.CookbookIcons.add();
+    const check = window.CookbookIcons.check();
+    const close = window.CookbookIcons.closeSmall();
+    document.querySelectorAll("[data-open-add]").forEach((btn) => {
+      btn.innerHTML = add;
+    });
+    document.querySelectorAll('.catalog-add [type="submit"]').forEach((btn) => {
+      btn.innerHTML = check;
+    });
+    document.querySelectorAll("[data-cancel-add]").forEach((btn) => {
+      btn.innerHTML = close;
+    });
   }
 
   function bindFormHandlers() {
@@ -426,6 +765,13 @@
       if (btn) setTab(btn.dataset.tab);
     };
 
+    document.querySelectorAll("[data-open-add]").forEach((btn) => {
+      btn.onclick = () => openAddPanel(btn.dataset.openAdd);
+    });
+    document.querySelectorAll("[data-cancel-add]").forEach((btn) => {
+      btn.onclick = () => closeAddPanel(btn.dataset.cancelAdd);
+    });
+
     qs("#category-form").onsubmit = async (event) => {
       event.preventDefault();
       const status = qs("[data-status]");
@@ -433,18 +779,9 @@
       if (!name) return;
       try {
         const ok = await assertNameAvailable(categories, name, {
-          excludeId: editingCategoryId,
           label: "uma categoria",
         });
         if (!ok) return;
-
-        if (editingCategoryId) {
-          const existing = categories.find((c) => c.id === editingCategoryId);
-          if (!existing) return;
-          existing.name = name;
-          await saveCategories(`Atualizar categoria ${editingCategoryId}`);
-          return;
-        }
 
         const id = window.CookbookData.uniqueId(
           name,
@@ -452,6 +789,7 @@
         );
         categories.push({ id, name });
         await saveCategories(`Adicionar categoria ${id}`);
+        closeAddPanel("categories");
       } catch (err) {
         showStatus(status, err.message, "error");
       }
@@ -465,19 +803,9 @@
       if (!name) return;
       try {
         const ok = await assertNameAvailable(measures, name, {
-          excludeId: editingMeasureId,
           label: "uma medida",
         });
         if (!ok) return;
-
-        if (editingMeasureId) {
-          const existing = measures.find((m) => m.id === editingMeasureId);
-          if (!existing) return;
-          existing.name = name;
-          existing.abbrev = abbrev || name;
-          await saveMeasures(`Atualizar medida ${editingMeasureId}`);
-          return;
-        }
 
         const id = window.CookbookData.uniqueId(
           name,
@@ -485,6 +813,7 @@
         );
         measures.push({ id, name, abbrev: abbrev || name });
         await saveMeasures(`Adicionar medida ${id}`);
+        closeAddPanel("measures");
       } catch (err) {
         showStatus(status, err.message, "error");
       }
@@ -498,21 +827,16 @@
 
       try {
         const ok = await assertNameAvailable(ingredients, name, {
-          excludeId: editingIngredientId,
           label: "um ingrediente",
         });
         if (!ok) return;
 
         const existingIds = new Set(ingredients.map((i) => i.id));
-        const id = editingIngredientId || window.CookbookData.uniqueId(name, existingIds);
+        const id = window.CookbookData.uniqueId(name, existingIds);
         if (!id) return;
 
         const file = ingredientImageFile || ingredientImagePicker?.getFile() || null;
-        const existing = editingIngredientId
-          ? ingredients.find((i) => i.id === editingIngredientId)
-          : null;
-        const previousImagePath = existing?.image || ingredientSavedImage || "";
-        let imagePath = ingredientImageCleared ? "" : previousImagePath;
+        let imagePath = "";
 
         showStatus(status, "Salvando ingrediente…", "info");
 
@@ -525,39 +849,15 @@
             base64,
             `Atualizar imagem do ingrediente: ${name}`
           );
-          if (
-            previousImagePath &&
-            previousImagePath !== imagePath &&
-            previousImagePath.startsWith("data/images/ingredients/")
-          ) {
-            await window.CookbookSync.remove(
-              previousImagePath,
-              `Remover imagem anterior do ingrediente ${id}`
-            );
-          }
-        } else if (
-          ingredientImageCleared &&
-          previousImagePath.startsWith("data/images/ingredients/")
-        ) {
-          await window.CookbookSync.remove(
-            previousImagePath,
-            `Remover imagem do ingrediente ${id}`
-          );
         }
 
         const record = { id, name, image: imagePath };
         await window.CookbookSync.writeJson(
           `data/ingredients/${id}.json`,
           record,
-          `${existing ? "Atualizar" : "Adicionar"} ingrediente: ${name}`
+          `Adicionar ingrediente: ${name}`
         );
-
-        if (existing) {
-          existing.name = name;
-          existing.image = imagePath;
-        } else {
-          ingredients.push(record);
-        }
+        ingredients.push(record);
 
         await window.CookbookSync.writeJson(
           "data/ingredients/_index.json",
@@ -566,16 +866,12 @@
         );
 
         renderIngredients();
-        resetIngredientForm();
+        closeAddPanel("ingredients");
         showStatus(status, "Ingrediente salvo neste dispositivo.", "ok");
       } catch (err) {
         showStatus(status, err.message, "error");
       }
     };
-
-    qs("[data-reset-category]").onclick = resetCategoryForm;
-    qs("[data-reset-measure]").onclick = resetMeasureForm;
-    qs("[data-reset-ingredient]").onclick = resetIngredientForm;
   }
 
   async function bootEditor({ skipShell = false } = {}) {
@@ -605,6 +901,7 @@
       },
     });
 
+    decorateFormActionIcons();
     bindFormHandlers();
   }
 
@@ -622,10 +919,11 @@
     ingredientImagePicker = null;
     ingredientImageFile = null;
     ingredientImageCleared = false;
-    ingredientSavedImage = "";
+    clearInlineIngredientPicker();
     editingCategoryId = null;
     editingMeasureId = null;
     editingIngredientId = null;
+    addingTab = null;
   }
 
   async function boot() {

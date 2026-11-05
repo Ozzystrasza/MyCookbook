@@ -2228,9 +2228,11 @@
     qs("[data-next]")?.addEventListener("click", () => flip("next"));
     qs("[data-back]")?.addEventListener("click", closeReading);
     qs("[data-edit-back]")?.addEventListener("click", () => {
-      const cancel = document.querySelector("[data-edit-cancel]");
-      if (cancel) cancel.click();
-      else closeEdit({ animate: true });
+      if (window.CookbookEditRecipe?.attemptClose) {
+        window.CookbookEditRecipe.attemptClose();
+        return;
+      }
+      closeEdit({ animate: true });
     });
     qs("[data-manage-back]")?.addEventListener("click", () => closeManage({ animate: true }));
     qs("[data-edit]")?.addEventListener("click", (e) => {
@@ -2250,8 +2252,16 @@
       e.stopPropagation();
       toggleFilterPanel();
     });
-    qs("[data-filter-apply]")?.addEventListener("click", applyFilters);
-    qs("[data-filter-reset]")?.addEventListener("click", resetFilters);
+    const filterReset = qs("[data-filter-reset]");
+    if (filterReset) {
+      filterReset.innerHTML = window.CookbookIcons.mop();
+      filterReset.addEventListener("click", resetFilters);
+    }
+    const filterApply = qs("[data-filter-apply]");
+    if (filterApply) {
+      filterApply.innerHTML = window.CookbookIcons.check();
+      filterApply.addEventListener("click", applyFilters);
+    }
     qs("[data-favorites]")?.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -2312,9 +2322,11 @@
           return;
         }
         if (state.mode === "editing") {
-          const cancel = document.querySelector("[data-edit-cancel]");
-          if (cancel) cancel.click();
-          else closeEdit({ animate: true });
+          if (window.CookbookEditRecipe?.attemptClose) {
+            window.CookbookEditRecipe.attemptClose();
+          } else {
+            closeEdit({ animate: true });
+          }
           return;
         }
         if (state.mode === "managing") {

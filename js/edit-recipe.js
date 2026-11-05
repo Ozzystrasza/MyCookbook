@@ -82,9 +82,8 @@
           </div>
           <div class="stack" data-groups-editor></div>
           <div class="actions actions--sticky">
-            <button type="submit" class="btn btn--primary">Salvar receita</button>
-            <button type="button" class="btn btn--danger" data-delete hidden>Excluir receita</button>
-            <button type="button" class="btn btn--ghost" data-edit-cancel>Cancelar</button>
+            <button type="submit" class="icon-btn icon-btn--primary" aria-label="Salvar receita" title="Salvar receita">${window.CookbookIcons.save()}</button>
+            <button type="button" class="icon-btn icon-btn--danger" data-delete hidden aria-label="Excluir receita" title="Excluir receita">${window.CookbookIcons.delete()}</button>
           </div>
         </form>
       </div>
@@ -994,17 +993,22 @@
     };
     const del = qs("[data-delete]");
     if (del) del.onclick = deleteRecipe;
-    const cancel = qs("[data-edit-cancel]");
-    if (cancel) {
-      cancel.onclick = () => {
-        if (dirty && !allowLeave) {
-          openLeaveModal(inBookMode ? "__close__" : "index.html?home=1");
-          return;
-        }
-        requestClose();
-      };
-    }
     bindLeaveGuard();
+  }
+
+  function attemptClose() {
+    if (dirty && !allowLeave) {
+      openLeaveModal(inBookMode ? "__close__" : "index.html?home=1");
+      return;
+    }
+    requestClose();
+  }
+
+  function decorateStickyActionIcons() {
+    const submit = qs('.actions--sticky [type="submit"]');
+    if (submit) submit.innerHTML = window.CookbookIcons.save();
+    const del = qs("[data-delete]");
+    if (del) del.innerHTML = window.CookbookIcons.delete();
   }
 
   async function bootEditor({ skipShell = false } = {}) {
@@ -1026,6 +1030,7 @@
 
     qs("#page-title").textContent = editingId ? "Editar receita" : "Nova receita";
     qs("[data-delete]")?.toggleAttribute("hidden", !editingId);
+    decorateStickyActionIcons();
 
     recipeImagePicker = mountImagePicker(qs("[data-recipe-image]"), {
       onChange: (file) => {
@@ -1076,6 +1081,7 @@
     formShellHtml,
     mountInBook,
     unmountFromBook,
+    attemptClose,
   };
 
   window.addEventListener("cookbook:ready", () => {
