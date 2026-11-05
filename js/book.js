@@ -38,6 +38,7 @@
   let flipHtmlPages = [];
   let flipHasCover = false;
   let resizeTimer = null;
+  let lastResizeLayout = null;
   let autoOpenTimer = null;
   let closeFallbackTimer = null;
   let modeBridge = null;
@@ -2261,20 +2262,21 @@
       if (e.key === "ArrowRight") flip("next");
     });
 
+    lastResizeLayout = { width: window.innerWidth, desktop: isDesktop() };
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        const gatedCover =
-          document.body.classList.contains("is-gated") &&
-          (state.coverPhase === "closed" || state.coverPhase === "opening");
-        // Soft keyboard changes height only; skip remount so the gate token step stays.
-        if (gatedCover && lastFlipSize && usesFlipBook()) {
-          const size = measureFlipSize();
-          const desktop = isDesktop();
-          if (size.width === lastFlipSize.width && desktop === lastFlipSize.desktop) {
-            return;
-          }
+        const desktop = isDesktop();
+        const width = window.innerWidth;
+        // Soft keyboard changes height only; skip remount so focused inputs stay.
+        if (
+          lastResizeLayout &&
+          lastResizeLayout.width === width &&
+          lastResizeLayout.desktop === desktop
+        ) {
+          return;
         }
+        lastResizeLayout = { width, desktop };
         if (state.mode === "reading") state.readingPages = [];
         if (state.mode === "shopping") state.shoppingPages = [];
         if (state.viewMode === "list") state.listPages = [];
