@@ -1,7 +1,10 @@
 (function () {
   const { qs, showStatus, mountImagePicker } = window.CookbookUI;
   const params = new URLSearchParams(window.location.search);
-  const editingId = params.get("id");
+  let editingId = params.get("id");
+  let inBookMode = false;
+  let onCloseCb = null;
+  let leaveGuardBound = false;
 
   let categories = [];
   let measures = [];
@@ -22,6 +25,55 @@
   let leaveModal = null;
   let pickModal = null;
   let createModal = null;
+
+  function formShellHtml() {
+    return `
+      <div class="book-form panel panel--in-book">
+        <h1 id="page-title">Nova receita</h1>
+        <p class="hint">Salva direto no seu repositório público do GitHub.</p>
+        <p class="status" data-status hidden></p>
+        <form id="recipe-form" class="stack">
+          <div class="row row--2">
+            <label class="field">
+              <span>Título</span>
+              <input id="title" name="title" required />
+            </label>
+            <label class="field">
+              <span>Categoria</span>
+              <select id="categoryId" name="categoryId" required></select>
+            </label>
+          </div>
+          <div class="field">
+            <span>Imagem da receita</span>
+            <div data-recipe-image></div>
+          </div>
+          <div class="toolbar toolbar--compact">
+            <h2 class="toolbar__label">Grupos</h2>
+            <button type="button" class="icon-btn" data-add-group aria-label="Adicionar grupo" title="Adicionar grupo">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <div class="stack" data-groups-editor></div>
+          <div class="actions">
+            <button type="submit" class="btn btn--primary">Salvar receita</button>
+            <button type="button" class="btn btn--danger" data-delete hidden>Excluir receita</button>
+            <button type="button" class="btn btn--ghost" data-edit-cancel>Cancelar</button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  function requestClose() {
+    if (typeof onCloseCb === "function") {
+      onCloseCb();
+      return;
+    }
+    window.CookbookAuth.markOpenedEntry();
+    window.location.href = "index.html?home=1";
+  }
 
   function blankGroup() {
     return {
@@ -129,13 +181,17 @@
     leaveModal.querySelector("[data-leave-discard]").addEventListener("click", () => {
       allowLeave = true;
       clearDirty();
-      const href = pendingLeaveHref || "index.html?home=1";
+      const href = pendingLeaveHref || "";
       pendingLeaveHref = "";
       closeLeaveModal();
+      if (inBookMode && (!href || href === "__close__")) {
+        requestClose();
+        return;
+      }
       window.CookbookAuth.markOpenedEntry({
         shopping: /[?&]shopping=1(?:&|$)/.test(href),
       });
-      window.location.href = href;
+      window.location.href = href || "index.html?home=1";
     });
 
     pickModal = document.createElement("div");
@@ -610,6 +666,14 @@
       allowLeave = true;
       showStatus(status, "Salvo. O GitHub Pages pode levar um minuto para atualizar.", "ok");
       window.setTimeout(() => {
+        if (inBookMode && window.CookbookBook?.openRecipe) {
+          void window.CookbookBook.openRecipe(id);
+          return;
+        }
+        if (inBookMode) {
+          requestClose();
+          return;
+        }
         window.location.href = `recipe.html?id=${encodeURIComponent(id)}`;
       }, 900);
     } catch (err) {
@@ -646,6 +710,10 @@
       );
       clearDirty();
       allowLeave = true;
+      if (inBookMode) {
+        requestClose();
+        return;
+      }
       window.CookbookAuth.markOpenedEntry();
       window.location.href = "index.html?home=1";
     } catch (err) {
@@ -654,12 +722,11 @@
   }
 
   function bindLeaveGuard() {
-    const form = qs("#recipe-form");
-    form.addEventListener("input", markDirty);
-    form.addEventListener("change", markDirty);
+    if (leaveGuardBound) return;
+    leaveGuardBound = true;
 
     window.addEventListener("beforeunload", (event) => {
-      if (!dirty || allowLeave) return;
+      if (!dirty || allowLeave || !qs("#recipe-form")) return;
       event.preventDefault();
       event.returnValue = "";
     });
@@ -667,7 +734,7 @@
     document.addEventListener(
       "click",
       (event) => {
-        if (!dirty || allowLeave) return;
+        if (!dirty || allowLeave || !qs("#recipe-form")) return;
         const link = event.target.closest("a[href]");
         if (!link) return;
         if (link.target === "_blank" || link.hasAttribute("download")) return;
@@ -690,9 +757,41 @@
     );
   }
 
-  async function boot() {
-    if (!window.CookbookAuth.requireCookOrRedirect()) return;
-    window.CookbookUI.mountShell({ active: "edit" });
+  function bindFormHandlers() {
+    const form = qs("#recipe-form");
+    if (!form) return;
+    form.onsubmit = saveRecipe;
+    form.oninput = markDirty;
+    form.onchange = markDirty;
+    qs("[data-add-group]").onclick = () => {
+      const groups = readGroupsFromDom({ keepEmpty: true });
+      groups.push(blankGroup());
+      markDirty();
+      renderGroups(groups);
+    };
+    const del = qs("[data-delete]");
+    if (del) del.onclick = deleteRecipe;
+    const cancel = qs("[data-edit-cancel]");
+    if (cancel) {
+      cancel.onclick = () => {
+        if (dirty && !allowLeave) {
+          openLeaveModal(inBookMode ? "__close__" : "index.html?home=1");
+          return;
+        }
+        requestClose();
+      };
+    }
+    bindLeaveGuard();
+  }
+
+  async function bootEditor({ skipShell = false } = {}) {
+    if (skipShell) {
+      if (!window.CookbookAuth.isCook()) return;
+    } else if (!window.CookbookAuth.requireCookOrRedirect()) {
+      return;
+    } else {
+      window.CookbookUI.mountShell({ active: "edit" });
+    }
     ensureModals();
 
     [categories, measures, ingredients, recipeIndex] = await Promise.all([
@@ -720,21 +819,49 @@
       fillForm({ title: "", categoryId: "", image: "", groups: [blankGroup()] });
     }
 
-    qs("#recipe-form").addEventListener("submit", saveRecipe);
-    qs("[data-add-group]").addEventListener("click", () => {
-      const groups = readGroupsFromDom({ keepEmpty: true });
-      groups.push(blankGroup());
-      markDirty();
-      renderGroups(groups);
-    });
-    qs("[data-delete]")?.addEventListener("click", deleteRecipe);
-    bindLeaveGuard();
+    bindFormHandlers();
   }
 
+  async function mountInBook(_host, { id = null, onClose } = {}) {
+    inBookMode = true;
+    onCloseCb = onClose || null;
+    editingId = id || null;
+    allowLeave = false;
+    clearDirty();
+    await bootEditor({ skipShell: true });
+  }
+
+  function unmountFromBook() {
+    inBookMode = false;
+    onCloseCb = null;
+    editingId = null;
+    clearDirty();
+    allowLeave = true;
+    recipeImagePicker = null;
+    imageFile = null;
+    imageCleared = false;
+    savedImagePath = "";
+  }
+
+  async function boot() {
+    inBookMode = false;
+    editingId = params.get("id");
+    await bootEditor({ skipShell: false });
+  }
+
+  window.CookbookEditRecipe = {
+    formShellHtml,
+    mountInBook,
+    unmountFromBook,
+  };
+
   window.addEventListener("cookbook:ready", () => {
+    if (document.querySelector("[data-book]")) return;
     boot().catch((err) => {
       showStatus(qs("[data-status]"), err.message, "error");
     });
   });
-  window.CookbookAuth.ensureSession();
+  if (!document.querySelector("[data-book]")) {
+    window.CookbookAuth.ensureSession();
+  }
 })();

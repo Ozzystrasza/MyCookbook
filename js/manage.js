@@ -11,6 +11,73 @@
   let ingredientImageFile = null;
   let ingredientImageCleared = false;
   let ingredientSavedImage = "";
+  let inBookMode = false;
+  let onCloseCb = null;
+  let formHandlersBound = false;
+
+  function formShellHtml() {
+    return `
+      <div class="book-form panel panel--in-book">
+        <h1>Gerenciar catálogos</h1>
+        <p class="hint">Categorias, medidas e ingredientes reutilizáveis com fotos.</p>
+        <p class="status" data-status hidden></p>
+        <div class="tabs" data-tabs>
+          <button type="button" class="btn btn--ghost is-active" data-tab="categories">Categorias</button>
+          <button type="button" class="btn btn--ghost" data-tab="measures">Medidas</button>
+          <button type="button" class="btn btn--ghost" data-tab="ingredients">Ingredientes</button>
+        </div>
+        <div data-panel-categories>
+          <form id="category-form" class="stack">
+            <label class="field">
+              <span>Nome</span>
+              <input id="category-name" required placeholder="Sobremesas" />
+            </label>
+            <div class="actions">
+              <button type="submit" class="btn btn--primary">Adicionar categoria</button>
+              <button type="button" class="btn btn--ghost" data-reset-category>Limpar</button>
+            </div>
+          </form>
+          <div class="catalog-grid" data-category-list style="margin-top:1rem"></div>
+        </div>
+        <div data-panel-measures hidden>
+          <form id="measure-form" class="stack">
+            <div class="row row--2">
+              <label class="field">
+                <span>Nome</span>
+                <input id="measure-name" required placeholder="colher de sopa" />
+              </label>
+              <label class="field">
+                <span>Abreviação</span>
+                <input id="measure-abbrev" placeholder="c.s." />
+              </label>
+            </div>
+            <div class="actions">
+              <button type="submit" class="btn btn--primary">Adicionar medida</button>
+              <button type="button" class="btn btn--ghost" data-reset-measure>Limpar</button>
+            </div>
+          </form>
+          <div class="catalog-grid" data-measure-list style="margin-top:1rem"></div>
+        </div>
+        <div data-panel-ingredients hidden>
+          <form id="ingredient-form" class="stack">
+            <label class="field">
+              <span>Nome</span>
+              <input id="ingredient-name" required placeholder="Farinha de trigo" />
+            </label>
+            <div class="field">
+              <span>Foto</span>
+              <div data-ingredient-image></div>
+            </div>
+            <div class="actions">
+              <button type="submit" class="btn btn--primary">Adicionar ingrediente</button>
+              <button type="button" class="btn btn--ghost" data-reset-ingredient>Limpar</button>
+            </div>
+          </form>
+          <div class="catalog-grid" data-ingredient-list style="margin-top:1rem"></div>
+        </div>
+      </div>
+    `;
+  }
 
   function setTab(tab) {
     activeTab = tab;
@@ -215,34 +282,18 @@
     ingredientImagePicker?.setUrl("");
   }
 
-  async function boot() {
-    if (!window.CookbookAuth.requireCookOrRedirect()) return;
-    window.CookbookUI.mountShell({ active: "manage" });
+  function bindFormHandlers() {
+    if (formHandlersBound) {
+      // Rebinding after in-book remount: replace DOM handlers via on* props
+    }
+    formHandlersBound = true;
 
-    [categories, measures, ingredients] = await Promise.all([
-      window.CookbookData.loadCategories(),
-      window.CookbookData.loadMeasures(),
-      window.CookbookData.loadIngredientIndex(),
-    ]);
-
-    renderCategories();
-    renderMeasures();
-    renderIngredients();
-    setTab("categories");
-
-    ingredientImagePicker = mountImagePicker(qs("[data-ingredient-image]"), {
-      onChange: (file) => {
-        ingredientImageFile = file;
-        ingredientImageCleared = !file;
-      },
-    });
-
-    qs("[data-tabs]").addEventListener("click", (event) => {
+    qs("[data-tabs]").onclick = (event) => {
       const btn = event.target.closest("[data-tab]");
       if (btn) setTab(btn.dataset.tab);
-    });
+    };
 
-    qs("#category-form").addEventListener("submit", async (event) => {
+    qs("#category-form").onsubmit = async (event) => {
       event.preventDefault();
       const name = qs("#category-name").value.trim();
       if (!name) return;
@@ -252,9 +303,9 @@
       if (existing) existing.name = name;
       else categories.push({ id, name });
       await saveCategories(existing ? `Atualizar categoria ${id}` : `Adicionar categoria ${id}`);
-    });
+    };
 
-    qs("#measure-form").addEventListener("submit", async (event) => {
+    qs("#measure-form").onsubmit = async (event) => {
       event.preventDefault();
       const name = qs("#measure-name").value.trim();
       const abbrev = qs("#measure-abbrev").value.trim();
@@ -269,9 +320,9 @@
         measures.push({ id, name, abbrev: abbrev || name });
       }
       await saveMeasures(existing ? `Atualizar medida ${id}` : `Adicionar medida ${id}`);
-    });
+    };
 
-    qs("#ingredient-form").addEventListener("submit", async (event) => {
+    qs("#ingredient-form").onsubmit = async (event) => {
       event.preventDefault();
       const status = qs("[data-status]");
       const token = window.CookbookAuth.getToken();
@@ -350,15 +401,79 @@
       } catch (err) {
         showStatus(status, err.message, "error");
       }
-    });
+    };
 
-    qs("[data-reset-category]").addEventListener("click", resetCategoryForm);
-    qs("[data-reset-measure]").addEventListener("click", resetMeasureForm);
-    qs("[data-reset-ingredient]").addEventListener("click", resetIngredientForm);
+    qs("[data-reset-category]").onclick = resetCategoryForm;
+    qs("[data-reset-measure]").onclick = resetMeasureForm;
+    qs("[data-reset-ingredient]").onclick = resetIngredientForm;
   }
 
+  async function bootEditor({ skipShell = false } = {}) {
+    if (skipShell) {
+      if (!window.CookbookAuth.isCook()) return;
+    } else if (!window.CookbookAuth.requireCookOrRedirect()) {
+      return;
+    } else {
+      window.CookbookUI.mountShell({ active: "manage" });
+    }
+
+    [categories, measures, ingredients] = await Promise.all([
+      window.CookbookData.loadCategories(),
+      window.CookbookData.loadMeasures(),
+      window.CookbookData.loadIngredientIndex(),
+    ]);
+
+    renderCategories();
+    renderMeasures();
+    renderIngredients();
+    setTab("categories");
+
+    ingredientImagePicker = mountImagePicker(qs("[data-ingredient-image]"), {
+      onChange: (file) => {
+        ingredientImageFile = file;
+        ingredientImageCleared = !file;
+      },
+    });
+
+    bindFormHandlers();
+  }
+
+  async function mountInBook(_host, { onClose } = {}) {
+    inBookMode = true;
+    onCloseCb = onClose || null;
+    formHandlersBound = false;
+    await bootEditor({ skipShell: true });
+  }
+
+  function unmountFromBook() {
+    inBookMode = false;
+    onCloseCb = null;
+    formHandlersBound = false;
+    ingredientImagePicker = null;
+    ingredientImageFile = null;
+    ingredientImageCleared = false;
+    ingredientSavedImage = "";
+    editingCategoryId = null;
+    editingMeasureId = null;
+    editingIngredientId = null;
+  }
+
+  async function boot() {
+    inBookMode = false;
+    await bootEditor({ skipShell: false });
+  }
+
+  window.CookbookManage = {
+    formShellHtml,
+    mountInBook,
+    unmountFromBook,
+  };
+
   window.addEventListener("cookbook:ready", () => {
+    if (document.querySelector("[data-book]")) return;
     boot().catch((err) => showStatus(qs("[data-status]"), err.message, "error"));
   });
-  window.CookbookAuth.ensureSession();
+  if (!document.querySelector("[data-book]")) {
+    window.CookbookAuth.ensureSession();
+  }
 })();

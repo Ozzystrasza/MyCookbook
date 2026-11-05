@@ -88,6 +88,31 @@
 
     window.CookbookShopping?.bindHeaderToggle(header);
     window.CookbookAuth.applyCookUi(document);
+
+    if (!window.matchMedia("(min-width: 800px)").matches) {
+      header.querySelectorAll('a[href="edit.html"], a[href^="edit.html?"]').forEach((link) => {
+        link.addEventListener("click", (event) => {
+          if (!window.CookbookBook?.openEdit) return;
+          event.preventDefault();
+          event.stopPropagation();
+          let id = null;
+          try {
+            id = new URL(link.getAttribute("href"), window.location.href).searchParams.get("id");
+          } catch (_) {
+            /* ignore */
+          }
+          void window.CookbookBook.openEdit({ id, animate: true });
+        });
+      });
+      header.querySelectorAll('a[href="manage.html"]').forEach((link) => {
+        link.addEventListener("click", (event) => {
+          if (!window.CookbookBook?.openManage) return;
+          event.preventDefault();
+          event.stopPropagation();
+          void window.CookbookBook.openManage({ animate: true });
+        });
+      });
+    }
   }
 
   if (!window.__cookbookBrandHomeBound) {

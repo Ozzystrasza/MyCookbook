@@ -956,7 +956,9 @@ textarea.field-control {
 
 /* —— Book shell —— */
 body.is-reading .site-header,
-body.is-shopping .site-header {
+body.is-shopping .site-header,
+body.is-editing .site-header,
+body.is-managing .site-header {
   display: none;
 }
 
@@ -1762,6 +1764,54 @@ body.is-shopping .site-header {
   display: grid;
   gap: 1rem;
   padding: 0.25rem 0.1rem 1rem;
+}
+
+.panel--in-book,
+.book-form.panel {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0.15rem 0.1rem 1rem;
+  max-width: 100%;
+}
+
+.book-form .tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.book-form .tabs .btn {
+  min-height: 2.5rem;
+}
+
+.book-form .catalog-grid {
+  grid-template-columns: 1fr;
+}
+
+.book-form .row--2 {
+  grid-template-columns: 1fr;
+}
+
+.book-form .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.book-form .actions .btn {
+  min-height: 2.75rem;
+}
+
+@media (min-width: 700px) {
+  .book-form .row--2 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .book-form .catalog-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
 }
 
 .shopping-page__title {

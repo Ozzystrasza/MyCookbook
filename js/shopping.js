@@ -482,7 +482,7 @@
     listActionsBound = true;
     document.addEventListener("click", (event) => {
       const btn = event.target.closest("[data-shopping-action]");
-      if (!btn || !btn.closest("[data-shopping-list]")) return;
+      if (!btn || !btn.closest(".shopping-page")) return;
       const id = btn.getAttribute("data-id");
       const action = btn.getAttribute("data-shopping-action");
       if (!id || !action) return;
@@ -496,6 +496,20 @@
       }
       renderPage();
     });
+  }
+
+  async function buildPageUnits() {
+    const { measures, ingredients } = await ensureData();
+    const list = loadList();
+    const units = [`<h1 class="shopping-page__title">Lista de compras</h1>`];
+    if (!list.length) {
+      units.push(`<p class="shopping-page__empty">Sua lista está vazia.</p>`);
+      return units;
+    }
+    list.forEach((item) => {
+      units.push(rowHtml(item, ingredients, measures));
+    });
+    return units;
   }
 
   function rowHtml(item, ingredients, measures) {
@@ -534,6 +548,10 @@
     ensureModals();
     bindChrome();
     bindListActions();
+    if (document.body.classList.contains("is-shopping") && window.CookbookBook?.refreshShoppingContent) {
+      await window.CookbookBook.refreshShoppingContent();
+      return;
+    }
     const listRoot = document.querySelector("[data-shopping-list]");
     if (!listRoot) return;
     const { measures, ingredients } = await ensureData();
@@ -727,6 +745,10 @@
     bindHeaderToggle,
     renderPage,
     pageShellHtml,
+    buildPageUnits,
+    ensureModals,
+    bindChrome,
+    bindListActions,
     hasOpenModal,
   };
 })();
