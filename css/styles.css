@@ -2360,7 +2360,7 @@ body:has(.shopping-modal:not([hidden])) .book__page.is-scrollable {
 }
 
 .shopping-recipe-line {
-  grid-template-columns: auto auto 36px minmax(0, 1fr);
+  grid-template-columns: auto 36px minmax(0, 1fr) auto;
   padding: 0.45rem 0.35rem;
   border-radius: 10px;
 }

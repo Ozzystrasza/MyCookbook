@@ -2145,7 +2145,7 @@
     const fav = e.target.closest("[data-favorite-toggle]");
     if (!fav) return;
     e.preventDefault();
-    e.stopPropagation();
+    e.stopImmediatePropagation();
     void toggleFavorite(fav.getAttribute("data-favorite-toggle"));
   }
 

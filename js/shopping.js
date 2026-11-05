@@ -707,9 +707,9 @@
             >
               <input type="checkbox" checked />
               ${window.CookbookIcons.checkboxIcon(true)}
-              <span class="shopping-recipe-line__qty">${escapeHtml(qtyLabel)}</span>
               <img src="${escapeHtml(ing?.image || "")}" alt="" loading="lazy" decoding="async" />
               <span class="shopping-recipe-line__name">${escapeHtml(ing?.name || entry.ingredientId)}</span>
+              <span class="shopping-recipe-line__qty">${escapeHtml(qtyLabel)}</span>
             </label>
           `;
         })
