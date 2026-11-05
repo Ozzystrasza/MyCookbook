@@ -160,7 +160,7 @@
     });
 
     menu.addEventListener("click", (event) => {
-      if (!event.target.closest("a.icon-btn, button.icon-btn")) return;
+      if (!event.target.closest(".site-nav__item")) return;
       closeOpenNavMenu();
     });
   }
@@ -205,33 +205,37 @@
             </svg>
           </button>
           <div class="site-nav__menu" id="site-nav-menu" data-nav-menu aria-label="Ações">
-            ${cook ? `<a href="edit.html" class="icon-btn${active === "edit" ? " is-active" : ""}" data-cook-only title="Nova receita" aria-label="Nova receita">
+            ${cook ? `<a href="edit.html" class="site-nav__item${active === "edit" ? " is-active" : ""}" data-cook-only title="Nova receita">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
               </svg>
+              <span class="site-nav__label">Nova receita</span>
             </a>` : ""}
-            ${cook ? `<a href="manage.html" class="icon-btn${active === "manage" ? " is-active" : ""}" data-cook-only title="Gerenciar" aria-label="Gerenciar">
+            ${cook ? `<a href="manage.html" class="site-nav__item${active === "manage" ? " is-active" : ""}" data-cook-only title="Gerenciar">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path d="M3.5 5.5h9M3.5 10h13M3.5 14.5h9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
                 <circle cx="15.5" cy="5.5" r="1.75" stroke="currentColor" stroke-width="1.5"/>
                 <circle cx="8.5" cy="10" r="1.75" stroke="currentColor" stroke-width="1.5"/>
                 <circle cx="15.5" cy="14.5" r="1.75" stroke="currentColor" stroke-width="1.5"/>
               </svg>
+              <span class="site-nav__label">Gerenciar</span>
             </a>` : ""}
-            ${cook ? `<button type="button" class="icon-btn" data-sync-pending hidden title="Sincronizar com GitHub" aria-label="Sincronizar com GitHub">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path d="M5.5 13.5A3.5 3.5 0 0 1 6 6.6 4.5 4.5 0 0 1 14.7 8 3 3 0 0 1 14.5 14H6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M10 9.5V15M10 9.5l-2.25 2.25M10 9.5l2.25 2.25" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>` : ""}
-            <button type="button" class="icon-btn" data-shopping-toggle title="Lista de compras" aria-label="Lista de compras">
+            <button type="button" class="site-nav__item" data-shopping-toggle title="Lista de compras">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path d="M3.5 4.5h1.2l1.1 8.2a1.5 1.5 0 0 0 1.5 1.3h6.9a1.5 1.5 0 0 0 1.5-1.2l1.1-5.3H6.2" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
                 <circle cx="8.2" cy="16.2" r="1.1" fill="currentColor"/>
                 <circle cx="14" cy="16.2" r="1.1" fill="currentColor"/>
               </svg>
+              <span class="site-nav__label">Lista de compras</span>
             </button>
-            <button type="button" class="icon-btn" data-sign-out title="${cook ? "Sair" : "Trocar perfil"}" aria-label="${cook ? "Sair" : "Trocar perfil"}">
+            ${cook ? `<button type="button" class="site-nav__item" data-sync-pending hidden title="Sincronizar com GitHub">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M5.5 13.5A3.5 3.5 0 0 1 6 6.6 4.5 4.5 0 0 1 14.7 8 3 3 0 0 1 14.5 14H6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10 9.5V15M10 9.5l-2.25 2.25M10 9.5l2.25 2.25" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="site-nav__label">Sincronizar</span>
+            </button>` : ""}
+            <button type="button" class="site-nav__item" data-sign-out title="${cook ? "Sair" : "Trocar perfil"}">
               ${cook
                 ? `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                     <path d="M8 4.5H5.5A1.5 1.5 0 0 0 4 6v8a1.5 1.5 0 0 0 1.5 1.5H8M11.5 13.5 15.5 10 11.5 6.5M15.5 10H8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
@@ -240,6 +244,7 @@
                     <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.75"/>
                     <path d="M4.5 16.5c.9-2.6 2.9-4 5.5-4s4.6 1.4 5.5 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
                   </svg>`}
+              <span class="site-nav__label">${cook ? "Sair" : "Trocar perfil"}</span>
             </button>
           </div>
         </nav>

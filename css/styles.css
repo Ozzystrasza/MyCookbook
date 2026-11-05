@@ -132,11 +132,13 @@ textarea {
   top: calc(100% + 0.4rem);
   right: 0;
   z-index: 30;
+  flex-direction: column;
   flex-wrap: nowrap;
-  gap: 0.25rem;
-  align-items: center;
+  gap: 0.15rem;
+  align-items: stretch;
+  min-width: 12.5rem;
   padding: 0.4rem;
-  border-radius: 999px;
+  border-radius: var(--radius);
   border: 1px solid rgba(47, 93, 58, 0.14);
   background: rgba(255, 252, 246, 0.96);
   box-shadow: 0 12px 28px rgba(28, 36, 28, 0.16);
@@ -148,21 +150,52 @@ textarea {
   display: flex;
 }
 
-.site-nav .icon-btn {
+.site-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: var(--tap-size);
+  padding: 0 0.75rem 0 0.55rem;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.site-nav__item svg {
+  flex-shrink: 0;
+}
+
+.site-nav__label {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.site-nav .icon-btn,
+.site-nav__item {
   color: var(--muted);
 }
 
-.site-nav .icon-btn.is-active,
-.site-nav .icon-btn:hover {
+.site-nav .icon-btn:hover,
+.site-nav__item.is-active,
+.site-nav__item:hover {
   color: var(--leaf-deep);
   background: rgba(31, 63, 40, 0.08);
 }
 
-.site-nav .icon-btn.is-active {
+.site-nav__item.is-active {
   background: rgba(31, 63, 40, 0.12);
 }
 
-.site-nav .icon-btn.is-syncing {
+.site-nav__item.is-syncing {
   opacity: 0.65;
   pointer-events: none;
 }
@@ -174,10 +207,13 @@ textarea {
 
   .site-nav__menu {
     display: flex;
+    flex-direction: row;
+    align-items: center;
     position: static;
     top: auto;
     right: auto;
     z-index: auto;
+    min-width: 0;
     padding: 0;
     border: 0;
     border-radius: 0;
@@ -185,6 +221,22 @@ textarea {
     box-shadow: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    gap: 0.25rem;
+  }
+
+  .site-nav__label {
+    display: none;
+  }
+
+  .site-nav__item {
+    justify-content: center;
+    width: var(--tap-size);
+    height: var(--tap-size);
+    min-width: var(--tap-size);
+    min-height: var(--tap-size);
+    padding: 0;
+    border-radius: 999px;
+    gap: 0;
   }
 }
 
