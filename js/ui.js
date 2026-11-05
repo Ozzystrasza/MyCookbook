@@ -259,12 +259,15 @@
             event.preventDefault();
             event.stopPropagation();
             let id = null;
+            let from = null;
             try {
-              id = new URL(link.getAttribute("href"), window.location.href).searchParams.get("id");
+              const params = new URL(link.getAttribute("href"), window.location.href).searchParams;
+              id = params.get("id");
+              from = params.get("from");
             } catch (_) {
               /* ignore */
             }
-            void window.CookbookBook.openEdit({ id, animate: true });
+            void window.CookbookBook.openEdit({ id, from, animate: true });
           });
         });
       header.querySelectorAll('a[href="manage.html"]').forEach((link) => {

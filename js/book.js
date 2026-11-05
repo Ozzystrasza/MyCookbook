@@ -23,6 +23,7 @@
     shoppingPages: [],
     shoppingPageIndex: 0,
     editRecipeId: null,
+    editRecipeFrom: null,
     flipping: false,
     filterOpen: false,
     favoriteIds: new Set(),
@@ -1365,6 +1366,7 @@
     const prev = qs("[data-prev]");
     const next = qs("[data-next]");
     const edit = qs("[data-edit]");
+    const duplicate = qs("[data-duplicate-recipe]");
     const addToCart = qs("[data-add-to-cart]");
     const filterToggle = qs("[data-filter-toggle]");
     const reading = state.mode === "reading";
@@ -1443,10 +1445,26 @@
     if (addToCart) {
       addToCart.hidden = !(reading && !!state.readingId);
     }
+    const showCookRecipeAction = reading && !!state.readingId && window.CookbookAuth.isCook();
+    if (duplicate) {
+      duplicate.hidden = !showCookRecipeAction;
+      if (showCookRecipeAction) {
+        if (isDesktop()) {
+          // Use `edit?from=` (not `edit.html?from=`) so local `serve` cleanUrls
+          // does not 301 to `/edit` and drop the query string.
+          duplicate.href = `edit?from=${encodeURIComponent(state.readingId)}`;
+        } else {
+          duplicate.removeAttribute("href");
+          duplicate.setAttribute("role", "button");
+        }
+      } else {
+        duplicate.removeAttribute("href");
+        duplicate.removeAttribute("role");
+      }
+    }
     if (edit) {
-      const showEdit = reading && !!state.readingId && window.CookbookAuth.isCook();
-      edit.hidden = !showEdit;
-      if (showEdit) {
+      edit.hidden = !showCookRecipeAction;
+      if (showCookRecipeAction) {
         if (isDesktop()) {
           // Use `edit?id=` (not `edit.html?id=`) so local `serve` cleanUrls
           // does not 301 to `/edit` and drop the query string.
@@ -1705,6 +1723,7 @@
     if (state.mode === "editing") window.CookbookEditRecipe?.unmountFromBook?.();
     if (state.mode === "managing") window.CookbookManage?.unmountFromBook?.();
     state.editRecipeId = null;
+    state.editRecipeFrom = null;
   }
 
   function renderEditingPage() {
@@ -1716,6 +1735,7 @@
     setPage(right, html, { scrollable: true });
     void window.CookbookEditRecipe?.mountInBook?.(right, {
       id: state.editRecipeId,
+      from: state.editRecipeFrom,
       onClose: () => closeEdit({ animate: true }),
     });
   }
@@ -1860,6 +1880,7 @@
       if (state.mode === "editing") {
         window.CookbookEditRecipe?.unmountFromBook?.();
         state.editRecipeId = null;
+        state.editRecipeFrom = null;
       }
       if (state.mode === "managing") {
         window.CookbookManage?.unmountFromBook?.();
@@ -1988,6 +2009,11 @@
   async function openEdit(options = {}) {
     if (isDesktop()) {
       const id = options.id;
+      const from = options.from;
+      if (from) {
+        window.location.href = `edit?from=${encodeURIComponent(from)}`;
+        return;
+      }
       window.location.href = id ? `edit?id=${encodeURIComponent(id)}` : "edit.html";
       return;
     }
@@ -2010,6 +2036,7 @@
     const outgoing = animate ? snapshotOutgoingPages() : null;
     state.mode = "editing";
     state.editRecipeId = options.id || null;
+    state.editRecipeFrom = state.editRecipeId ? null : options.from || null;
     syncUrl();
     window.CookbookUI?.mountShell?.({ active: "home" });
 
@@ -2034,6 +2061,7 @@
     window.CookbookEditRecipe?.unmountFromBook?.();
     state.mode = "browse";
     state.editRecipeId = null;
+    state.editRecipeFrom = null;
     syncUrl();
     if (!animate) {
       render();
@@ -2241,6 +2269,11 @@
       if (isDesktop() || !state.readingId) return;
       e.preventDefault();
       void openEdit({ id: state.readingId, animate: true });
+    });
+    qs("[data-duplicate-recipe]")?.addEventListener("click", (e) => {
+      if (isDesktop() || !state.readingId) return;
+      e.preventDefault();
+      void openEdit({ from: state.readingId, animate: true });
     });
     qs("[data-add-to-cart]")?.addEventListener("click", () => {
       if (!state.readingRecipe) return;

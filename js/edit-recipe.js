@@ -2,6 +2,7 @@
   const { qs, showStatus, mountImagePicker, assertNameAvailable } = window.CookbookUI;
   const params = new URLSearchParams(window.location.search);
   let editingId = params.get("id");
+  let duplicateFromId = params.get("from");
   let inBookMode = false;
   let onCloseCb = null;
   let leaveGuardBound = false;
@@ -819,6 +820,23 @@
     clearDirty();
   }
 
+  function extensionFromPath(path) {
+    const match = String(path || "").match(/\.[a-z0-9]+$/i);
+    return match ? match[0].toLowerCase() : ".jpg";
+  }
+
+  async function copyRecipeImage(sourcePath, destPath, message) {
+    const url = await window.CookbookSync.objectUrl(sourcePath);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Não foi possível copiar a imagem.`);
+    const blob = await res.blob();
+    const file = new File([blob], destPath.split("/").pop() || "image", {
+      type: blob.type || "image/jpeg",
+    });
+    const base64 = await window.CookbookGitHub.fileToBase64(file);
+    await window.CookbookSync.writeBase64(destPath, base64, message);
+  }
+
   async function saveRecipe(event) {
     event.preventDefault();
     const status = qs("[data-status]");
@@ -875,6 +893,7 @@
           `Atualizar imagem da receita: ${title}`
         );
         if (
+          editingId &&
           savedImagePath &&
           savedImagePath !== imagePath &&
           savedImagePath.startsWith("data/images/recipes/")
@@ -884,11 +903,30 @@
             `Remover imagem anterior da receita ${id}`
           );
         }
-      } else if (imageCleared && savedImagePath.startsWith("data/images/recipes/")) {
+      } else if (
+        editingId &&
+        imageCleared &&
+        savedImagePath.startsWith("data/images/recipes/")
+      ) {
         await window.CookbookSync.remove(
           savedImagePath,
           `Remover imagem da receita ${id}`
         );
+      } else if (
+        !editingId &&
+        !imageCleared &&
+        savedImagePath &&
+        savedImagePath.startsWith("data/images/recipes/")
+      ) {
+        const ext = extensionFromPath(savedImagePath);
+        imagePath = `data/images/recipes/${id}${ext}`;
+        if (imagePath !== savedImagePath) {
+          await copyRecipeImage(
+            savedImagePath,
+            imagePath,
+            `Copiar imagem da receita: ${title}`
+          );
+        }
       }
 
       const recipe = {
@@ -1090,6 +1128,11 @@
     if (editingId) {
       const recipe = await window.CookbookData.loadRecipe(editingId);
       await fillForm(recipe);
+    } else if (duplicateFromId) {
+      const recipe = await window.CookbookData.loadRecipe(duplicateFromId);
+      await fillForm(recipe);
+      markDirty();
+      showStatus(qs("[data-status]"), "Altere o título para salvar a cópia.", "info");
     } else {
       await fillForm({ title: "", categoryId: "", image: "", groups: [blankGroup()] });
     }
@@ -1097,10 +1140,11 @@
     bindFormHandlers();
   }
 
-  async function mountInBook(_host, { id = null, onClose } = {}) {
+  async function mountInBook(_host, { id = null, from = null, onClose } = {}) {
     inBookMode = true;
     onCloseCb = onClose || null;
     editingId = id || null;
+    duplicateFromId = editingId ? null : from || null;
     allowLeave = false;
     clearDirty();
     await bootEditor({ skipShell: true });
@@ -1110,6 +1154,7 @@
     inBookMode = false;
     onCloseCb = null;
     editingId = null;
+    duplicateFromId = null;
     clearDirty();
     allowLeave = true;
     recipeImagePicker = null;
@@ -1121,6 +1166,7 @@
   async function boot() {
     inBookMode = false;
     editingId = params.get("id");
+    duplicateFromId = editingId ? null : params.get("from");
     await bootEditor({ skipShell: false });
   }
 

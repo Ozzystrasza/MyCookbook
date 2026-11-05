@@ -560,6 +560,7 @@ textarea {
 .btn[hidden],
 .icon-btn[hidden],
 [data-edit][hidden],
+[data-duplicate-recipe][hidden],
 .site-nav__item[hidden] {
   display: none !important;
 }
