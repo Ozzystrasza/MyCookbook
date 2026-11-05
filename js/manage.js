@@ -1,5 +1,5 @@
 (function () {
-  const { qs, showStatus, mountImagePicker } = window.CookbookUI;
+  const { qs, showStatus, mountImagePicker, assertNameAvailable } = window.CookbookUI;
   let categories = [];
   let measures = [];
   let ingredients = [];
@@ -180,7 +180,7 @@
       .join("");
 
     list.querySelectorAll("[data-edit-ingredient]").forEach((btn) => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", async () => {
         const item = ingredients.find((i) => i.id === btn.dataset.editIngredient);
         editingIngredientId = item.id;
         qs("#ingredient-name").value = item.name;
@@ -188,55 +188,56 @@
         ingredientSavedImage = item.image || "";
         ingredientImageFile = null;
         ingredientImageCleared = false;
-        ingredientImagePicker?.setUrl(ingredientSavedImage);
+        const preview = ingredientSavedImage
+          ? await window.CookbookSync.objectUrl(ingredientSavedImage)
+          : "";
+        ingredientImagePicker?.setUrl(preview);
       });
     });
 
     list.querySelectorAll("[data-delete-ingredient]").forEach((btn) => {
       btn.addEventListener("click", async () => {
         if (!window.confirm("Excluir este ingrediente do catálogo?")) return;
-        const token = window.CookbookAuth.getToken();
         const item = ingredients.find((i) => i.id === btn.dataset.deleteIngredient);
         const status = qs("[data-status]");
         showStatus(status, "Excluindo ingrediente…", "info");
         try {
-          await window.CookbookGitHub.deleteFile(
+          await window.CookbookSync.remove(
             `data/ingredients/${item.id}.json`,
-            `Excluir ingrediente ${item.id}`,
-            token
+            `Excluir ingrediente ${item.id}`
           );
           if (item.image && item.image.startsWith("data/images/ingredients/")) {
-            await window.CookbookGitHub.deleteFile(item.image, `Excluir imagem do ingrediente ${item.id}`, token);
+            await window.CookbookSync.remove(item.image, `Excluir imagem do ingrediente ${item.id}`);
           }
           ingredients = ingredients.filter((i) => i.id !== item.id);
-          await window.CookbookGitHub.putJsonFile(
+          await window.CookbookSync.writeJson(
             "data/ingredients/_index.json",
             ingredients,
-            `Atualizar índice de ingredientes após excluir ${item.id}`,
-            token
+            `Atualizar índice de ingredientes após excluir ${item.id}`
           );
           renderIngredients();
-          showStatus(status, "Ingrediente excluído. As páginas podem levar um minuto para atualizar.", "ok");
+          showStatus(status, "Ingrediente excluído neste dispositivo.", "ok");
         } catch (err) {
           showStatus(status, err.message, "error");
         }
       });
     });
+
+    void window.CookbookSync.hydrateImages(list);
   }
 
   async function saveCategories(message) {
     const status = qs("[data-status]");
     showStatus(status, "Salvando categorias…", "info");
     try {
-      await window.CookbookGitHub.putJsonFile(
+      await window.CookbookSync.writeJson(
         "data/categories.json",
         categories,
-        message || "Atualizar categorias",
-        window.CookbookAuth.getToken()
+        message || "Atualizar categorias"
       );
       renderCategories();
       resetCategoryForm();
-      showStatus(status, "Categorias salvas.", "ok");
+      showStatus(status, "Categorias salvas neste dispositivo.", "ok");
     } catch (err) {
       showStatus(status, err.message, "error");
     }
@@ -246,15 +247,14 @@
     const status = qs("[data-status]");
     showStatus(status, "Salvando medidas…", "info");
     try {
-      await window.CookbookGitHub.putJsonFile(
+      await window.CookbookSync.writeJson(
         "data/measures.json",
         measures,
-        message || "Atualizar medidas",
-        window.CookbookAuth.getToken()
+        message || "Atualizar medidas"
       );
       renderMeasures();
       resetMeasureForm();
-      showStatus(status, "Medidas salvas.", "ok");
+      showStatus(status, "Medidas salvas neste dispositivo.", "ok");
     } catch (err) {
       showStatus(status, err.message, "error");
     }
@@ -295,90 +295,128 @@
 
     qs("#category-form").onsubmit = async (event) => {
       event.preventDefault();
+      const status = qs("[data-status]");
       const name = qs("#category-name").value.trim();
       if (!name) return;
-      const id = editingCategoryId || window.CookbookData.slugify(name);
-      if (!id) return;
-      const existing = categories.find((c) => c.id === id);
-      if (existing) existing.name = name;
-      else categories.push({ id, name });
-      await saveCategories(existing ? `Atualizar categoria ${id}` : `Adicionar categoria ${id}`);
+      try {
+        const ok = await assertNameAvailable(categories, name, {
+          excludeId: editingCategoryId,
+          label: "uma categoria",
+        });
+        if (!ok) return;
+
+        if (editingCategoryId) {
+          const existing = categories.find((c) => c.id === editingCategoryId);
+          if (!existing) return;
+          existing.name = name;
+          await saveCategories(`Atualizar categoria ${editingCategoryId}`);
+          return;
+        }
+
+        const id = window.CookbookData.uniqueId(
+          name,
+          new Set(categories.map((c) => c.id))
+        );
+        categories.push({ id, name });
+        await saveCategories(`Adicionar categoria ${id}`);
+      } catch (err) {
+        showStatus(status, err.message, "error");
+      }
     };
 
     qs("#measure-form").onsubmit = async (event) => {
       event.preventDefault();
+      const status = qs("[data-status]");
       const name = qs("#measure-name").value.trim();
       const abbrev = qs("#measure-abbrev").value.trim();
       if (!name) return;
-      const id = editingMeasureId || window.CookbookData.slugify(name);
-      if (!id) return;
-      const existing = measures.find((m) => m.id === id);
-      if (existing) {
-        existing.name = name;
-        existing.abbrev = abbrev || name;
-      } else {
+      try {
+        const ok = await assertNameAvailable(measures, name, {
+          excludeId: editingMeasureId,
+          label: "uma medida",
+        });
+        if (!ok) return;
+
+        if (editingMeasureId) {
+          const existing = measures.find((m) => m.id === editingMeasureId);
+          if (!existing) return;
+          existing.name = name;
+          existing.abbrev = abbrev || name;
+          await saveMeasures(`Atualizar medida ${editingMeasureId}`);
+          return;
+        }
+
+        const id = window.CookbookData.uniqueId(
+          name,
+          new Set(measures.map((m) => m.id))
+        );
         measures.push({ id, name, abbrev: abbrev || name });
+        await saveMeasures(`Adicionar medida ${id}`);
+      } catch (err) {
+        showStatus(status, err.message, "error");
       }
-      await saveMeasures(existing ? `Atualizar medida ${id}` : `Adicionar medida ${id}`);
     };
 
     qs("#ingredient-form").onsubmit = async (event) => {
       event.preventDefault();
       const status = qs("[data-status]");
-      const token = window.CookbookAuth.getToken();
       const name = qs("#ingredient-name").value.trim();
       if (!name) return;
 
-      const existingIds = new Set(ingredients.map((i) => i.id));
-      const id = editingIngredientId || window.CookbookData.uniqueId(name, existingIds);
-      if (!id) return;
-
-      const file = ingredientImageFile || ingredientImagePicker?.getFile() || null;
-      const existing = ingredients.find((i) => i.id === id);
-      const previousImagePath = existing?.image || ingredientSavedImage || "";
-      let imagePath = ingredientImageCleared ? "" : previousImagePath;
-
-      showStatus(status, "Salvando ingrediente…", "info");
       try {
+        const ok = await assertNameAvailable(ingredients, name, {
+          excludeId: editingIngredientId,
+          label: "um ingrediente",
+        });
+        if (!ok) return;
+
+        const existingIds = new Set(ingredients.map((i) => i.id));
+        const id = editingIngredientId || window.CookbookData.uniqueId(name, existingIds);
+        if (!id) return;
+
+        const file = ingredientImageFile || ingredientImagePicker?.getFile() || null;
+        const existing = editingIngredientId
+          ? ingredients.find((i) => i.id === editingIngredientId)
+          : null;
+        const previousImagePath = existing?.image || ingredientSavedImage || "";
+        let imagePath = ingredientImageCleared ? "" : previousImagePath;
+
+        showStatus(status, "Salvando ingrediente…", "info");
+
         if (file) {
           const ext = window.CookbookGitHub.extensionForFile(file);
           imagePath = `data/images/ingredients/${id}${ext}`;
           const base64 = await window.CookbookGitHub.fileToBase64(file);
-          await window.CookbookGitHub.putFile(
+          await window.CookbookSync.writeBase64(
             imagePath,
             base64,
-            `Atualizar imagem do ingrediente: ${name}`,
-            token,
-            (await window.CookbookGitHub.getFile(imagePath, token))?.sha
+            `Atualizar imagem do ingrediente: ${name}`
           );
           if (
             previousImagePath &&
             previousImagePath !== imagePath &&
             previousImagePath.startsWith("data/images/ingredients/")
           ) {
-            await window.CookbookGitHub.deleteFile(
+            await window.CookbookSync.remove(
               previousImagePath,
-              `Remover imagem anterior do ingrediente ${id}`,
-              token
+              `Remover imagem anterior do ingrediente ${id}`
             );
           }
         } else if (
           ingredientImageCleared &&
           previousImagePath.startsWith("data/images/ingredients/")
         ) {
-          await window.CookbookGitHub.deleteFile(
+          await window.CookbookSync.remove(
             previousImagePath,
-            `Remover imagem do ingrediente ${id}`,
-            token
+            `Remover imagem do ingrediente ${id}`
           );
         }
 
         const record = { id, name, image: imagePath };
-        await window.CookbookGitHub.putJsonFile(
+        await window.CookbookSync.writeJson(
           `data/ingredients/${id}.json`,
           record,
-          `${existing ? "Atualizar" : "Adicionar"} ingrediente: ${name}`,
-          token
+          `${existing ? "Atualizar" : "Adicionar"} ingrediente: ${name}`
         );
 
         if (existing) {
@@ -388,16 +426,15 @@
           ingredients.push(record);
         }
 
-        await window.CookbookGitHub.putJsonFile(
+        await window.CookbookSync.writeJson(
           "data/ingredients/_index.json",
           ingredients,
-          `Atualizar índice de ingredientes após ${name}`,
-          token
+          `Atualizar índice de ingredientes após ${name}`
         );
 
         renderIngredients();
         resetIngredientForm();
-        showStatus(status, "Ingrediente salvo.", "ok");
+        showStatus(status, "Ingrediente salvo neste dispositivo.", "ok");
       } catch (err) {
         showStatus(status, err.message, "error");
       }

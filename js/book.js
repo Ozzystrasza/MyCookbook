@@ -75,18 +75,12 @@
     return state.categories.find((c) => c.id === id)?.name || id || "Sem categoria";
   }
 
-  const FAVORITES_DAY_MS = 86400000;
-
   function favoritesStorageKey() {
     return window.CookbookConfig?.storageKeys?.favorites || "mycookbook_favorites";
   }
 
   function favoritesCookCacheKey() {
     return window.CookbookConfig?.storageKeys?.favoritesCookCache || "mycookbook_favorites_cook";
-  }
-
-  function favoritesLastSyncKey() {
-    return window.CookbookConfig?.storageKeys?.favoritesLastSync || "mycookbook_favorites_last_sync";
   }
 
   function parseFavoriteIds(value) {
@@ -96,13 +90,6 @@
 
   function sortedFavoriteIds(ids) {
     return [...ids].filter((id) => typeof id === "string" && id).sort();
-  }
-
-  function favoritesEqual(a, b) {
-    const left = sortedFavoriteIds(a);
-    const right = sortedFavoriteIds(b);
-    if (left.length !== right.length) return false;
-    return left.every((id, i) => id === right[i]);
   }
 
   function readLocalFavoriteIds(key) {
@@ -123,36 +110,6 @@
     }
   }
 
-  function saveFavoritesLocal() {
-    if (window.CookbookAuth.isCook()) {
-      writeLocalFavoriteIds(favoritesCookCacheKey(), state.favoriteIds);
-    } else {
-      writeLocalFavoriteIds(favoritesStorageKey(), state.favoriteIds);
-    }
-  }
-
-  function readFavoritesLastSync() {
-    try {
-      const raw = localStorage.getItem(favoritesLastSyncKey());
-      const ts = raw ? Number(raw) : NaN;
-      return Number.isFinite(ts) ? ts : 0;
-    } catch (_) {
-      return 0;
-    }
-  }
-
-  function writeFavoritesLastSync(ts = Date.now()) {
-    try {
-      localStorage.setItem(favoritesLastSyncKey(), String(ts));
-    } catch (_) {
-      /* ignore */
-    }
-  }
-
-  function isFavoritesDailySyncDue() {
-    return Date.now() - readFavoritesLastSync() >= FAVORITES_DAY_MS;
-  }
-
   function hasLocalKey(key) {
     try {
       return localStorage.getItem(key) !== null;
@@ -161,55 +118,50 @@
     }
   }
 
+  function saveFavoritesLocal() {
+    if (window.CookbookAuth.isCook()) {
+      writeLocalFavoriteIds(favoritesCookCacheKey(), state.favoriteIds);
+      void window.CookbookSync.writeJson(
+        "data/favorites.json",
+        sortedFavoriteIds(state.favoriteIds),
+        "Atualizar favoritos"
+      );
+    } else {
+      writeLocalFavoriteIds(favoritesStorageKey(), state.favoriteIds);
+    }
+  }
+
   function loadVisitorFavorites() {
     state.favoriteIds = new Set(readLocalFavoriteIds(favoritesStorageKey()));
-  }
-
-  async function fetchRemoteFavoriteIds(token) {
-    const file = await window.CookbookGitHub.getFile("data/favorites.json", token);
-    if (!file) return [];
-    const text = window.CookbookGitHub.decodeContent(file);
-    return parseFavoriteIds(JSON.parse(text || "[]"));
-  }
-
-  async function maybeSyncCookFavoritesDaily() {
-    if (!isFavoritesDailySyncDue()) return;
-
-    const token = window.CookbookAuth.getToken();
-    try {
-      const remoteIds = await fetchRemoteFavoriteIds(token);
-      const localIds = [...state.favoriteIds];
-
-      if (localIds.length === 0 && remoteIds.length > 0) {
-        state.favoriteIds = new Set(remoteIds);
-        writeLocalFavoriteIds(favoritesCookCacheKey(), state.favoriteIds);
-      } else if (!favoritesEqual(localIds, remoteIds)) {
-        await window.CookbookGitHub.putJsonFile(
-          "data/favorites.json",
-          sortedFavoriteIds(state.favoriteIds),
-          "Atualizar favoritos",
-          token
-        );
-      }
-
-      writeFavoritesLastSync();
-    } catch (err) {
-      console.warn("Favorites daily sync skipped:", err?.message || err);
-    }
   }
 
   async function loadCookFavorites() {
     const cacheKey = favoritesCookCacheKey();
 
-    if (hasLocalKey(cacheKey)) {
-      state.favoriteIds = new Set(readLocalFavoriteIds(cacheKey));
-    } else {
-      const seed = readLocalFavoriteIds(favoritesStorageKey());
-      state.favoriteIds = new Set(seed);
+    if (await window.CookbookSync.hasLocalFile("data/favorites.json")) {
+      const data = await window.CookbookSync.readJson("data/favorites.json");
+      state.favoriteIds = new Set(parseFavoriteIds(data));
       writeLocalFavoriteIds(cacheKey, state.favoriteIds);
+      return;
     }
 
-    await maybeSyncCookFavoritesDaily();
+    if (hasLocalKey(cacheKey)) {
+      state.favoriteIds = new Set(readLocalFavoriteIds(cacheKey));
+      await window.CookbookSync.writeJson(
+        "data/favorites.json",
+        sortedFavoriteIds(state.favoriteIds),
+        "Atualizar favoritos"
+      );
+      return;
+    }
+
+    try {
+      const data = await window.CookbookSync.readJson("data/favorites.json");
+      state.favoriteIds = new Set(parseFavoriteIds(data));
+    } catch (_) {
+      state.favoriteIds = new Set(readLocalFavoriteIds(favoritesStorageKey()));
+    }
+    writeLocalFavoriteIds(cacheKey, state.favoriteIds);
   }
 
   async function loadFavorites() {
@@ -1780,6 +1732,7 @@
       renderBrowseBook();
     }
     updateChrome();
+    void window.CookbookSync?.hydrateImages?.(document.querySelector("[data-book]") || document);
   }
 
   function flip(direction) {

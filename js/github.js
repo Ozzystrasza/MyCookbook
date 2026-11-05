@@ -26,7 +26,7 @@
     const url = `${api}/repos/${owner}/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g, "/")}?ref=${branch}`;
     const res = await fetch(url, {
       cache: "no-store",
-      headers: headers(token, { "Cache-Control": "no-cache" }),
+      headers: headers(token),
     });
     if (res.status === 404) return null;
     if (!res.ok) await parseError(res);
@@ -112,6 +112,79 @@
     return data;
   }
 
+  async function apiJson(url, token, options = {}) {
+    const res = await fetch(url, {
+      ...options,
+      headers: headers(token, {
+        ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...(options.headers || {}),
+      }),
+    });
+    if (!res.ok) await parseError(res);
+    if (res.status === 204) return null;
+    return res.json();
+  }
+
+  /**
+   * One commit for many path changes.
+   * changes: [{ path, encoding?: "utf-8"|"base64", content?: string, deleted?: boolean }]
+   */
+  async function commitChanges(changes, message, token) {
+    const list = (changes || []).filter((c) => c && c.path);
+    if (!list.length) return null;
+
+    const ref = await apiJson(`${api}/repos/${owner}/${repo}/git/ref/heads/${branch}`, token);
+    const parentSha = ref?.object?.sha;
+    if (!parentSha) throw new Error("Não foi possível ler o branch do repositório.");
+
+    const parentCommit = await apiJson(`${api}/repos/${owner}/${repo}/git/commits/${parentSha}`, token);
+    const baseTreeSha = parentCommit?.tree?.sha;
+    if (!baseTreeSha) throw new Error("Não foi possível ler a árvore do commit atual.");
+
+    const tree = [];
+    for (const change of list) {
+      const path = String(change.path).replace(/^\/+/, "");
+      if (change.deleted) {
+        tree.push({ path, mode: "100644", type: "blob", sha: null });
+        continue;
+      }
+      const encoding = change.encoding === "base64" ? "base64" : "utf-8";
+      const content =
+        encoding === "base64"
+          ? String(change.content || "")
+          : String(change.content ?? "");
+      const blob = await apiJson(`${api}/repos/${owner}/${repo}/git/blobs`, token, {
+        method: "POST",
+        body: JSON.stringify({ content, encoding }),
+      });
+      if (!blob?.sha) throw new Error(`Falha ao criar blob para ${path}.`);
+      tree.push({ path, mode: "100644", type: "blob", sha: blob.sha });
+    }
+
+    const newTree = await apiJson(`${api}/repos/${owner}/${repo}/git/trees`, token, {
+      method: "POST",
+      body: JSON.stringify({ base_tree: baseTreeSha, tree }),
+    });
+    if (!newTree?.sha) throw new Error("Falha ao criar árvore do commit.");
+
+    const commit = await apiJson(`${api}/repos/${owner}/${repo}/git/commits`, token, {
+      method: "POST",
+      body: JSON.stringify({
+        message: message || "Sincronizar alterações do cookbook",
+        tree: newTree.sha,
+        parents: [parentSha],
+      }),
+    });
+    if (!commit?.sha) throw new Error("Falha ao criar commit.");
+
+    await apiJson(`${api}/repos/${owner}/${repo}/git/refs/heads/${branch}`, token, {
+      method: "PATCH",
+      body: JSON.stringify({ sha: commit.sha }),
+    });
+
+    return commit;
+  }
+
   function fileToBase64(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -141,6 +214,7 @@
     putTextFile,
     putJsonFile,
     deleteFile,
+    commitChanges,
     validateToken,
     fileToBase64,
     extensionForFile,

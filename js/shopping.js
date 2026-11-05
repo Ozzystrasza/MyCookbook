@@ -410,8 +410,18 @@
       return;
     }
 
-    const token = window.CookbookAuth.getToken();
     await ensureData();
+    const catalog = Object.values(ingredientsCache || {});
+    try {
+      const ok = await window.CookbookUI.assertNameAvailable(catalog, name, {
+        label: "um ingrediente",
+      });
+      if (!ok) return;
+    } catch (err) {
+      window.CookbookUI.showStatus(status, err.message || "Falha ao salvar ingrediente.", "error");
+      return;
+    }
+
     const existingIds = new Set(Object.keys(ingredientsCache || {}));
     const id = window.CookbookData.uniqueId(name, existingIds);
     let imagePath = "";
@@ -424,29 +434,25 @@
         const ext = window.CookbookGitHub.extensionForFile(file);
         imagePath = `data/images/ingredients/${id}${ext}`;
         const base64 = await window.CookbookGitHub.fileToBase64(file);
-        await window.CookbookGitHub.putFile(
+        await window.CookbookSync.writeBase64(
           imagePath,
           base64,
-          `Atualizar imagem do ingrediente: ${name}`,
-          token,
-          (await window.CookbookGitHub.getFile(imagePath, token))?.sha
+          `Atualizar imagem do ingrediente: ${name}`
         );
       }
 
       const record = { id, name, image: imagePath };
-      await window.CookbookGitHub.putJsonFile(
+      await window.CookbookSync.writeJson(
         `data/ingredients/${id}.json`,
         record,
-        `Adicionar ingrediente: ${name}`,
-        token
+        `Adicionar ingrediente: ${name}`
       );
 
       ingredientsCache[id] = record;
-      await window.CookbookGitHub.putJsonFile(
+      await window.CookbookSync.writeJson(
         "data/ingredients/_index.json",
         Object.values(ingredientsCache),
-        `Atualizar índice de ingredientes após ${name}`,
-        token
+        `Atualizar índice de ingredientes após ${name}`
       );
 
       closeCreateModal();
@@ -561,6 +567,7 @@
       return;
     }
     listRoot.innerHTML = list.map((item) => rowHtml(item, ingredients, measures)).join("");
+    void window.CookbookSync?.hydrateImages?.(listRoot);
   }
 
   function pageShellHtml() {
@@ -623,6 +630,7 @@
       </button>`
       : "";
     listRoot.innerHTML = `${rows}${createAction}`;
+    void window.CookbookSync?.hydrateImages?.(listRoot);
   }
 
   async function openCatalogPicker() {

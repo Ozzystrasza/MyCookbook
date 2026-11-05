@@ -12,5 +12,7 @@ window.CookbookConfig = {
     shoppingList: "mycookbook_shopping_list",
     enterOpened: "mycookbook_enter_opened",
     openShopping: "mycookbook_open_shopping",
+    syncPendingSince: "mycookbook_sync_pending_since",
+    syncLastSync: "mycookbook_sync_last_sync",
   },
 };

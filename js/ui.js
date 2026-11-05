@@ -77,6 +77,12 @@
               <circle cx="15.5" cy="14.5" r="1.75" stroke="currentColor" stroke-width="1.5"/>
             </svg>
           </a>` : ""}
+          ${cook ? `<button type="button" class="icon-btn" data-sync-pending hidden title="Sincronizar com GitHub" aria-label="Sincronizar com GitHub">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M5.5 13.5A3.5 3.5 0 0 1 6 6.6 4.5 4.5 0 0 1 14.7 8 3 3 0 0 1 14.5 14H6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M10 9.5V15M10 9.5l-2.25 2.25M10 9.5l2.25 2.25" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>` : ""}
           <button type="button" class="icon-btn" data-shopping-toggle title="Lista de compras" aria-label="Lista de compras">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <path d="M3.5 4.5h1.2l1.1 8.2a1.5 1.5 0 0 0 1.5 1.3h6.9a1.5 1.5 0 0 0 1.5-1.2l1.1-5.3H6.2" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
@@ -102,6 +108,8 @@
 
     window.CookbookShopping?.bindHeaderToggle(header);
     window.CookbookAuth.applyCookUi(document);
+    bindSyncButton(header);
+    void refreshSyncButton(header);
 
     if (!window.matchMedia("(min-width: 800px)").matches) {
       header.querySelectorAll('a[href="edit.html"], a[href^="edit.html?"]').forEach((link) => {
@@ -201,6 +209,122 @@
     elNode.hidden = !message;
     elNode.textContent = message || "";
     elNode.className = `status status--${kind}`;
+  }
+
+  async function refreshSyncButton(root = document) {
+    const btn = root.querySelector?.("[data-sync-pending]") || qs("[data-sync-pending]");
+    if (!btn || !window.CookbookAuth?.isCook?.()) {
+      if (btn) btn.hidden = true;
+      return;
+    }
+    const syncing = window.CookbookSync?.isSyncing?.() || false;
+    const pending = syncing ? true : await window.CookbookSync.hasPending();
+    btn.hidden = !pending;
+    btn.disabled = syncing;
+    const label = syncing ? "Sincronizando…" : "Sincronizar com GitHub";
+    btn.title = label;
+    btn.setAttribute("aria-label", label);
+    btn.classList.toggle("is-syncing", syncing);
+  }
+
+  function bindSyncButton(header) {
+    const btn = header?.querySelector?.("[data-sync-pending]");
+    if (!btn || btn.dataset.bound === "1") return;
+    btn.dataset.bound = "1";
+    btn.addEventListener("click", async () => {
+      if (!window.CookbookSync || btn.disabled) return;
+      btn.disabled = true;
+      btn.title = "Sincronizando…";
+      btn.setAttribute("aria-label", "Sincronizando…");
+      btn.classList.add("is-syncing");
+      try {
+        await window.CookbookSync.syncNow();
+      } catch (err) {
+        const message = err?.message || "Falha ao sincronizar.";
+        btn.title = message;
+        btn.setAttribute("aria-label", message);
+        window.alert(message);
+      } finally {
+        await refreshSyncButton(document);
+      }
+    });
+  }
+
+  if (!window.__cookbookSyncStatusBound) {
+    window.__cookbookSyncStatusBound = true;
+    window.addEventListener("cookbook:sync-status", () => {
+      void refreshSyncButton(document);
+    });
+  }
+
+  function confirmSimilarNames({ name, matches, label = "item", nameKey = "name" } = {}) {
+    const items = Array.isArray(matches) ? matches : [];
+    if (!items.length) return Promise.resolve(true);
+
+    return new Promise((resolve) => {
+      const existing = document.querySelector("[data-similar-confirm]");
+      existing?.remove();
+
+      const modal = document.createElement("div");
+      modal.className = "shopping-modal";
+      modal.setAttribute("data-similar-confirm", "");
+      modal.innerHTML = `
+        <div class="shopping-modal__backdrop" data-similar-cancel tabindex="-1"></div>
+        <div class="shopping-modal__panel" role="dialog" aria-labelledby="similar-confirm-title" aria-modal="true">
+          <div class="shopping-modal__header">
+            <h2 class="shopping-modal__title" id="similar-confirm-title">Nome parecido</h2>
+            <button type="button" class="icon-btn" data-similar-cancel aria-label="Fechar">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <div class="editor-modal__body">
+            <p class="hint" data-similar-hint></p>
+            <ul class="similar-confirm__list" data-similar-list></ul>
+            <div class="editor-modal__footer">
+              <button type="button" class="btn btn--ghost" data-similar-cancel>Cancelar</button>
+              <button type="button" class="btn btn--primary" data-similar-confirm>Adicionar mesmo assim</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const hint = modal.querySelector("[data-similar-hint]");
+      hint.textContent = `Encontramos ${label} com nome parecido com “${name}”. Confira antes de continuar:`;
+
+      const list = modal.querySelector("[data-similar-list]");
+      items.forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = String(item?.[nameKey] ?? "");
+        list.append(li);
+      });
+
+      let settled = false;
+      function finish(ok) {
+        if (settled) return;
+        settled = true;
+        modal.remove();
+        resolve(ok);
+      }
+
+      modal.querySelectorAll("[data-similar-cancel]").forEach((elNode) => {
+        elNode.addEventListener("click", () => finish(false));
+      });
+      modal.querySelector("[data-similar-confirm]")?.addEventListener("click", () => finish(true));
+      document.body.appendChild(modal);
+      window.setTimeout(() => modal.querySelector("[data-similar-confirm]")?.focus(), 30);
+    });
+  }
+
+  async function assertNameAvailable(items, name, { excludeId = null, nameKey = "name", label = "um item" } = {}) {
+    const exact = window.CookbookData.findExactNameMatch(items, name, { excludeId, nameKey });
+    if (exact) {
+      throw new Error(`Já existe ${label} com esse nome.`);
+    }
+    const similar = window.CookbookData.findSimilarNameMatches(items, name, { excludeId, nameKey });
+    if (!similar.length) return true;
+    return confirmSimilarNames({ name, matches: similar, label, nameKey });
   }
 
   function mountImagePicker(container, { initialUrl = "", onChange } = {}) {
@@ -343,5 +467,8 @@
     mountShell,
     showStatus,
     mountImagePicker,
+    confirmSimilarNames,
+    assertNameAvailable,
+    refreshSyncButton,
   };
 })();

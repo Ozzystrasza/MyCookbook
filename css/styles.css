@@ -138,6 +138,11 @@ textarea {
   background: rgba(31, 63, 40, 0.12);
 }
 
+.site-nav .icon-btn.is-syncing {
+  opacity: 0.65;
+  pointer-events: none;
+}
+
 .page {
   max-width: 1100px;
   margin: 0 auto;
@@ -2136,6 +2141,24 @@ body:has(.shopping-modal:not([hidden])) .book__page.is-scrollable {
 
 .shopping-modal__footer .btn {
   width: 100%;
+}
+
+.similar-confirm__list {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.similar-confirm__list li {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  padding: 0.7rem 0.85rem;
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
 }
 
 .shopping-catalog-item {
