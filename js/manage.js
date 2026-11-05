@@ -1,5 +1,5 @@
 (function () {
-  const { qs, showStatus } = window.CookbookUI;
+  const { qs, showStatus, mountImagePicker } = window.CookbookUI;
   let categories = [];
   let measures = [];
   let ingredients = [];
@@ -7,6 +7,10 @@
   let editingCategoryId = null;
   let editingMeasureId = null;
   let editingIngredientId = null;
+  let ingredientImagePicker = null;
+  let ingredientImageFile = null;
+  let ingredientImageCleared = false;
+  let ingredientSavedImage = "";
 
   function setTab(tab) {
     activeTab = tab;
@@ -114,9 +118,10 @@
         editingIngredientId = item.id;
         qs("#ingredient-name").value = item.name;
         qs("#ingredient-form [type='submit']").textContent = "Atualizar ingrediente";
-        qs("[data-ingredient-image-hint]").textContent = item.image
-          ? `Imagem atual: ${item.image}`
-          : "Nenhuma imagem ainda.";
+        ingredientSavedImage = item.image || "";
+        ingredientImageFile = null;
+        ingredientImageCleared = false;
+        ingredientImagePicker?.setUrl(ingredientSavedImage);
       });
     });
 
@@ -204,7 +209,10 @@
     qs("#ingredient-form").reset();
     editingIngredientId = null;
     qs("#ingredient-form [type='submit']").textContent = "Adicionar ingrediente";
-    qs("[data-ingredient-image-hint]").textContent = "";
+    ingredientSavedImage = "";
+    ingredientImageFile = null;
+    ingredientImageCleared = false;
+    ingredientImagePicker?.setUrl("");
   }
 
   async function boot() {
@@ -221,6 +229,13 @@
     renderMeasures();
     renderIngredients();
     setTab("categories");
+
+    ingredientImagePicker = mountImagePicker(qs("[data-ingredient-image]"), {
+      onChange: (file) => {
+        ingredientImageFile = file;
+        ingredientImageCleared = !file;
+      },
+    });
 
     qs("[data-tabs]").addEventListener("click", (event) => {
       const btn = event.target.closest("[data-tab]");
@@ -267,9 +282,10 @@
       const id = editingIngredientId || window.CookbookData.uniqueId(name, existingIds);
       if (!id) return;
 
-      const file = qs("#ingredient-image").files?.[0];
+      const file = ingredientImageFile || ingredientImagePicker?.getFile() || null;
       const existing = ingredients.find((i) => i.id === id);
-      let imagePath = existing?.image || "";
+      const previousImagePath = existing?.image || ingredientSavedImage || "";
+      let imagePath = ingredientImageCleared ? "" : previousImagePath;
 
       showStatus(status, "Salvando ingrediente…", "info");
       try {
@@ -283,6 +299,26 @@
             `Atualizar imagem do ingrediente: ${name}`,
             token,
             (await window.CookbookGitHub.getFile(imagePath, token))?.sha
+          );
+          if (
+            previousImagePath &&
+            previousImagePath !== imagePath &&
+            previousImagePath.startsWith("data/images/ingredients/")
+          ) {
+            await window.CookbookGitHub.deleteFile(
+              previousImagePath,
+              `Remover imagem anterior do ingrediente ${id}`,
+              token
+            );
+          }
+        } else if (
+          ingredientImageCleared &&
+          previousImagePath.startsWith("data/images/ingredients/")
+        ) {
+          await window.CookbookGitHub.deleteFile(
+            previousImagePath,
+            `Remover imagem do ingrediente ${id}`,
+            token
           );
         }
 

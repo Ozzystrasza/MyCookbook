@@ -1,5 +1,5 @@
 (function () {
-  const { qs, showStatus } = window.CookbookUI;
+  const { qs, showStatus, mountImagePicker } = window.CookbookUI;
   const params = new URLSearchParams(window.location.search);
   const editingId = params.get("id");
 
@@ -7,13 +7,17 @@
   let measures = [];
   let ingredients = [];
   let recipeIndex = [];
-  let currentImagePath = "";
+  let savedImagePath = "";
   let imageFile = null;
+  let imageCleared = false;
   let dirty = false;
   let allowLeave = false;
   let pendingLeaveHref = "";
   let pickerTargetInput = null;
   let createTargetInput = null;
+  let recipeImagePicker = null;
+  let createImagePicker = null;
+  let createImageFile = null;
 
   let leaveModal = null;
   let pickModal = null;
@@ -181,10 +185,10 @@
             <span>Nome</span>
             <input data-create-name required placeholder="Farinha de trigo" autocomplete="off" />
           </label>
-          <label class="field">
+          <div class="field">
             <span>Foto (opcional)</span>
-            <input data-create-image type="file" accept="image/*" />
-          </label>
+            <div data-create-image></div>
+          </div>
           <p class="status editor-modal__status" data-create-status hidden></p>
           <div class="editor-modal__footer">
             <button type="button" class="btn btn--ghost" data-create-close>Cancelar</button>
@@ -201,6 +205,11 @@
       });
     });
     createModal.querySelector("[data-create-form]").addEventListener("submit", saveNewIngredient);
+    createImagePicker = mountImagePicker(createModal.querySelector("[data-create-image]"), {
+      onChange: (file) => {
+        createImageFile = file;
+      },
+    });
 
     document.addEventListener("keydown", (event) => {
       if (event.key !== "Escape") return;
@@ -245,6 +254,8 @@
   function closeCreateModal() {
     createModal.hidden = true;
     createTargetInput = null;
+    createImageFile = null;
+    createImagePicker?.setUrl("");
     const form = createModal.querySelector("[data-create-form]");
     form?.reset();
     showStatus(createModal.querySelector("[data-create-status]"), "", "info");
@@ -290,7 +301,7 @@
     const status = createModal.querySelector("[data-create-status]");
     const submit = createModal.querySelector('[type="submit"]');
     const name = createModal.querySelector("[data-create-name]").value.trim();
-    const file = createModal.querySelector("[data-create-image]").files?.[0] || null;
+    const file = createImageFile || createImagePicker?.getFile() || null;
     if (!name) {
       showStatus(status, "Informe o nome do ingrediente.", "error");
       return;
@@ -501,10 +512,10 @@
   function fillForm(recipe) {
     qs("#title").value = recipe.title || "";
     qs("#categoryId").innerHTML = optionList(categories, recipe.categoryId);
-    currentImagePath = recipe.image || "";
-    qs("[data-current-image]").textContent = currentImagePath
-      ? `Imagem atual: ${currentImagePath}`
-      : "Nenhuma imagem ainda.";
+    savedImagePath = recipe.image || "";
+    imageFile = null;
+    imageCleared = false;
+    recipeImagePicker?.setUrl(savedImagePath);
     renderGroups(recipe.groups?.length ? recipe.groups : [blankGroup()]);
     clearDirty();
   }
@@ -539,7 +550,7 @@
     showStatus(status, "Salvando no GitHub…", "info");
 
     try {
-      let imagePath = currentImagePath;
+      let imagePath = imageCleared ? "" : savedImagePath;
       if (imageFile) {
         const ext = window.CookbookGitHub.extensionForFile(imageFile);
         imagePath = `data/images/recipes/${id}${ext}`;
@@ -550,6 +561,23 @@
           `Atualizar imagem da receita: ${title}`,
           token,
           (await window.CookbookGitHub.getFile(imagePath, token))?.sha
+        );
+        if (
+          savedImagePath &&
+          savedImagePath !== imagePath &&
+          savedImagePath.startsWith("data/images/recipes/")
+        ) {
+          await window.CookbookGitHub.deleteFile(
+            savedImagePath,
+            `Remover imagem anterior da receita ${id}`,
+            token
+          );
+        }
+      } else if (imageCleared && savedImagePath.startsWith("data/images/recipes/")) {
+        await window.CookbookGitHub.deleteFile(
+          savedImagePath,
+          `Remover imagem da receita ${id}`,
+          token
         );
       }
 
@@ -607,9 +635,9 @@
         `Excluir receita ${editingId}`,
         token
       );
-      if (currentImagePath && currentImagePath.startsWith("data/images/recipes/")) {
+      if (savedImagePath && savedImagePath.startsWith("data/images/recipes/")) {
         await window.CookbookGitHub.deleteFile(
-          currentImagePath,
+          savedImagePath,
           `Excluir imagem da receita ${editingId}`,
           token
         );
@@ -681,6 +709,14 @@
     qs("#page-title").textContent = editingId ? "Editar receita" : "Nova receita";
     qs("[data-delete]")?.toggleAttribute("hidden", !editingId);
 
+    recipeImagePicker = mountImagePicker(qs("[data-recipe-image]"), {
+      onChange: (file) => {
+        imageFile = file;
+        imageCleared = !file;
+        markDirty();
+      },
+    });
+
     if (editingId) {
       const recipe = await window.CookbookData.loadRecipe(editingId);
       fillForm(recipe);
@@ -688,10 +724,6 @@
       fillForm({ title: "", categoryId: "", image: "", groups: [blankGroup()] });
     }
 
-    qs("#image").addEventListener("change", (event) => {
-      imageFile = event.target.files?.[0] || null;
-      markDirty();
-    });
     qs("#recipe-form").addEventListener("submit", saveRecipe);
     qs("[data-add-group]").addEventListener("click", () => {
       const groups = readGroupsFromDom({ keepEmpty: true });

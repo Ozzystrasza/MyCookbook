@@ -109,11 +109,147 @@
     elNode.className = `status status--${kind}`;
   }
 
+  function mountImagePicker(container, { initialUrl = "", onChange } = {}) {
+    if (!container) return null;
+
+    let objectUrl = null;
+    let currentFile = null;
+    let dragDepth = 0;
+
+    const minusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`;
+
+    container.innerHTML = `
+      <div class="image-drop" data-image-drop tabindex="0" role="button" aria-label="Toque ou arraste uma foto">
+        <input type="file" accept="image/*" hidden data-image-input />
+        <div class="image-drop__empty" data-image-empty>Toque ou arraste uma foto</div>
+        <div class="image-drop__preview" data-image-preview hidden>
+          <img class="image-drop__img" data-image-thumb alt="" />
+          <button type="button" class="icon-btn image-drop__remove" data-image-remove aria-label="Remover imagem" title="Remover">${minusIcon}</button>
+        </div>
+      </div>
+    `;
+
+    const root = container.querySelector("[data-image-drop]");
+    const input = container.querySelector("[data-image-input]");
+    const empty = container.querySelector("[data-image-empty]");
+    const preview = container.querySelector("[data-image-preview]");
+    const thumb = container.querySelector("[data-image-thumb]");
+    const removeBtn = container.querySelector("[data-image-remove]");
+
+    function revokeObjectUrl() {
+      if (!objectUrl) return;
+      URL.revokeObjectURL(objectUrl);
+      objectUrl = null;
+    }
+
+    function showEmpty() {
+      empty.hidden = false;
+      preview.hidden = true;
+      thumb.removeAttribute("src");
+      root.classList.remove("has-image");
+    }
+
+    function showPreview(url) {
+      empty.hidden = true;
+      preview.hidden = false;
+      thumb.src = url;
+      root.classList.add("has-image");
+    }
+
+    function setFile(file) {
+      if (!file || !String(file.type || "").startsWith("image/")) return;
+      revokeObjectUrl();
+      currentFile = file;
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      input.files = dt.files;
+      objectUrl = URL.createObjectURL(file);
+      showPreview(objectUrl);
+      onChange?.(file);
+    }
+
+    function clear() {
+      revokeObjectUrl();
+      currentFile = null;
+      input.value = "";
+      showEmpty();
+      onChange?.(null);
+    }
+
+    function setUrl(url) {
+      revokeObjectUrl();
+      currentFile = null;
+      input.value = "";
+      if (url) showPreview(url);
+      else showEmpty();
+    }
+
+    root.addEventListener("click", (event) => {
+      if (event.target.closest("[data-image-remove]")) return;
+      input.click();
+    });
+
+    removeBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      clear();
+    });
+
+    input.addEventListener("change", () => {
+      const file = input.files?.[0];
+      if (file) setFile(file);
+    });
+
+    root.addEventListener("dragenter", (event) => {
+      event.preventDefault();
+      dragDepth += 1;
+      root.classList.add("is-dragover");
+    });
+
+    root.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "copy";
+    });
+
+    root.addEventListener("dragleave", (event) => {
+      event.preventDefault();
+      dragDepth -= 1;
+      if (dragDepth > 0) return;
+      dragDepth = 0;
+      root.classList.remove("is-dragover");
+    });
+
+    root.addEventListener("drop", (event) => {
+      event.preventDefault();
+      dragDepth = 0;
+      root.classList.remove("is-dragover");
+      const file = [...(event.dataTransfer?.files || [])].find((item) =>
+        String(item.type || "").startsWith("image/")
+      );
+      if (file) setFile(file);
+    });
+
+    root.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      input.click();
+    });
+
+    if (initialUrl) setUrl(initialUrl);
+
+    return {
+      setUrl,
+      clear,
+      getFile: () => currentFile,
+    };
+  }
+
   window.CookbookUI = {
     qs,
     qsa,
     el,
     mountShell,
     showStatus,
+    mountImagePicker,
   };
 })();
