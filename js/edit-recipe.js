@@ -81,7 +81,9 @@
 
   function setPickerValue(input, id) {
     input.value = id || "";
-    const trigger = input.closest(".ingredient-picker")?.querySelector("[data-ingredient-trigger]");
+    const trigger =
+      input.closest(".line-row__ipicker")?.querySelector("[data-ingredient-trigger]") ||
+      input.closest(".line-row")?.querySelector("[data-ingredient-trigger]");
     const valueEl = trigger?.querySelector(".ingredient-picker__value");
     if (!valueEl) return;
     const label = ingredientLabel(id);
@@ -366,14 +368,12 @@
       wrap.className = "group-editor";
       wrap.dataset.groupIndex = String(groupIndex);
       wrap.innerHTML = `
-        <div class="row row--2 group-editor__header">
-          <label class="field">
-            <span>Nome do grupo</span>
-            <input data-field="name" value="${escapeHtml(group.name || "")}" placeholder="Massa, Cobertura…" />
-          </label>
+        <div class="group-editor__header">
+          <span class="field-label">Nome do grupo</span>
           <div class="actions actions--row">
             <button type="button" class="icon-btn" data-remove-group aria-label="Remover grupo" title="Remover grupo">${minusIcon()}</button>
           </div>
+          <input class="field-control" data-field="name" value="${escapeHtml(group.name || "")}" placeholder="Massa, Cobertura…" />
         </div>
         <div>
           <div class="toolbar toolbar--compact">
@@ -400,25 +400,21 @@
         row.className = "line-row ingredients";
         const selectedLabel = ingredientLabel(line.ingredientId);
         row.innerHTML = `
-          <div class="field ingredient-picker">
-            <span>Ingrediente</span>
+          <span class="field-label line-row__ilabel">Ingrediente</span>
+          <div class="actions actions--row">
+            <button type="button" class="icon-btn" data-remove-ingredient aria-label="Remover ingrediente" title="Remover">${minusIcon()}</button>
+          </div>
+          <div class="line-row__ipicker">
             <input type="hidden" data-field="ingredientId" value="${escapeHtml(line.ingredientId || "")}" />
             <button type="button" class="ingredient-picker__trigger" data-ingredient-trigger aria-haspopup="dialog">
               <span class="ingredient-picker__value ${selectedLabel ? "" : "is-placeholder"}">${escapeHtml(selectedLabel || "Selecione…")}</span>
               ${chevronIcon()}
             </button>
           </div>
-          <label class="field">
-            <span>Medida</span>
-            <select data-field="measureId">${optionList(measures, line.measureId)}</select>
-          </label>
-          <label class="field">
-            <span>Quantidade</span>
-            <input data-field="quantity" value="${escapeHtml(line.quantity ?? "")}" placeholder="2 ou 1/2" />
-          </label>
-          <div class="actions actions--row">
-            <button type="button" class="icon-btn" data-remove-ingredient aria-label="Remover ingrediente" title="Remover">${minusIcon()}</button>
-          </div>
+          <span class="field-label line-row__mlabel">Medida</span>
+          <select class="field-control line-row__mctrl" data-field="measureId">${optionList(measures, line.measureId)}</select>
+          <span class="field-label line-row__qlabel">Quantidade</span>
+          <input class="field-control line-row__qctrl" data-field="quantity" value="${escapeHtml(line.quantity ?? "")}" placeholder="2 ou 1/2" />
         `;
         row.querySelector("[data-ingredient-trigger]").addEventListener("click", () => {
           openPickModal(row.querySelector('[data-field="ingredientId"]'));
@@ -441,13 +437,11 @@
         const row = document.createElement("div");
         row.className = "line-row steps";
         row.innerHTML = `
-          <label class="field">
-            <span>Passo</span>
-            <textarea data-field="description" placeholder="O que fazer…">${escapeHtml(step.description || "")}</textarea>
-          </label>
+          <span class="field-label line-row__slabel">Passo</span>
           <div class="actions actions--row">
             <button type="button" class="icon-btn" data-remove-step aria-label="Remover passo" title="Remover">${minusIcon()}</button>
           </div>
+          <textarea class="field-control line-row__sctrl" data-field="description" placeholder="O que fazer…">${escapeHtml(step.description || "")}</textarea>
         `;
         row.querySelector("[data-remove-step]").addEventListener("click", () => {
           const current = readGroupsFromDom({ keepEmpty: true });

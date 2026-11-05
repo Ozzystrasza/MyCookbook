@@ -121,11 +121,11 @@
     container.innerHTML = `
       <div class="image-drop" data-image-drop tabindex="0" role="button" aria-label="Toque ou arraste uma foto">
         <input type="file" accept="image/*" hidden data-image-input />
-        <div class="image-drop__empty" data-image-empty>Toque ou arraste uma foto</div>
         <div class="image-drop__preview" data-image-preview hidden>
           <img class="image-drop__img" data-image-thumb alt="" />
           <button type="button" class="icon-btn image-drop__remove" data-image-remove aria-label="Remover imagem" title="Remover">${minusIcon}</button>
         </div>
+        <div class="image-drop__empty" data-image-empty>Toque ou arraste uma foto</div>
       </div>
     `;
 
@@ -143,14 +143,12 @@
     }
 
     function showEmpty() {
-      empty.hidden = false;
       preview.hidden = true;
       thumb.removeAttribute("src");
       root.classList.remove("has-image");
     }
 
     function showPreview(url) {
-      empty.hidden = true;
       preview.hidden = false;
       thumb.src = url;
       root.classList.add("has-image");

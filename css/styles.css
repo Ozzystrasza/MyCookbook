@@ -370,16 +370,16 @@ textarea {
 }
 
 .image-drop {
-  position: relative;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
   width: 100%;
-  min-height: 10rem;
+  min-height: 5.5rem;
+  padding: 0.75rem;
   border: 1.5px dashed var(--line);
   border-radius: 12px;
   background: #fffdf8;
   cursor: pointer;
-  overflow: hidden;
   outline: none;
 }
 
@@ -390,7 +390,8 @@ textarea {
 }
 
 .image-drop__empty {
-  padding: 1rem 1.1rem;
+  flex: 1;
+  min-width: 0;
   text-align: center;
   color: var(--muted);
   font-size: 0.95rem;
@@ -398,9 +399,10 @@ textarea {
 }
 
 .image-drop__preview {
-  position: absolute;
-  inset: 0;
-  display: grid;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
 }
 
 .image-drop__preview[hidden] {
@@ -408,23 +410,17 @@ textarea {
 }
 
 .image-drop__img {
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
+  width: 64px;
+  height: 64px;
+  max-width: 64px;
+  border-radius: 10px;
   object-fit: cover;
   display: block;
+  background: rgba(28, 36, 28, 0.06);
 }
 
 .image-drop__remove {
-  position: absolute;
-  top: 0.45rem;
-  right: 0.45rem;
-  background: rgba(255, 252, 246, 0.92);
-  box-shadow: 0 1px 4px rgba(28, 36, 28, 0.16);
-}
-
-.image-drop__remove:hover {
-  background: #fff;
+  flex-shrink: 0;
 }
 
 .row {
@@ -537,48 +533,123 @@ textarea {
   gap: 0.85rem;
 }
 
+.field-label {
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.field-control {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.7rem 0.85rem;
+  background: #fffdf8;
+  font: inherit;
+  color: inherit;
+}
+
+textarea.field-control {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.group-editor__header {
+  display: grid;
+  gap: 0.35rem 0.5rem;
+  grid-template-columns: max-content max-content 1fr;
+  grid-template-areas:
+    "glabel gremove ."
+    "gname gname gname";
+  align-items: center;
+}
+
+.group-editor__header .field-label {
+  grid-area: glabel;
+}
+
+.group-editor__header .actions--row {
+  grid-area: gremove;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.group-editor__header .field-control {
+  grid-area: gname;
+}
+
 .line-row {
   display: grid;
-  gap: 0.5rem;
-  grid-template-columns: 1fr;
+  gap: 0.35rem 0.5rem;
   align-items: center;
 }
 
 .line-row .actions--row {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
-.group-editor__header .actions--row {
-  align-self: end;
+.line-row.ingredients {
+  grid-template-columns: max-content max-content 1fr;
+  grid-template-areas:
+    "ilabel iremove ."
+    "ipicker ipicker ipicker"
+    "mlabel mlabel mlabel"
+    "mctrl mctrl mctrl"
+    "qlabel qlabel qlabel"
+    "qctrl qctrl qctrl";
 }
 
-@media (min-width: 700px) {
-  .group-editor__header .actions--row {
-    align-self: center;
-    padding-top: 1.35rem;
-  }
+.line-row.ingredients .line-row__ilabel { grid-area: ilabel; }
+.line-row.ingredients .actions--row { grid-area: iremove; }
+.line-row.ingredients .line-row__ipicker { grid-area: ipicker; }
+.line-row.ingredients .line-row__mlabel { grid-area: mlabel; }
+.line-row.ingredients .line-row__mctrl { grid-area: mctrl; }
+.line-row.ingredients .line-row__qlabel { grid-area: qlabel; }
+.line-row.ingredients .line-row__qctrl { grid-area: qctrl; }
+
+.line-row.steps {
+  grid-template-columns: max-content max-content 1fr;
+  grid-template-areas:
+    "slabel sremove ."
+    "sctrl sctrl sctrl";
 }
+
+.line-row.steps .line-row__slabel { grid-area: slabel; }
+.line-row.steps .actions--row { grid-area: sremove; }
+.line-row.steps .line-row__sctrl { grid-area: sctrl; }
 
 @media (min-width: 800px) {
-  .line-row.ingredients {
-    grid-template-columns: 1.4fr 0.9fr 0.7fr auto;
-  }
-  .line-row.steps {
+  .group-editor__header {
     grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "glabel ."
+      "gname gremove";
   }
 
-  /* Align − with the control band only (skip field labels) */
+  .group-editor__header .actions--row,
   .line-row .actions--row {
-    align-self: stretch;
-    padding-top: calc(0.92rem * 1.2 + 0.35rem);
+    justify-content: flex-end;
+  }
+
+  .line-row.ingredients {
+    grid-template-columns: 1.4fr 0.9fr 0.7fr auto;
+    grid-template-areas:
+      "ilabel mlabel qlabel ."
+      "ipicker mctrl qctrl iremove";
+  }
+
+  .line-row.steps {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "slabel ."
+      "sctrl sremove";
   }
 }
 
-.ingredient-picker {
-  display: grid;
-  gap: 0.35rem;
+.line-row__ipicker {
+  min-width: 0;
 }
 
 .ingredient-picker__trigger {
