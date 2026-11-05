@@ -80,10 +80,6 @@
             </button>
           </div>
           <div class="stack" data-groups-editor></div>
-          <div class="actions actions--sticky">
-            <button type="submit" class="icon-btn icon-btn--primary" aria-label="Salvar receita" title="Salvar receita">${window.CookbookIcons.save()}</button>
-            <button type="button" class="icon-btn icon-btn--danger" data-delete hidden aria-label="Excluir receita" title="Excluir receita">${window.CookbookIcons.delete()}</button>
-          </div>
         </form>
       </div>
     `;
@@ -623,7 +619,15 @@
     }
   }
 
-  function renderGroups(groups) {
+  function focusNewControl(el) {
+    if (!el) return;
+    requestAnimationFrame(() => {
+      el.focus({ preventScroll: true });
+      el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    });
+  }
+
+  function renderGroups(groups, { focus } = {}) {
     const host = qs("[data-groups-editor]");
     host.innerHTML = "";
     groups.forEach((group, groupIndex) => {
@@ -741,13 +745,13 @@
         const current = readGroupsFromDom({ keepEmpty: true });
         current[groupIndex].ingredients.push({ ingredientId: "", measureId: "", quantity: "" });
         markDirty();
-        renderGroups(current);
+        renderGroups(current, { focus: { type: "ingredient", groupIndex } });
       });
       wrap.querySelector("[data-add-step]").addEventListener("click", () => {
         const current = readGroupsFromDom({ keepEmpty: true });
         current[groupIndex].steps.push({ description: "" });
         markDirty();
-        renderGroups(current);
+        renderGroups(current, { focus: { type: "step", groupIndex } });
       });
       wrap.querySelector("[data-remove-group]").addEventListener("click", () => {
         const current = readGroupsFromDom({ keepEmpty: true });
@@ -758,6 +762,22 @@
 
       host.append(wrap);
     });
+
+    if (!focus) return;
+    const groupEl =
+      focus.type === "group"
+        ? host.lastElementChild
+        : host.querySelector(`[data-group-index="${focus.groupIndex}"]`);
+    if (!groupEl) return;
+    if (focus.type === "group") {
+      focusNewControl(groupEl.querySelector('[data-field="name"]'));
+    } else if (focus.type === "ingredient") {
+      const rows = groupEl.querySelectorAll("[data-ingredient-lines] .line-row");
+      focusNewControl(rows[rows.length - 1]?.querySelector("[data-ingredient-trigger]"));
+    } else if (focus.type === "step") {
+      const rows = groupEl.querySelectorAll("[data-step-lines] .line-row");
+      focusNewControl(rows[rows.length - 1]?.querySelector('[data-field="description"]'));
+    }
   }
 
   function readGroupsFromDom({ keepEmpty = false } = {}) {
@@ -839,8 +859,8 @@
     if (editingId) existingIds.delete(editingId);
     const id = editingId || window.CookbookData.uniqueId(title, existingIds);
 
-    const submit = qs('[type="submit"]');
-    submit.disabled = true;
+    const submit = qs("[data-recipe-save]");
+    if (submit) submit.disabled = true;
     showStatus(status, "Salvando neste dispositivo…", "info");
 
     try {
@@ -921,7 +941,7 @@
       }, 900);
     } catch (err) {
       showStatus(status, err.message || "Falha ao salvar.", "error");
-      submit.disabled = false;
+      if (submit) submit.disabled = false;
     }
   }
 
@@ -1016,7 +1036,7 @@
       const groups = readGroupsFromDom({ keepEmpty: true });
       groups.push(blankGroup());
       markDirty();
-      renderGroups(groups);
+      renderGroups(groups, { focus: { type: "group" } });
     };
     const del = qs("[data-delete]");
     if (del) del.onclick = deleteRecipe;
@@ -1031,8 +1051,8 @@
     requestClose();
   }
 
-  function decorateStickyActionIcons() {
-    const submit = qs('.actions--sticky [type="submit"]');
+  function decorateRecipeActionIcons() {
+    const submit = qs("[data-recipe-save]");
     if (submit) submit.innerHTML = window.CookbookIcons.save();
     const del = qs("[data-delete]");
     if (del) del.innerHTML = window.CookbookIcons.delete();
@@ -1057,7 +1077,7 @@
 
     qs("#page-title").textContent = editingId ? "Editar receita" : "Nova receita";
     qs("[data-delete]")?.toggleAttribute("hidden", !editingId);
-    decorateStickyActionIcons();
+    decorateRecipeActionIcons();
 
     recipeImagePicker = mountImagePicker(qs("[data-recipe-image]"), {
       onChange: (file) => {

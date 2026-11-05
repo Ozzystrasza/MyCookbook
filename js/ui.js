@@ -97,7 +97,7 @@
     return node;
   }
 
-  function syncPageChrome(standalone) {
+  function syncPageChrome(standalone, active) {
     let bar = qs("[data-page-chrome]");
     if (!standalone) {
       document.body.classList.remove("is-standalone-form");
@@ -116,10 +116,19 @@
       header.after(bar);
     }
 
+    const editActions =
+      active === "edit"
+        ? `<div class="page-chrome__actions">
+            <button type="submit" form="recipe-form" class="icon-btn icon-btn--primary" data-recipe-save aria-label="Salvar receita" title="Salvar receita"></button>
+            <button type="button" class="icon-btn icon-btn--danger" data-delete hidden aria-label="Excluir receita" title="Excluir receita"></button>
+          </div>`
+        : "";
+
     bar.innerHTML = `
       <a href="index.html?home=1" class="icon-btn" aria-label="Voltar">
         ${window.CookbookIcons.chevronLeft()}
       </a>
+      ${editActions}
     `;
   }
 
@@ -233,7 +242,7 @@
       </div>
     `;
 
-    syncPageChrome(standalone);
+    syncPageChrome(standalone, active);
 
     window.CookbookShopping?.bindHeaderToggle(header);
     window.CookbookAuth.applyCookUi(document);
