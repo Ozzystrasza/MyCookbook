@@ -62,8 +62,8 @@
     return `
       <div class="book-cover" role="dialog" aria-labelledby="gate-title">
         <div class="book-cover__body">
+          <h1 id="gate-title" class="book-cover__title">My Cookbook</h1>
           <div class="book-cover__step" data-gate-step="choice">
-            <h1 id="gate-title" class="book-cover__title">My Cookbook</h1>
             <div class="book-cover__panel book-cover__actions">
               <button type="button" class="btn btn--primary" data-gate="cook">Abrir livro</button>
               <button type="button" class="btn btn--ghost" data-gate="visitor">Dar uma espiada</button>
@@ -75,7 +75,6 @@
                 <path d="M12.5 4.5L7 10l5.5 5.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-            <h1 id="gate-token-title" class="book-cover__title book-cover__title--sm">Abrir livro</h1>
             <form class="book-cover__panel book-cover__cook" data-gate-cook>
               <div class="field">
                 <input
@@ -121,7 +120,6 @@
         if (errorEl) errorEl.hidden = true;
         if (tokenStep) tokenStep.hidden = true;
         if (choiceStep) choiceStep.hidden = false;
-        cover.setAttribute("aria-labelledby", "gate-title");
       });
     }
 
@@ -131,7 +129,6 @@
         const tokenStep = cover.querySelector('[data-gate-step="token"]');
         if (choiceStep) choiceStep.hidden = true;
         if (tokenStep) tokenStep.hidden = false;
-        cover.setAttribute("aria-labelledby", "gate-token-title");
       });
       document.querySelector('.book-cover [data-gate-step="token"]:not([hidden]) input[name="token"]')?.focus();
     }
