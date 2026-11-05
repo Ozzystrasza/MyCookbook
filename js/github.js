@@ -145,6 +145,8 @@
     for (const change of list) {
       const path = String(change.path).replace(/^\/+/, "");
       if (change.deleted) {
+        const existing = await getFile(path, token);
+        if (!existing) continue;
         tree.push({ path, mode: "100644", type: "blob", sha: null });
         continue;
       }
@@ -160,6 +162,8 @@
       if (!blob?.sha) throw new Error(`Falha ao criar blob para ${path}.`);
       tree.push({ path, mode: "100644", type: "blob", sha: blob.sha });
     }
+
+    if (!tree.length) return null;
 
     const newTree = await apiJson(`${api}/repos/${owner}/${repo}/git/trees`, token, {
       method: "POST",

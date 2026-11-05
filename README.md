@@ -50,6 +50,8 @@ Use **Sign out** / **Switch role** in the header to return to that gate.
 
 Edits are **local-first**: they are stored in IndexedDB on your device and marked pending. Use the sync button in the header to push pending changes to GitHub in one commit. Pending changes older than a day also try a background sync when you open the site as cook.
 
+If another device already synced overlapping files, Sync asks whether to **keep your local changes** (overwrite GitHub) or **discard local pending edits** and use GitHub.
+
 After a successful sync, GitHub Pages rebuilds the public site (often under a minute). Until you sync, other devices will not see your edits.
 
 Shopping lists stay on the device only (`localStorage`). Favorites for cooks sync through `data/favorites.json` when you change them and sync.

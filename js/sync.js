@@ -73,6 +73,91 @@
     });
   }
 
+  function isBinaryPath(path) {
+    return /\.(png|jpe?g|webp|gif|svg)$/i.test(String(path || ""));
+  }
+
+  function bytesToBase64(bytes) {
+    let binary = "";
+    bytes.forEach((b) => {
+      binary += String.fromCharCode(b);
+    });
+    return btoa(binary);
+  }
+
+  function decodeGitHubContent(file) {
+    if (!file?.content) return "";
+    const normalized = String(file.content).replace(/\n/g, "");
+    const binary = atob(normalized);
+    const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+  }
+
+  async function captureBaseRemote(path) {
+    const existing = await getRecord(path);
+    if (existing?.dirty && typeof existing.baseRemote === "string") return existing.baseRemote;
+    try {
+      const res = await fetch(path, { cache: "no-store" });
+      if (res.status === 404) {
+        return fingerprint({ deleted: true, encoding: "utf-8", content: "" });
+      }
+      if (!res.ok) return null;
+      if (isBinaryPath(path)) {
+        const bytes = new Uint8Array(await res.arrayBuffer());
+        return fingerprint({
+          deleted: false,
+          encoding: "base64",
+          content: bytesToBase64(bytes),
+        });
+      }
+      return fingerprint({
+        deleted: false,
+        encoding: "utf-8",
+        content: await res.text(),
+      });
+    } catch (_) {
+      return fingerprint({ deleted: true, encoding: "utf-8", content: "" });
+    }
+  }
+
+  async function remoteFingerprintFromGitHub(path, token) {
+    const file = await window.CookbookGitHub.getFile(path, token);
+    if (!file) return fingerprint({ deleted: true, encoding: "utf-8", content: "" });
+    if (isBinaryPath(path)) {
+      return fingerprint({
+        deleted: false,
+        encoding: "base64",
+        content: String(file.content || "").replace(/\n/g, ""),
+      });
+    }
+    return fingerprint({
+      deleted: false,
+      encoding: "utf-8",
+      content: decodeGitHubContent(file),
+    });
+  }
+
+  async function detectConflicts(dirty, token) {
+    const conflicts = [];
+    for (const rec of dirty || []) {
+      if (!rec?.path) continue;
+      const current = await remoteFingerprintFromGitHub(rec.path, token);
+      if (typeof rec.baseRemote !== "string" || rec.baseRemote !== current) {
+        conflicts.push({ path: rec.path });
+      }
+    }
+    return conflicts;
+  }
+
+  async function discardAllPending() {
+    const dirty = await listDirty();
+    for (const rec of dirty) {
+      await deleteRecord(rec.path);
+    }
+    clearPendingSince();
+    emitStatus({ pending: false, discarded: true });
+  }
+
   function readMetaNumber(key) {
     try {
       const raw = localStorage.getItem(key);
@@ -142,6 +227,7 @@
 
   async function writeText(path, text, message) {
     revokeObjectUrl(path);
+    const baseRemote = await captureBaseRemote(path);
     await putRecord({
       path,
       encoding: "utf-8",
@@ -149,6 +235,7 @@
       deleted: false,
       dirty: true,
       message: message || "",
+      baseRemote,
     });
     await markDirty(path);
   }
@@ -159,6 +246,7 @@
 
   async function writeBase64(path, contentBase64, message) {
     revokeObjectUrl(path);
+    const baseRemote = await captureBaseRemote(path);
     await putRecord({
       path,
       encoding: "base64",
@@ -166,12 +254,14 @@
       deleted: false,
       dirty: true,
       message: message || "",
+      baseRemote,
     });
     await markDirty(path);
   }
 
   async function remove(path, message) {
     revokeObjectUrl(path);
+    const baseRemote = await captureBaseRemote(path);
     await putRecord({
       path,
       encoding: "utf-8",
@@ -179,6 +269,7 @@
       deleted: true,
       dirty: true,
       message: message || "",
+      baseRemote,
     });
     await markDirty(path);
   }
@@ -293,7 +384,7 @@
     return remainingDirty;
   }
 
-  async function syncNow() {
+  async function syncNow(options = {}) {
     if (syncing) return { ok: false, reason: "busy" };
     const token = window.CookbookAuth?.getToken?.();
     if (!token) throw new Error("Faça login como cozinheiro para sincronizar.");
@@ -303,6 +394,22 @@
       clearPendingSince();
       emitStatus({ pending: false });
       return { ok: true, count: 0 };
+    }
+
+    const conflicts = await detectConflicts(dirty, token);
+    if (conflicts.length) {
+      const resolve =
+        options.resolveConflict || window.CookbookUI?.confirmSyncConflict?.bind(window.CookbookUI);
+      const choice = resolve
+        ? await resolve({ paths: conflicts.map((c) => c.path) })
+        : "local";
+      if (choice === "remote") {
+        await discardAllPending();
+        return { ok: true, discarded: true, count: 0 };
+      }
+      if (choice !== "local") {
+        return { ok: false, reason: "cancelled" };
+      }
     }
 
     const snapshots = dirty.map((rec) => ({
@@ -370,6 +477,7 @@
     hasLocalFile,
     listDirty,
     syncNow,
+    discardAllPending,
     maybeDailySync,
     objectUrl,
     hydrateImages,

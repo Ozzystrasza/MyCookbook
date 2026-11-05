@@ -363,7 +363,13 @@
       btn.setAttribute("aria-label", "Sincronizando…");
       btn.classList.add("is-syncing");
       try {
-        await window.CookbookSync.syncNow();
+        const result = await window.CookbookSync.syncNow({
+          resolveConflict: (detail) => confirmSyncConflict(detail),
+        });
+        if (result?.discarded) {
+          window.location.reload();
+          return;
+        }
       } catch (err) {
         const message = err?.message || "Falha ao sincronizar.";
         btn.title = message;
@@ -438,6 +444,69 @@
       modal.querySelector("[data-similar-confirm]")?.addEventListener("click", () => finish(true));
       document.body.appendChild(modal);
       activateModalFocus(modal, "[data-similar-confirm]");
+    });
+  }
+
+  function confirmSyncConflict({ paths = [] } = {}) {
+    const items = Array.isArray(paths) ? paths.filter(Boolean) : [];
+    return new Promise((resolve) => {
+      const existing = document.querySelector("[data-sync-conflict]");
+      existing?.remove();
+
+      const modal = document.createElement("div");
+      modal.className = "shopping-modal";
+      modal.setAttribute("data-sync-conflict", "");
+      modal.innerHTML = `
+        <div class="shopping-modal__backdrop" data-sync-conflict-cancel tabindex="-1"></div>
+        <div class="shopping-modal__panel" role="dialog" aria-labelledby="sync-conflict-title" aria-modal="true">
+          <div class="shopping-modal__header">
+            <h2 class="shopping-modal__title" id="sync-conflict-title">Conflito ao sincronizar</h2>
+            <button type="button" class="icon-btn" data-sync-conflict-cancel aria-label="Fechar">
+              ${window.CookbookIcons.closeSmall()}
+            </button>
+          </div>
+          <div class="editor-modal__body">
+            <p class="hint" data-sync-conflict-hint></p>
+            <ul class="similar-confirm__list" data-sync-conflict-list></ul>
+            <div class="editor-modal__footer">
+              <button type="button" class="btn btn--ghost" data-sync-conflict-cancel>Cancelar</button>
+              <button type="button" class="btn btn--ghost" data-sync-conflict-remote>Descartar alterações locais</button>
+              <button type="button" class="btn btn--primary" data-sync-conflict-local>Manter minhas alterações</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const hint = modal.querySelector("[data-sync-conflict-hint]");
+      const count = items.length;
+      hint.textContent =
+        count === 1
+          ? "O GitHub tem alterações mais novas neste arquivo. O que deseja fazer?"
+          : `O GitHub tem alterações mais novas em ${count} arquivos. O que deseja fazer?`;
+
+      const list = modal.querySelector("[data-sync-conflict-list]");
+      items.forEach((path) => {
+        const li = document.createElement("li");
+        li.textContent = String(path);
+        list.append(li);
+      });
+
+      let settled = false;
+      function finish(choice) {
+        if (settled) return;
+        settled = true;
+        deactivateModalFocus(modal);
+        modal.remove();
+        resolve(choice);
+      }
+
+      modal.querySelectorAll("[data-sync-conflict-cancel]").forEach((elNode) => {
+        elNode.addEventListener("click", () => finish(null));
+      });
+      modal.querySelector("[data-sync-conflict-remote]")?.addEventListener("click", () => finish("remote"));
+      modal.querySelector("[data-sync-conflict-local]")?.addEventListener("click", () => finish("local"));
+      document.body.appendChild(modal);
+      activateModalFocus(modal, "[data-sync-conflict-local]");
     });
   }
 
@@ -618,6 +687,7 @@
     showStatus,
     mountImagePicker,
     confirmSimilarNames,
+    confirmSyncConflict,
     assertNameAvailable,
     refreshSyncButton,
     activateModalFocus,

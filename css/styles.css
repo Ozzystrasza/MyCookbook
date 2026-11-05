@@ -556,7 +556,8 @@ textarea {
 
 .btn[hidden],
 .icon-btn[hidden],
-[data-edit][hidden] {
+[data-edit][hidden],
+.site-nav__item[hidden] {
   display: none !important;
 }
 
