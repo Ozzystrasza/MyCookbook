@@ -179,14 +179,13 @@
   }
 
   async function ensureData() {
-    if (!measuresCache || !ingredientsCache) {
-      const [measures, ingredients] = await Promise.all([
-        window.CookbookData.loadMeasures(),
-        window.CookbookData.loadIngredientIndex(),
-      ]);
-      measuresCache = Object.fromEntries((measures || []).map((m) => [m.id, m]));
-      ingredientsCache = Object.fromEntries((ingredients || []).map((i) => [i.id, i]));
-    }
+    // Always reload so manage/edit image path changes (e.g. .png → .svg) show up.
+    const [measures, ingredients] = await Promise.all([
+      window.CookbookData.loadMeasures(),
+      window.CookbookData.loadIngredientIndex(),
+    ]);
+    measuresCache = Object.fromEntries((measures || []).map((m) => [m.id, m]));
+    ingredientsCache = Object.fromEntries((ingredients || []).map((i) => [i.id, i]));
     return { measures: measuresCache, ingredients: ingredientsCache };
   }
 
@@ -666,14 +665,8 @@
     refreshShoppingCheckIcon(all);
   }
 
-  async function openRecipePicker(recipe, ingredientsMap, measuresMap) {
+  async function openRecipePicker(recipe, _ingredientsMap, _measuresMap) {
     ensureModals();
-    if (ingredientsMap) {
-      ingredientsCache = { ...(ingredientsCache || {}), ...ingredientsMap };
-    }
-    if (measuresMap) {
-      measuresCache = { ...(measuresCache || {}), ...measuresMap };
-    }
     await ensureData();
     const listRoot = recipeEl.querySelector("[data-recipe-list]");
     const lines = (recipe?.groups || []).flatMap((g) => g.ingredients || []);

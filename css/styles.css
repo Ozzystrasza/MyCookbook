@@ -18,6 +18,7 @@
   --focus-ring: 0 0 0 3px rgba(47, 93, 58, 0.35);
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "Outfit", system-ui, sans-serif;
+  --ingredient-icon-inset: 0.35rem;
 }
 
 *,
@@ -393,7 +394,9 @@ textarea {
   width: 52px;
   height: 52px;
   border-radius: 12px;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
+  padding: var(--ingredient-icon-inset);
   background: #e7dfd0;
 }
 
@@ -519,6 +522,13 @@ textarea {
   object-fit: cover;
   display: block;
   background: rgba(28, 36, 28, 0.06);
+}
+
+[data-ingredient-image] .image-drop__img,
+[data-create-image] .image-drop__img {
+  object-fit: contain;
+  object-position: center;
+  padding: var(--ingredient-icon-inset);
 }
 
 .image-drop__remove {
@@ -869,7 +879,9 @@ textarea.field-control {
 .catalog-card img {
   width: 100%;
   aspect-ratio: 1;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
+  padding: var(--ingredient-icon-inset);
   background: #e7dfd0;
 }
 
@@ -2155,8 +2167,12 @@ body.is-managing .book__actions {
 .shopping-row__icon {
   width: 40px;
   height: 40px;
+  border-radius: 8px;
   object-fit: contain;
+  object-position: center;
+  padding: var(--ingredient-icon-inset);
   max-width: 100%;
+  background: #e7dfd0;
 }
 
 .shopping-row__meta {
@@ -2355,8 +2371,12 @@ body:has(.shopping-modal:not([hidden])) .book__page.is-scrollable {
 .shopping-catalog-item img {
   width: 40px;
   height: 40px;
+  border-radius: 8px;
   object-fit: contain;
+  object-position: center;
+  padding: var(--ingredient-icon-inset);
   max-width: 100%;
+  background: #e7dfd0;
 }
 
 .shopping-recipe-line {
@@ -2372,8 +2392,12 @@ body:has(.shopping-modal:not([hidden])) .book__page.is-scrollable {
 .shopping-recipe-line img {
   width: 36px;
   height: 36px;
+  border-radius: 8px;
   object-fit: contain;
+  object-position: center;
+  padding: var(--ingredient-icon-inset);
   max-width: 100%;
+  background: #e7dfd0;
 }
 
 .shopping-recipe-line__qty {

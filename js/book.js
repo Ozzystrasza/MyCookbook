@@ -1633,14 +1633,14 @@
     }
   }
 
-  function renderShoppingPortrait() {
+  async function renderShoppingPortrait() {
     teardownFlipBook();
     const left = qs('[data-page="left"]');
     const right = qs('[data-page="right"]');
     const html = window.CookbookShopping?.pageShellHtml?.() || "";
     setPage(left, "", { blank: true });
     setPage(right, html, { scrollable: true });
-    void fillShoppingPortraitList();
+    await fillShoppingPortraitList();
   }
 
   async function fillShoppingPortraitList() {
@@ -1654,12 +1654,14 @@
         <p class="shopping-page__empty">Sua lista está vazia.</p>
         <button type="button" class="btn btn--primary" data-shopping-empty-add>Adicionar ingrediente</button>
       </div>`;
+    await window.CookbookSync?.hydrateImages?.(listRoot);
   }
 
   async function renderShoppingFlip() {
     if (!state.shoppingPages.length) await packShoppingPages();
     clampBrowseIndex();
     refreshFlipBook(state.shoppingPages, state.shoppingPageIndex);
+    await window.CookbookSync?.hydrateImages?.(document.querySelector("[data-book]") || document);
   }
 
   async function settleShoppingView() {
@@ -1669,7 +1671,7 @@
       state.shoppingPageIndex = 0;
       await renderShoppingFlip();
     } else {
-      renderShoppingPortrait();
+      await renderShoppingPortrait();
     }
     updateChrome();
   }
@@ -1683,6 +1685,7 @@
       state.shoppingPageIndex = keep;
       clampBrowseIndex();
       refreshFlipBook(state.shoppingPages, state.shoppingPageIndex);
+      await window.CookbookSync?.hydrateImages?.(document.querySelector("[data-book]") || document);
       updateChrome();
       return;
     }
@@ -2082,6 +2085,19 @@
     });
   }
 
+  async function refreshCatalog() {
+    try {
+      const [measures, ingredients] = await Promise.all([
+        window.CookbookData.loadMeasures(),
+        window.CookbookData.loadIngredientIndex(),
+      ]);
+      state.measures = measures || [];
+      state.ingredients = ingredients || [];
+    } catch (_) {
+      /* keep existing catalog */
+    }
+  }
+
   function closeManage(options = {}) {
     if (state.mode !== "managing" || modeBridge) return;
     const animate = options.animate !== false && state.coverPhase === "open";
@@ -2089,15 +2105,17 @@
     window.CookbookManage?.unmountFromBook?.();
     state.mode = "browse";
     syncUrl();
-    if (!animate) {
-      render();
-      return;
-    }
-    runModeBridge({
-      direction: "prev",
-      outgoing,
-      incoming: browseDestPages(),
-      onDone: () => render(),
+    void refreshCatalog().then(() => {
+      if (!animate) {
+        render();
+        return;
+      }
+      runModeBridge({
+        direction: "prev",
+        outgoing,
+        incoming: browseDestPages(),
+        onDone: () => render(),
+      });
     });
   }
 
