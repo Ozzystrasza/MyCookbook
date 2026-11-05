@@ -2,22 +2,22 @@
   {
     "id": "flour",
     "name": "Farinha de trigo",
-    "image": "data/images/ingredients/flour.svg"
+    "image": "data/images/ingredients/flour.png"
   },
   {
     "id": "sugar",
     "name": "Açúcar cristal",
-    "image": "data/images/ingredients/sugar.svg"
+    "image": "data/images/ingredients/sugar.png"
   },
   {
     "id": "eggs",
     "name": "Ovos",
-    "image": "data/images/ingredients/eggs.svg"
+    "image": "data/images/ingredients/eggs.png"
   },
   {
     "id": "butter",
     "name": "Manteiga",
-    "image": "data/images/ingredients/butter.svg"
+    "image": "data/images/ingredients/butter.png"
   },
   {
     "id": "milk",
