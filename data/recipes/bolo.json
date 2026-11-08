@@ -63,10 +63,10 @@
           "description": "Adicione o fermento por último"
         },
         {
-          "description": "Assim que terminar de bater, ligue o forno para pré-aquecer"
+          "description": "Assim que terminar de bater, ligue o forno para pré-aquecer a 180°-205° (depende do forno)"
         },
         {
-          "description": "Unte a forma com manteiga e farinha, e despeje toda a massa"
+          "description": "Unte a forma com manteiga e farinha, e despeje toda a massa de maneira uniforme"
         },
         {
           "description": "Asse por 40-45 minutos"
@@ -118,7 +118,7 @@
         {
           "ingredientId": "chocolate",
           "measureId": "colher",
-          "quantity": "1"
+          "quantity": "1/2"
         },
         {
           "ingredientId": "leite-condensado",
@@ -136,5 +136,5 @@
       ]
     }
   ],
-  "updatedAt": "2026-11-05T20:50:49.505Z"
+  "updatedAt": "2026-11-06T05:25:02.100Z"
 }
