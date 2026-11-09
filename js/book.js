@@ -1954,6 +1954,7 @@
     if (state.mode === "editing" || state.mode === "managing") clearFormModes();
     if (state.mode === "reading") clearReadingState();
 
+    window.CookbookShopping?.removeCheckedItems?.();
     const outgoing = animate ? snapshotOutgoingPages() : null;
     state.mode = "shopping";
     state.shoppingPageIndex = 0;

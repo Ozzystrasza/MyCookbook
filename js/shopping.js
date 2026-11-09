@@ -178,6 +178,12 @@
     return [];
   }
 
+  function removeCheckedItems() {
+    const next = loadList().filter((item) => !item.checked);
+    saveList(next);
+    return next;
+  }
+
   async function ensureData() {
     // Always reload so manage/edit image path changes (e.g. .png → .svg) show up.
     const [measures, ingredients] = await Promise.all([
@@ -763,6 +769,7 @@
     setChecked,
     adjustQuantity,
     clearList,
+    removeCheckedItems,
     open,
     close,
     openPanel: open,
