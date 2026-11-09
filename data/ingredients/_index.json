@@ -1,7 +1,7 @@
 [
   {
     "id": "sugar",
-    "name": "Açúcar cristal",
+    "name": "Açúcar",
     "image": "data/images/ingredients/sugar.png"
   },
   {
@@ -48,6 +48,11 @@
     "id": "eggs",
     "name": "Ovos",
     "image": "data/images/ingredients/eggs.png"
+  },
+  {
+    "id": "p-o",
+    "name": "Pão",
+    "image": ""
   },
   {
     "id": "salt",
