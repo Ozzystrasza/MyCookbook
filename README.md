@@ -54,7 +54,7 @@ If another device already synced overlapping files, Sync asks whether to **keep 
 
 After a successful sync, GitHub Pages rebuilds the public site (often under a minute). Until you sync, other devices will not see your edits.
 
-Shopping lists stay on the device only (`localStorage`). Favorites for cooks sync through `data/favorites.json` when you change them and sync.
+Shopping lists and favorites stay on the device only (`localStorage`).
 
 ### Add to Home Screen
 
@@ -75,7 +75,6 @@ Shopping lists stay on the device only (`localStorage`). Favorites for cooks syn
 | `data/measures.json` | Measure catalog |
 | `data/ingredients/` | Ingredient catalog + `_index.json` |
 | `data/recipes/` | Recipes + `_index.json` |
-| `data/favorites.json` | Shared cook favorites |
 | `data/images/` | Ingredient, recipe, and cover images |
 
 On narrow screens, edit and manage open inside the book instead of separate pages. Book browse and recipe reading use [StPageFlip](https://nodlik.github.io/StPageFlip/) via the vendored script above (loaded in `index.html` before `js/book.js`). List view and shopping list do not use it.

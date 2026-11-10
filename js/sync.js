@@ -289,6 +289,10 @@
     return Boolean(rec) && !rec.deleted;
   }
 
+  async function forgetLocal(path) {
+    await deleteRecord(path);
+  }
+
   async function fetchNetworkText(path) {
     const res = await fetch(path, { cache: "no-store" });
     if (!res.ok) throw new Error(`Não foi possível carregar ${path}`);
@@ -475,6 +479,7 @@
     readJson,
     hasPending,
     hasLocalFile,
+    forgetLocal,
     listDirty,
     syncNow,
     discardAllPending,

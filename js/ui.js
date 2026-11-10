@@ -213,6 +213,9 @@
           <a class="brand" href="index.html?home=1">My Cookbook</a>
         </div>
         <nav class="site-nav" aria-label="Principal">
+          <button type="button" class="icon-btn" data-shopping-toggle title="Lista de compras" aria-label="Lista de compras">
+            ${window.CookbookIcons.shoppingCart()}
+          </button>
           <button type="button" class="icon-btn site-nav__menu-toggle" data-nav-menu-toggle title="Menu" aria-label="Menu" aria-expanded="false" aria-controls="site-nav-menu">
             ${window.CookbookIcons.menu()}
           </button>
@@ -225,10 +228,6 @@
               ${window.CookbookIcons.tune()}
               <span class="site-nav__label">Gerenciar</span>
             </a>` : ""}
-            <button type="button" class="site-nav__item" data-shopping-toggle title="Lista de compras">
-              ${window.CookbookIcons.shoppingCart()}
-              <span class="site-nav__label">Lista de compras</span>
-            </button>
             ${cook ? `<button type="button" class="site-nav__item" data-sync-pending hidden title="Sincronizar com GitHub">
               ${window.CookbookIcons.sync()}
               <span class="site-nav__label">Sincronizar</span>

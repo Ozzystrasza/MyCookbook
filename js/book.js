@@ -81,17 +81,9 @@
     return window.CookbookConfig?.storageKeys?.favorites || "mycookbook_favorites";
   }
 
-  function favoritesCookCacheKey() {
-    return window.CookbookConfig?.storageKeys?.favoritesCookCache || "mycookbook_favorites_cook";
-  }
-
   function parseFavoriteIds(value) {
     if (!Array.isArray(value)) return [];
     return value.filter((id) => typeof id === "string" && id);
-  }
-
-  function sortedFavoriteIds(ids) {
-    return [...ids].filter((id) => typeof id === "string" && id).sort();
   }
 
   function readLocalFavoriteIds(key) {
@@ -112,65 +104,45 @@
     }
   }
 
-  function hasLocalKey(key) {
-    try {
-      return localStorage.getItem(key) !== null;
-    } catch (_) {
-      return false;
-    }
-  }
-
   function saveFavoritesLocal() {
-    if (window.CookbookAuth.isCook()) {
-      writeLocalFavoriteIds(favoritesCookCacheKey(), state.favoriteIds);
-      void window.CookbookSync.writeJson(
-        "data/favorites.json",
-        sortedFavoriteIds(state.favoriteIds),
-        "Atualizar favoritos"
-      );
-    } else {
-      writeLocalFavoriteIds(favoritesStorageKey(), state.favoriteIds);
-    }
+    writeLocalFavoriteIds(favoritesStorageKey(), state.favoriteIds);
   }
 
-  function loadVisitorFavorites() {
-    state.favoriteIds = new Set(readLocalFavoriteIds(favoritesStorageKey()));
-  }
+  async function migrateFavoritesIfNeeded(storageKey) {
+    let ids = readLocalFavoriteIds(storageKey);
+    if (ids.length) return ids;
 
-  async function loadCookFavorites() {
-    const cacheKey = favoritesCookCacheKey();
-
-    // Pending IndexedDB edits win; never auto-stage a stale localStorage cache
-    // over GitHub when opening the book on an old device.
-    if (await window.CookbookSync.hasLocalFile("data/favorites.json")) {
-      const data = await window.CookbookSync.readJson("data/favorites.json");
-      state.favoriteIds = new Set(parseFavoriteIds(data));
-      writeLocalFavoriteIds(cacheKey, state.favoriteIds);
-      return;
+    const sync = window.CookbookSync;
+    if (sync?.hasLocalFile && (await sync.hasLocalFile("data/favorites.json"))) {
+      try {
+        ids = parseFavoriteIds(await sync.readJson("data/favorites.json"));
+      } catch (_) {
+        ids = [];
+      }
     }
 
-    try {
-      const data = await window.CookbookSync.readJson("data/favorites.json");
-      state.favoriteIds = new Set(parseFavoriteIds(data));
-      writeLocalFavoriteIds(cacheKey, state.favoriteIds);
-      return;
-    } catch (_) {
-      /* fall through to offline caches — do not mark dirty */
+    if (!ids.length) {
+      ids = readLocalFavoriteIds("mycookbook_favorites_cook");
     }
 
-    if (hasLocalKey(cacheKey)) {
-      state.favoriteIds = new Set(readLocalFavoriteIds(cacheKey));
-    } else {
-      state.favoriteIds = new Set(readLocalFavoriteIds(favoritesStorageKey()));
+    if (!ids.length && sync?.readJson) {
+      try {
+        ids = parseFavoriteIds(await sync.readJson("data/favorites.json"));
+      } catch (_) {
+        ids = [];
+      }
     }
-    writeLocalFavoriteIds(cacheKey, state.favoriteIds);
+
+    if (ids.length) writeLocalFavoriteIds(storageKey, ids);
+    return ids;
   }
 
   async function loadFavorites() {
-    if (window.CookbookAuth.isCook()) {
-      await loadCookFavorites();
-    } else {
-      loadVisitorFavorites();
+    const storageKey = favoritesStorageKey();
+    const ids = await migrateFavoritesIfNeeded(storageKey);
+    state.favoriteIds = new Set(ids);
+    if (window.CookbookSync?.forgetLocal) {
+      await window.CookbookSync.forgetLocal("data/favorites.json");
     }
   }
 
