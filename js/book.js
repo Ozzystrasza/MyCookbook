@@ -1213,7 +1213,10 @@
     }
 
     (recipe.groups || []).forEach((group) => {
-      blocks.push(`<h2 class="book-read__section-title">${escapeHtml(group.name || "Seção")}</h2>`);
+      const groupName = String(group.name || "").trim();
+      if (groupName) {
+        blocks.push(`<h2 class="book-read__section-title">${escapeHtml(groupName)}</h2>`);
+      }
       blocks.push(`<p class="book-read__label">Ingredientes</p>`);
       const lines = group.ingredients || [];
       if (!lines.length) {

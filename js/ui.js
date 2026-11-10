@@ -81,6 +81,28 @@
     }
   }
 
+  function syncVisualViewportVars() {
+    const root = document.documentElement;
+    const vv = window.visualViewport;
+    if (!vv) {
+      root.style.setProperty("--vv-top", "0px");
+      root.style.setProperty("--vv-height", "100%");
+      return;
+    }
+    root.style.setProperty("--vv-top", `${vv.offsetTop}px`);
+    root.style.setProperty("--vv-height", `${vv.height}px`);
+  }
+
+  (function installVisualViewportVars() {
+    syncVisualViewportVars();
+    const vv = window.visualViewport;
+    if (vv) {
+      vv.addEventListener("resize", syncVisualViewportVars);
+      vv.addEventListener("scroll", syncVisualViewportVars);
+    }
+    window.addEventListener("resize", syncVisualViewportVars);
+  })();
+
   function el(tag, attrs = {}, children = []) {
     const node = document.createElement(tag);
     Object.entries(attrs).forEach(([key, value]) => {

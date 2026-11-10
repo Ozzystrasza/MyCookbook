@@ -2410,11 +2410,15 @@ body:has(.shopping-modal:not([hidden])) .book__page.is-scrollable {
 
 .shopping-modal {
   position: fixed;
-  inset: 0;
+  top: var(--vv-top, 0px);
+  left: 0;
+  width: 100%;
+  height: var(--vv-height, 100%);
   z-index: 40;
   display: grid;
   place-items: end center;
   padding: 0.75rem;
+  box-sizing: border-box;
 }
 
 .shopping-modal[hidden] {
@@ -2431,7 +2435,7 @@ body:has(.shopping-modal:not([hidden])) .book__page.is-scrollable {
   position: relative;
   z-index: 1;
   width: min(28rem, 100%);
-  max-height: min(85vh, 40rem);
+  max-height: min(85%, 40rem);
   display: flex;
   flex-direction: column;
   padding: 1rem;
