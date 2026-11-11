@@ -464,6 +464,7 @@
       addManual(id);
       open();
       renderPage();
+      window.CookbookUI?.nudgeSync?.();
     } catch (err) {
       window.CookbookUI.showStatus(status, err.message || "Falha ao salvar ingrediente.", "error");
       submit.disabled = false;

@@ -643,7 +643,8 @@
         editingIngredientId = null;
         clearInlineIngredientPicker();
         renderIngredients();
-        showStatus(status, "Ingrediente salvo neste dispositivo.", "ok");
+        showStatus(status, "Ingrediente salvo neste dispositivo. Use Sincronizar para enviar ao GitHub.", "ok");
+        window.CookbookUI?.nudgeSync?.();
       } catch (err) {
         showStatus(status, err.message, "error");
       }
@@ -692,7 +693,8 @@
             `Atualizar índice de ingredientes após excluir ${item.id}`
           );
           renderIngredients();
-          showStatus(status, "Ingrediente excluído neste dispositivo.", "ok");
+          showStatus(status, "Ingrediente excluído neste dispositivo. Use Sincronizar para enviar ao GitHub.", "ok");
+          window.CookbookUI?.nudgeSync?.();
         } catch (err) {
           showStatus(status, err.message, "error");
         }
@@ -718,7 +720,8 @@
         message || "Atualizar categorias"
       );
       renderCategories();
-      showStatus(status, "Categorias salvas neste dispositivo.", "ok");
+      showStatus(status, "Categorias salvas neste dispositivo. Use Sincronizar para enviar ao GitHub.", "ok");
+      window.CookbookUI?.nudgeSync?.();
     } catch (err) {
       showStatus(status, err.message, "error");
     }
@@ -735,7 +738,8 @@
         message || "Atualizar medidas"
       );
       renderMeasures();
-      showStatus(status, "Medidas salvas neste dispositivo.", "ok");
+      showStatus(status, "Medidas salvas neste dispositivo. Use Sincronizar para enviar ao GitHub.", "ok");
+      window.CookbookUI?.nudgeSync?.();
     } catch (err) {
       showStatus(status, err.message, "error");
     }
@@ -884,7 +888,8 @@
 
         renderIngredients();
         closeAddPanel("ingredients");
-        showStatus(status, "Ingrediente salvo neste dispositivo.", "ok");
+        showStatus(status, "Ingrediente salvo neste dispositivo. Use Sincronizar para enviar ao GitHub.", "ok");
+        window.CookbookUI?.nudgeSync?.();
       } catch (err) {
         showStatus(status, err.message, "error");
       }

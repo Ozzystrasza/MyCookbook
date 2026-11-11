@@ -442,6 +442,7 @@
       setPickerValue(target, id);
       markDirty();
     }
+    window.CookbookUI?.nudgeSync?.();
   }
 
   function measurePickLabel(item) {
@@ -966,6 +967,7 @@
       clearDirty();
       allowLeave = true;
       showStatus(status, "Salvo neste dispositivo. Use Sincronizar para enviar ao GitHub.", "ok");
+      window.CookbookUI?.nudgeSync?.();
       window.setTimeout(() => {
         if (inBookMode && window.CookbookBook?.openRecipe) {
           void window.CookbookBook.openRecipe(id);
@@ -1011,6 +1013,7 @@
       );
       clearDirty();
       allowLeave = true;
+      window.CookbookUI?.nudgeSync?.();
       if (inBookMode) {
         requestClose();
         return;

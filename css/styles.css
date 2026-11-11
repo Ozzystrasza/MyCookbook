@@ -206,6 +206,33 @@ textarea {
   pointer-events: none;
 }
 
+.sync-conflict__paths {
+  margin: 0.75rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.site-nav__item.is-sync-nudge {
+  color: var(--leaf-deep);
+  background: rgba(31, 63, 40, 0.12);
+  animation: sync-nudge 1.2s ease-in-out 2;
+}
+
+@keyframes sync-nudge {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-nav__item.is-sync-nudge {
+    animation: none;
+  }
+}
+
 @media (min-width: 800px) {
   .site-nav .site-nav__menu-toggle {
     display: none;
@@ -2419,6 +2446,15 @@ body:has(.shopping-modal:not([hidden])) .book__page.is-scrollable {
   place-items: end center;
   padding: 0.75rem;
   box-sizing: border-box;
+}
+
+html.is-vv-keyboard .shopping-modal {
+  place-items: start center;
+}
+
+html.is-vv-keyboard .shopping-modal__panel {
+  border-radius: 12px 12px 16px 16px;
+  max-height: min(100%, 40rem);
 }
 
 .shopping-modal[hidden] {

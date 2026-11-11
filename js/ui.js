@@ -63,7 +63,18 @@
     modalFocusState.set(modal, { prev, onKeyDown });
     const focusEl =
       (focusSelector && modal.querySelector(focusSelector)) || getFocusable(panel)[0] || panel;
-    window.setTimeout(() => focusEl?.focus?.(), 30);
+    window.setTimeout(() => {
+      if (!focusEl?.focus) return;
+      try {
+        focusEl.focus({ preventScroll: true });
+      } catch {
+        focusEl.focus();
+      }
+      syncVisualViewportVars();
+      window.requestAnimationFrame(syncVisualViewportVars);
+      window.setTimeout(syncVisualViewportVars, 100);
+      window.setTimeout(syncVisualViewportVars, 300);
+    }, 30);
   }
 
   function deactivateModalFocus(modal, restore = true) {
@@ -84,13 +95,14 @@
   function syncVisualViewportVars() {
     const root = document.documentElement;
     const vv = window.visualViewport;
+    root.style.setProperty("--vv-top", "0px");
     if (!vv) {
-      root.style.setProperty("--vv-top", "0px");
       root.style.setProperty("--vv-height", "100%");
+      root.classList.remove("is-vv-keyboard");
       return;
     }
-    root.style.setProperty("--vv-top", `${vv.offsetTop}px`);
     root.style.setProperty("--vv-height", `${vv.height}px`);
+    root.classList.toggle("is-vv-keyboard", window.innerHeight - vv.height > 120);
   }
 
   (function installVisualViewportVars() {
@@ -489,10 +501,17 @@
     });
   }
 
-  function confirmSyncConflict() {
+  function confirmSyncConflict(detail = {}) {
     return new Promise((resolve) => {
       const existing = document.querySelector("[data-sync-conflict]");
       existing?.remove();
+
+      const paths = [...new Set((detail.paths || []).filter(Boolean))];
+      const pathList = paths.length
+        ? `<ul class="sync-conflict__paths hint">${paths
+            .map((p) => `<li><code>${escapeHtml(p)}</code></li>`)
+            .join("")}</ul>`
+        : "";
 
       const modal = document.createElement("div");
       modal.className = "shopping-modal";
@@ -507,10 +526,11 @@
             </button>
           </div>
           <div class="editor-modal__body">
-            <p class="hint">O GitHub tem alterações mais novas. Descartar as daqui ou sobrescrever o GitHub?</p>
+            <p class="hint">Índices e catálogos já foram mesclados. Estes arquivos também mudaram no GitHub — descartar só eles daqui, ou sobrescrever o GitHub com a versão deste dispositivo?</p>
+            ${pathList}
             <div class="editor-modal__footer">
               <button type="button" class="btn btn--ghost" data-sync-conflict-cancel>Cancelar</button>
-              <button type="button" class="btn btn--ghost" data-sync-conflict-remote>Descartar locais</button>
+              <button type="button" class="btn btn--ghost" data-sync-conflict-remote>Descartar estes</button>
               <button type="button" class="btn btn--primary" data-sync-conflict-local>Sobrescrever GitHub</button>
             </div>
           </div>
@@ -533,6 +553,18 @@
       modal.querySelector("[data-sync-conflict-local]")?.addEventListener("click", () => finish("local"));
       document.body.appendChild(modal);
       activateModalFocus(modal, "[data-sync-conflict-local]");
+    });
+  }
+
+  function nudgeSync() {
+    void refreshSyncButton(document).then(() => {
+      const btn = qs("[data-sync-pending]");
+      if (!btn || btn.hidden) return;
+      btn.classList.remove("is-sync-nudge");
+      // Restart animation if nudge fires repeatedly.
+      void btn.offsetWidth;
+      btn.classList.add("is-sync-nudge");
+      window.setTimeout(() => btn.classList.remove("is-sync-nudge"), 2600);
     });
   }
 
@@ -715,6 +747,7 @@
     mountImagePicker,
     confirmSimilarNames,
     confirmSyncConflict,
+    nudgeSync,
     assertNameAvailable,
     refreshSyncButton,
     activateModalFocus,
