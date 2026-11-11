@@ -159,7 +159,9 @@
 
     if (categoryId && !needFull) {
       index.forEach((meta) => {
-        if (meta.categoryId === categoryId) hits.push(meta.title || meta.id);
+        if (window.CookbookData.recipeCategoryIds(meta).includes(categoryId)) {
+          hits.push(meta.title || meta.id);
+        }
       });
       return hits;
     }
@@ -176,7 +178,10 @@
     );
 
     recipes.forEach(({ meta, recipe }) => {
-      if (categoryId && (recipe?.categoryId || meta.categoryId) === categoryId) {
+      if (
+        categoryId &&
+        window.CookbookData.recipeCategoryIds(recipe || meta).includes(categoryId)
+      ) {
         hits.push(meta.title || meta.id);
         return;
       }

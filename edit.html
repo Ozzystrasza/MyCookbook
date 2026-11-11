@@ -29,11 +29,11 @@
               <input id="title" name="title" required />
             </label>
             <div class="field">
-              <span>Categoria</span>
-              <div class="catalog-picker">
-                <input type="hidden" id="categoryId" name="categoryId" value="" />
-                <button type="button" class="ingredient-picker__trigger" data-category-trigger data-picker-trigger aria-haspopup="dialog">
-                  <span class="ingredient-picker__value is-placeholder">Selecione…</span>
+              <span>Categorias</span>
+              <div class="category-tags" data-category-tags>
+                <div class="category-tags__list" data-category-chips></div>
+                <button type="button" class="ingredient-picker__trigger category-tags__add" data-category-trigger aria-haspopup="dialog">
+                  <span class="ingredient-picker__value">Adicionar…</span>
                   <svg class="ingredient-picker__chevron" width="16" height="16" viewBox="0 -960 960 960" aria-hidden="true"><path fill="currentColor" d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"/></svg>
                 </button>
               </div>

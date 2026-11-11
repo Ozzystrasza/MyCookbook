@@ -244,7 +244,13 @@
   }
 
   function categoryName(id) {
-    return state.categories.find((c) => c.id === id)?.name || id || "Sem categoria";
+    return state.categories.find((c) => c.id === id)?.name || id || "";
+  }
+
+  function recipeCategoriesLabel(recipe) {
+    const ids = window.CookbookData.recipeCategoryIds(recipe);
+    if (!ids.length) return "Sem categoria";
+    return ids.map((id) => categoryName(id) || id).filter(Boolean).join(" · ") || "Sem categoria";
   }
 
   function favoritesStorageKey() {
@@ -433,8 +439,10 @@
       recipes = recipes.filter((recipe) => !state.testedIds.has(recipe.id));
     }
     if (state.categoryFilters.length) {
-      const allowed = new Set(state.categoryFilters);
-      recipes = recipes.filter((recipe) => allowed.has(recipe.categoryId));
+      recipes = recipes.filter((recipe) => {
+        const ids = window.CookbookData.recipeCategoryIds(recipe);
+        return state.categoryFilters.every((id) => ids.includes(id));
+      });
     }
     const query = state.searchQuery.trim().toLowerCase();
     if (query) {
@@ -1411,7 +1419,7 @@
         </div>
         <div class="book-preview__text">
           <button type="button" class="book-preview__open" data-open-recipe="${id}">
-            <p class="book-preview__category">${escapeHtml(categoryName(recipe.categoryId))}</p>
+            <p class="book-preview__category">${escapeHtml(recipeCategoriesLabel(recipe))}</p>
           </button>
           <div class="book-preview__title-row">
             <button type="button" class="book-preview__title-btn" data-open-recipe="${id}">
@@ -1433,7 +1441,7 @@
         </button>
         <div class="book-list__meta">
           <button type="button" class="book-list__text-btn" data-open-recipe="${id}">
-            <p class="book-list__category">${escapeHtml(categoryName(recipe.categoryId))}</p>
+            <p class="book-list__category">${escapeHtml(recipeCategoriesLabel(recipe))}</p>
           </button>
           <div class="book-list__title-row">
             <button type="button" class="book-list__title-btn" data-open-recipe="${id}">
@@ -1462,7 +1470,7 @@
   function buildReadingBlocks(recipe) {
     const measures = measureMap();
     const ingredients = ingredientMap();
-    const category = categoryName(recipe.categoryId);
+    const category = recipeCategoriesLabel(recipe);
     const blocks = [];
 
     blocks.push(`

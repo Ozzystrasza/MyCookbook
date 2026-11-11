@@ -141,6 +141,12 @@
     return scored.slice(0, limit).map((entry) => entry.item);
   }
 
+  function recipeCategoryIds(recipe) {
+    if (Array.isArray(recipe?.categoryIds)) return recipe.categoryIds.filter(Boolean);
+    if (recipe?.categoryId) return [recipe.categoryId];
+    return [];
+  }
+
   window.CookbookData = {
     fetchJson,
     compareByName,
@@ -157,5 +163,6 @@
     normalizeName,
     findExactNameMatch,
     findSimilarNameMatches,
+    recipeCategoryIds,
   };
 })();

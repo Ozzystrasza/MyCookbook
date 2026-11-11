@@ -20,6 +20,7 @@
   let pickerTargetInput = null;
   let pickKind = "ingredient";
   let createTargetInput = null;
+  let selectedCategoryIds = [];
   let recipeImagePicker = null;
   let createImagePicker = null;
   let createImageFile = null;
@@ -60,11 +61,11 @@
               <input id="title" name="title" required />
             </label>
             <div class="field">
-              <span>Categoria</span>
-              <div class="catalog-picker">
-                <input type="hidden" id="categoryId" name="categoryId" value="" />
-                <button type="button" class="ingredient-picker__trigger" data-category-trigger data-picker-trigger aria-haspopup="dialog">
-                  <span class="ingredient-picker__value is-placeholder">Selecione…</span>
+              <span>Categorias</span>
+              <div class="category-tags" data-category-tags>
+                <div class="category-tags__list" data-category-chips></div>
+                <button type="button" class="ingredient-picker__trigger category-tags__add" data-category-trigger aria-haspopup="dialog">
+                  <span class="ingredient-picker__value">Adicionar…</span>
                   ${chevronIcon()}
                 </button>
               </div>
@@ -139,8 +140,49 @@
   function kindFromInput(input) {
     const field = input?.dataset?.field || input?.id || "";
     if (field === "measureId") return "measure";
-    if (field === "categoryId") return "category";
     return "ingredient";
+  }
+
+  function renderCategoryChips() {
+    const list = qs("[data-category-chips]");
+    if (!list) return;
+    list.innerHTML = selectedCategoryIds
+      .map((id) => {
+        const label = catalogLabel("category", id) || id;
+        return `
+          <span class="category-tag">
+            <span class="category-tag__label">${escapeHtml(label)}</span>
+            <button type="button" class="category-tag__remove" data-remove-category="${escapeHtml(id)}" aria-label="Remover ${escapeHtml(label)}">
+              ${closeIcon()}
+            </button>
+          </span>`;
+      })
+      .join("");
+  }
+
+  function setSelectedCategoryIds(ids) {
+    const seen = new Set();
+    selectedCategoryIds = [];
+    for (const id of ids || []) {
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      selectedCategoryIds.push(id);
+    }
+    renderCategoryChips();
+  }
+
+  function addCategoryId(id) {
+    if (!id || selectedCategoryIds.includes(id)) {
+      renderCategoryChips();
+      return;
+    }
+    selectedCategoryIds = [...selectedCategoryIds, id];
+    renderCategoryChips();
+  }
+
+  function removeCategoryId(id) {
+    selectedCategoryIds = selectedCategoryIds.filter((entry) => entry !== id);
+    renderCategoryChips();
   }
 
   function catalogItems(kind) {
@@ -164,8 +206,7 @@
     const wrap = input.closest(".catalog-picker");
     const trigger =
       wrap?.querySelector("[data-picker-trigger]") ||
-      wrap?.querySelector("[data-ingredient-trigger], [data-measure-trigger], [data-category-trigger]") ||
-      (kind === "category" ? qs("[data-category-trigger]") : null);
+      wrap?.querySelector("[data-ingredient-trigger], [data-measure-trigger]");
     const valueEl = trigger?.querySelector(".ingredient-picker__value");
     if (!valueEl) return;
     const label = catalogLabel(kind, id);
@@ -179,8 +220,7 @@
   }
 
   function refreshAllPickers() {
-    const categoryInput = qs("#categoryId");
-    if (categoryInput) setPickerValue(categoryInput, categoryInput.value);
+    renderCategoryChips();
     qs("[data-groups-editor]")
       ?.querySelectorAll('[data-field="ingredientId"], [data-field="measureId"]')
       .forEach((input) => setPickerValue(input, input.value));
@@ -258,8 +298,16 @@
         return;
       }
       const pickBtn = event.target.closest("[data-pick-id]");
-      if (!pickBtn || !pickerTargetInput) return;
-      setPickerValue(pickerTargetInput, pickBtn.getAttribute("data-pick-id"));
+      if (!pickBtn) return;
+      const pickedId = pickBtn.getAttribute("data-pick-id");
+      if (pickKind === "category") {
+        addCategoryId(pickedId);
+        markDirty();
+        closePickModal();
+        return;
+      }
+      if (!pickerTargetInput) return;
+      setPickerValue(pickerTargetInput, pickedId);
       markDirty();
       closePickModal();
     });
@@ -434,11 +482,15 @@
     window.CookbookUI.activateModalFocus?.(modal, "[data-create-name]");
   }
 
-  function finishCreate(id) {
+  function finishCreate(id, kind = null) {
     const target = createTargetInput;
+    const resolved = kind || (target ? kindFromInput(target) : null);
     closeCreateModals();
     refreshAllPickers();
-    if (target) {
+    if (resolved === "category") {
+      addCategoryId(id);
+      markDirty();
+    } else if (target) {
       setPickerValue(target, id);
       markDirty();
     }
@@ -457,8 +509,10 @@
     const query = (pickModal.querySelector("[data-pick-search]")?.value || "").trim().toLowerCase();
     const meta = PICK_META[pickKind] || PICK_META.ingredient;
     const items = catalogItems(pickKind);
+    const selected = pickKind === "category" ? new Set(selectedCategoryIds) : null;
     const filtered = items
       .filter((item) => {
+        if (selected?.has(item.id)) return false;
         if (!query) return true;
         const name = String(item.name || "").toLowerCase();
         const abbrev = String(item.abbrev || "").toLowerCase();
@@ -523,7 +577,7 @@
         categories,
         `Adicionar categoria: ${name}`
       );
-      finishCreate(id);
+      finishCreate(id, "category");
     } catch (err) {
       showStatus(status, err.message || "Falha ao salvar.", "error");
       submit.disabled = false;
@@ -809,7 +863,7 @@
 
   async function fillForm(recipe) {
     qs("#title").value = recipe.title || "";
-    setPickerValue(qs("#categoryId"), recipe.categoryId || "");
+    setSelectedCategoryIds(window.CookbookData.recipeCategoryIds(recipe));
     savedImagePath = recipe.image || "";
     imageFile = null;
     imageCleared = false;
@@ -842,13 +896,13 @@
     event.preventDefault();
     const status = qs("[data-status]");
     const title = qs("#title").value.trim();
-    const categoryId = qs("#categoryId").value;
+    const categoryIds = selectedCategoryIds.slice();
     if (!title) {
       showStatus(status, "O título é obrigatório.", "error");
       return;
     }
-    if (!categoryId) {
-      showStatus(status, "Escolha uma categoria.", "error");
+    if (!categoryIds.length) {
+      showStatus(status, "Escolha ao menos uma categoria.", "error");
       return;
     }
 
@@ -933,7 +987,7 @@
       const recipe = {
         id,
         title,
-        categoryId,
+        categoryIds,
         image: imagePath,
         groups,
         updatedAt: new Date().toISOString(),
@@ -951,7 +1005,7 @@
           {
             id,
             title,
-            categoryId,
+            categoryIds,
             image: imagePath,
           },
         ],
@@ -1070,7 +1124,16 @@
     const categoryTrigger = qs("[data-category-trigger]");
     if (categoryTrigger) {
       categoryTrigger.onclick = () => {
-        openPickModal(qs("#categoryId"), "category");
+        openPickModal(null, "category");
+      };
+    }
+    const chips = qs("[data-category-chips]");
+    if (chips) {
+      chips.onclick = (event) => {
+        const btn = event.target.closest("[data-remove-category]");
+        if (!btn) return;
+        removeCategoryId(btn.getAttribute("data-remove-category"));
+        markDirty();
       };
     }
     qs("[data-add-group]").onclick = () => {
@@ -1137,7 +1200,7 @@
       markDirty();
       showStatus(qs("[data-status]"), "Altere o título para salvar a cópia.", "info");
     } else {
-      await fillForm({ title: "", categoryId: "", image: "", groups: [blankGroup()] });
+      await fillForm({ title: "", categoryIds: [], image: "", groups: [blankGroup()] });
     }
 
     bindFormHandlers();

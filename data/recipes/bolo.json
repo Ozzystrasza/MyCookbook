@@ -1,7 +1,7 @@
 {
   "id": "bolo",
   "title": "Bolo",
-  "categoryId": "doces",
+  "categoryIds": ["doces"],
   "image": "data/images/recipes/bolo.png",
   "groups": [
     {

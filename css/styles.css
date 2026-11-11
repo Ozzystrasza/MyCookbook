@@ -824,6 +824,69 @@ textarea.field-control {
   width: 100%;
 }
 
+.category-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.category-tags__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.category-tags__list:empty {
+  display: none;
+}
+
+.category-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  max-width: 100%;
+  min-height: var(--tap-size);
+  padding: 0.2rem 0.25rem 0.2rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 252, 246, 0.85);
+  color: var(--ink);
+}
+
+.category-tag__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-tag__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-size);
+  height: var(--tap-size);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.category-tag__remove:hover,
+.category-tag__remove:focus-visible {
+  color: var(--ink);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.category-tags__add {
+  width: 100%;
+}
+
 .ingredient-picker__trigger {
   width: 100%;
   min-height: 2.75rem;

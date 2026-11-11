@@ -1,7 +1,7 @@
 {
   "id": "mousse",
   "title": "Mousse",
-  "categoryId": "doces",
+  "categoryIds": ["doces"],
   "image": "",
   "groups": [
     {
