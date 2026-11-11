@@ -143,7 +143,7 @@
       : [];
     const imgs = contentPages
       .slice(0, count)
-      .flatMap((page) => [...page.querySelectorAll("img[src]")"]);
+      .flatMap((page) => [...page.querySelectorAll("img[src]")]);
 
     if (imgs.length) {
       await Promise.all(
