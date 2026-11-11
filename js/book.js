@@ -56,7 +56,6 @@
   let pageFlipAudio = null;
   let searchDebounceTimer = null;
   let coverImageUrl = "";
-  let coverBlobUrl = null;
   let coverAssetsReady = false;
   let coverShownAt = 0;
   let coverReadyPromise = null;
@@ -98,33 +97,24 @@
       return coverImageUrl;
     }
 
-    let response = null;
     try {
       if (typeof caches !== "undefined") {
         const cache = await caches.open(COVER_CACHE_NAME);
-        response = await cache.match(COVER_IMAGE_PATH);
-        if (!response) {
+        let cached = await cache.match(COVER_IMAGE_PATH);
+        if (!cached) {
           const fetched = await fetch(COVER_IMAGE_PATH, { cache: "default" });
           if (fetched.ok) {
             await cache.put(COVER_IMAGE_PATH, fetched.clone());
-            response = fetched;
+            cached = fetched;
           }
         }
       }
     } catch (_) {
-      /* Cache API unavailable — fall through to fetch */
+      /* Cache API unavailable — decode path below still warms HTTP cache. */
     }
 
-    if (!response || !response.ok) {
-      response = await fetch(COVER_IMAGE_PATH, { cache: "default" });
-    }
-    if (!response.ok) throw new Error("cover load failed");
-
-    const blob = await response.blob();
-    if (coverBlobUrl) URL.revokeObjectURL(coverBlobUrl);
-    coverBlobUrl = URL.createObjectURL(blob);
-    coverImageUrl = coverBlobUrl;
-    await decodeImageUrl(coverImageUrl);
+    await decodeImageUrl(COVER_IMAGE_PATH);
+    coverImageUrl = COVER_IMAGE_PATH;
     return coverImageUrl;
   }
 
