@@ -15,6 +15,11 @@
     "image": "data/images/ingredients/chocolate.png"
   },
   {
+    "id": "creme-de-leite",
+    "name": "Creme de leite",
+    "image": ""
+  },
+  {
     "id": "flour",
     "name": "Farinha de trigo",
     "image": "data/images/ingredients/flour.png"

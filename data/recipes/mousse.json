@@ -1,0 +1,44 @@
+{
+  "id": "mousse",
+  "title": "Mousse",
+  "categoryId": "doces",
+  "image": "",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "",
+      "ingredients": [
+        {
+          "ingredientId": "suco",
+          "measureId": "cup",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "leite-condensado",
+          "measureId": "caixa",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "creme-de-leite",
+          "measureId": "caixa",
+          "quantity": "1"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Fazer o suco (pode ser limão ou maracujá), quanto mais puro melhor"
+        },
+        {
+          "description": "Congele o suco por algumas horas em uma forma de gelo para que ele fique em pedaços pequenos. Não congele por muito tempo pois acumula água."
+        },
+        {
+          "description": "Bater os ingredientes no liquidificador até misturar bem"
+        },
+        {
+          "description": "Guardar na geladeira por algumas horas"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-10T21:48:04.541Z"
+}
