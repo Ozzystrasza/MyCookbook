@@ -3,6 +3,9 @@
   const DESKTOP_MQ = "(min-width: 800px)";
   const BLANK_PAGE = `<div class="book-read book-read--blank" aria-hidden="true"></div>`;
   const COVER_PAGE = "<!--book-cover-->";
+  const COVER_IMAGE_PATH = "data/images/cover.webp";
+  const COVER_CACHE_NAME = "mycookbook-cover";
+  const COVER_MIN_HOLD_MS = 1800;
   const HEART_SVG = (on) => (on ? window.CookbookIcons.favoriteFilled() : window.CookbookIcons.favorite());
 
   const state = {
@@ -49,6 +52,12 @@
   let coverSlideAnim = null;
   let pageFlipAudio = null;
   let searchDebounceTimer = null;
+  let coverImageUrl = "";
+  let coverBlobUrl = null;
+  let coverAssetsReady = false;
+  let coverShownAt = 0;
+  let coverReadyPromise = null;
+  let coverOpenPending = false;
 
   function playPageFlipSound() {
     try {
@@ -63,6 +72,174 @@
     } catch (_) {
       /* ignore missing file / autoplay */
     }
+  }
+
+  async function decodeImageUrl(url) {
+    const img = new Image();
+    img.decoding = "async";
+    img.src = url;
+    if (typeof img.decode === "function") {
+      await img.decode();
+      return url;
+    }
+    await new Promise((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("image load failed"));
+    });
+    return url;
+  }
+
+  async function ensureCoverImage() {
+    if (coverImageUrl) {
+      await decodeImageUrl(coverImageUrl);
+      return coverImageUrl;
+    }
+
+    let response = null;
+    try {
+      if (typeof caches !== "undefined") {
+        const cache = await caches.open(COVER_CACHE_NAME);
+        response = await cache.match(COVER_IMAGE_PATH);
+        if (!response) {
+          const fetched = await fetch(COVER_IMAGE_PATH, { cache: "default" });
+          if (fetched.ok) {
+            await cache.put(COVER_IMAGE_PATH, fetched.clone());
+            response = fetched;
+          }
+        }
+      }
+    } catch (_) {
+      /* Cache API unavailable — fall through to fetch */
+    }
+
+    if (!response || !response.ok) {
+      response = await fetch(COVER_IMAGE_PATH, { cache: "default" });
+    }
+    if (!response.ok) throw new Error("cover load failed");
+
+    const blob = await response.blob();
+    if (coverBlobUrl) URL.revokeObjectURL(coverBlobUrl);
+    coverBlobUrl = URL.createObjectURL(blob);
+    coverImageUrl = coverBlobUrl;
+    await decodeImageUrl(coverImageUrl);
+    return coverImageUrl;
+  }
+
+  function applyCoverBackground() {
+    if (!coverImageUrl) return;
+    document.querySelectorAll(".book__page--cover").forEach((el) => {
+      el.style.setProperty("--cover-image", `url("${coverImageUrl}")`);
+      el.classList.add("book__page--cover-ready");
+    });
+  }
+
+  async function warmFirstSpreadThumbs() {
+    const count = isDesktop() ? 2 : 1;
+    const slot = qs("[data-flip-slot]");
+    const contentPages = slot
+      ? [...slot.querySelectorAll(".book__page, .stf-page")].filter(
+          (page) => !page.classList.contains("book__page--cover")
+        )
+      : [];
+    const imgs = contentPages
+      .slice(0, count)
+      .flatMap((page) => [...page.querySelectorAll("img[src]")"]);
+
+    if (imgs.length) {
+      await Promise.all(
+        imgs.map((img) => {
+          img.loading = "eager";
+          if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+          if (typeof img.decode === "function") {
+            return img.decode().catch(() => {});
+          }
+          return new Promise((resolve) => {
+            img.addEventListener("load", resolve, { once: true });
+            img.addEventListener("error", resolve, { once: true });
+          });
+        })
+      );
+      return;
+    }
+
+    const urls = visibleRecipes()
+      .map((recipe) => String(recipe.image || "").trim())
+      .filter(Boolean)
+      .slice(0, count);
+    await Promise.all(urls.map((url) => decodeImageUrl(url).catch(() => {})));
+  }
+
+  function remainingCoverHoldMs() {
+    if (!coverShownAt) return COVER_MIN_HOLD_MS;
+    return Math.max(0, COVER_MIN_HOLD_MS - (Date.now() - coverShownAt));
+  }
+
+  function resetCoverOpenState() {
+    clearTimeout(autoOpenTimer);
+    autoOpenTimer = null;
+    coverAssetsReady = false;
+    coverShownAt = 0;
+    coverReadyPromise = null;
+    coverOpenPending = false;
+  }
+
+  async function prepareCoverAssets() {
+    if (coverAssetsReady) {
+      applyCoverBackground();
+      return;
+    }
+    if (coverReadyPromise) return coverReadyPromise;
+
+    coverReadyPromise = (async () => {
+      try {
+        await ensureCoverImage();
+        applyCoverBackground();
+      } catch (_) {
+        /* Prefer opening without art over hanging forever. */
+      }
+      try {
+        await window.CookbookSync?.hydrateImages?.(
+          document.querySelector("[data-book]") || document
+        );
+        await warmFirstSpreadThumbs();
+      } catch (_) {
+        /* Thumbs are best-effort. */
+      }
+      coverAssetsReady = true;
+      if (!coverShownAt) coverShownAt = Date.now();
+    })();
+
+    try {
+      await coverReadyPromise;
+    } finally {
+      coverReadyPromise = null;
+    }
+  }
+
+  function requestOpenFromCover() {
+    coverOpenPending = true;
+    clearTimeout(autoOpenTimer);
+
+    void (async () => {
+      await prepareCoverAssets();
+      const wait = remainingCoverHoldMs();
+      if (wait > 0) {
+        await new Promise((resolve) => {
+          autoOpenTimer = setTimeout(resolve, wait);
+        });
+      }
+      if (!coverOpenPending) return;
+      if (!window.CookbookAuth.hasChosenRole()) {
+        coverOpenPending = false;
+        return;
+      }
+      if (state.coverPhase !== "closed" || !pageFlip) {
+        coverOpenPending = false;
+        return;
+      }
+      coverOpenPending = false;
+      beginCoverOpen();
+    })();
   }
 
   function qs(sel, root = document) {
@@ -683,6 +860,10 @@
         el.classList.add("book__page--cover");
         el.setAttribute("data-density", "hard");
         el.innerHTML = window.CookbookAuth.coverFaceHtml();
+        if (coverImageUrl) {
+          el.style.setProperty("--cover-image", `url("${coverImageUrl}")`);
+          el.classList.add("book__page--cover-ready");
+        }
         return el;
       }
       const blank = isBlankPageHtml(html);
@@ -977,12 +1158,16 @@
   function bindCoverAuth() {
     const root = qs("[data-flip-slot]") || qs("[data-flip-root]");
     window.CookbookAuth.bindCoverGate(root, () => {
-      openFromCover();
+      requestOpenFromCover();
     });
     window.CookbookAuth.restoreGateStep?.();
   }
 
   function openFromCover() {
+    requestOpenFromCover();
+  }
+
+  function beginCoverOpen() {
     if (state.coverPhase !== "closed") return;
     if (!window.CookbookAuth.hasChosenRole()) return;
     if (!pageFlip) return;
@@ -1025,14 +1210,18 @@
   function finishCoverClose() {
     if (state.coverPhase !== "closing") return;
     clearTimeout(closeFallbackTimer);
+    coverOpenPending = false;
     state.coverPhase = "closed";
     document.body.classList.add("is-gated");
     // Rebuild full catalog under the cover (still on index 0) so the next open
     // flips onto page 1 instead of the leftover thin close page.
     const content = padEvenPages(browseContentHtmlPages());
     mountFlipBook([COVER_PAGE, ...content], 0, { showCover: true, skipCoverCenter: true });
+    applyCoverBackground();
+    coverShownAt = coverAssetsReady ? Date.now() : 0;
     updateChrome();
     window.CookbookUI?.mountShell?.({ active: "home" });
+    void prepareCoverAssets();
     requestAnimationFrame(() => {
       requestAnimationFrame(() => centerCoverAfterClose());
     });
@@ -1040,7 +1229,9 @@
 
   function closeToCover() {
     if (state.coverPhase === "closed" || state.coverPhase === "closing") return;
+    coverOpenPending = false;
     clearTimeout(autoOpenTimer);
+    autoOpenTimer = null;
     clearTimeout(closeFallbackTimer);
 
     // Capture current view before resetting — close from this page/spread, not page 1.
@@ -2420,13 +2611,15 @@
       return;
     }
 
+    resetCoverOpenState();
     state.coverPhase = "closed";
     document.body.classList.add("is-gated");
     render();
 
     if (window.CookbookAuth.hasChosenRole()) {
-      clearTimeout(autoOpenTimer);
-      autoOpenTimer = setTimeout(() => openFromCover(), 480);
+      requestOpenFromCover();
+    } else {
+      void prepareCoverAssets();
     }
   }
 
