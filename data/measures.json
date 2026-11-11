@@ -25,6 +25,11 @@
     "abbrev": "c.s."
   },
   {
+    "id": "copo",
+    "name": "copo",
+    "abbrev": "cp"
+  },
+  {
     "id": "g",
     "name": "grama",
     "abbrev": "g"
