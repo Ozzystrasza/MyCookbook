@@ -1262,9 +1262,18 @@ textarea.field-control {
 
 .tabs {
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  gap: 0.35rem;
+  flex-wrap: nowrap;
   margin-bottom: 1rem;
+}
+
+.tabs .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: nowrap;
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+  font-size: clamp(0.78rem, 2.8vw, 1rem);
 }
 
 .tabs button.is-active {
@@ -2206,7 +2215,7 @@ body.is-managing .book__actions {
 
 .book-form .tabs {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.35rem;
 }
 
