@@ -7,6 +7,7 @@ window.CookbookConfig = {
     role: "mycookbook_role",
     token: "mycookbook_token",
     favorites: "mycookbook_favorites",
+    tested: "mycookbook_tested",
     shoppingList: "mycookbook_shopping_list",
     enterOpened: "mycookbook_enter_opened",
     openShopping: "mycookbook_open_shopping",

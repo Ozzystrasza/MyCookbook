@@ -158,8 +158,23 @@
               data-filter-panel
               hidden
               role="dialog"
-              aria-label="Filtrar por categoria"
+              aria-label="Filtrar receitas"
             >
+              <p class="book-filter__title">Status</p>
+              <div class="book-filter__status" data-filter-status role="radiogroup" aria-label="Status da receita">
+                <label class="shopping-check book-filter__option">
+                  <input type="radio" name="tested-filter" value="all" data-tested-filter checked />
+                  <span>Todas</span>
+                </label>
+                <label class="shopping-check book-filter__option">
+                  <input type="radio" name="tested-filter" value="tested" data-tested-filter />
+                  <span>Testadas</span>
+                </label>
+                <label class="shopping-check book-filter__option">
+                  <input type="radio" name="tested-filter" value="untested" data-tested-filter />
+                  <span>Não testadas</span>
+                </label>
+              </div>
               <p class="book-filter__title">Categorias</p>
               <div class="book-filter__list" data-filter-list></div>
               <div class="book-filter__actions">

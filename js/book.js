@@ -7,6 +7,7 @@
   const COVER_CACHE_NAME = "mycookbook-cover";
   const COVER_MIN_HOLD_MS = 1800;
   const HEART_SVG = (on) => (on ? window.CookbookIcons.favoriteFilled() : window.CookbookIcons.favorite());
+  const POT_SVG = (on) => (on ? window.CookbookIcons.cookingFilled() : window.CookbookIcons.cooking());
 
   const state = {
     recipes: [],
@@ -31,6 +32,8 @@
     filterOpen: false,
     favoriteIds: new Set(),
     favoritesOnly: false,
+    testedIds: new Set(),
+    testedFilter: "all",
     coverPhase: "closed",
     pendingDeepLink: null,
     skipModeBridge: false,
@@ -258,6 +261,10 @@
     return window.CookbookConfig?.storageKeys?.favorites || "mycookbook_favorites";
   }
 
+  function testedStorageKey() {
+    return window.CookbookConfig?.storageKeys?.tested || "mycookbook_tested";
+  }
+
   function parseFavoriteIds(value) {
     if (!Array.isArray(value)) return [];
     return value.filter((id) => typeof id === "string" && id);
@@ -283,6 +290,14 @@
 
   function saveFavoritesLocal() {
     writeLocalFavoriteIds(favoritesStorageKey(), state.favoriteIds);
+  }
+
+  function saveTestedLocal() {
+    writeLocalFavoriteIds(testedStorageKey(), state.testedIds);
+  }
+
+  function loadTested() {
+    state.testedIds = new Set(readLocalFavoriteIds(testedStorageKey()));
   }
 
   async function migrateFavoritesIfNeeded(storageKey) {
@@ -327,11 +342,22 @@
     return state.favoriteIds.has(id);
   }
 
+  function isTested(id) {
+    return state.testedIds.has(id);
+  }
+
   function favoriteBtnHtml(recipeId, extraClass = "") {
     const on = isFavorite(recipeId);
     const label = on ? "Remover dos favoritos" : "Adicionar aos favoritos";
     const cls = extraClass ? `favorite-btn ${extraClass}` : "favorite-btn";
     return `<button type="button" class="${cls}" data-favorite-toggle="${escapeHtml(recipeId)}" aria-pressed="${on ? "true" : "false"}" title="${label}" aria-label="${label}">${HEART_SVG(on)}</button>`;
+  }
+
+  function testedBtnHtml(recipeId, extraClass = "") {
+    const on = isTested(recipeId);
+    const label = on ? "Marcar como não testada" : "Marcar como testada";
+    const cls = extraClass ? `tested-btn ${extraClass}` : "tested-btn";
+    return `<button type="button" class="${cls}" data-tested-toggle="${escapeHtml(recipeId)}" aria-pressed="${on ? "true" : "false"}" title="${label}" aria-label="${label}">${POT_SVG(on)}</button>`;
   }
 
   function syncFavoriteButtons() {
@@ -347,6 +373,19 @@
     });
   }
 
+  function syncTestedButtons() {
+    document.querySelectorAll("[data-tested-toggle]").forEach((btn) => {
+      const id = btn.getAttribute("data-tested-toggle");
+      const on = isTested(id);
+      const label = on ? "Marcar como não testada" : "Marcar como testada";
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.setAttribute("aria-label", label);
+      btn.setAttribute("title", label);
+      btn.title = label;
+      btn.innerHTML = POT_SVG(on);
+    });
+  }
+
   function refreshFavoriteUi() {
     if (state.mode === "browse" && state.favoritesOnly) {
       state.browseIndex = 0;
@@ -358,12 +397,31 @@
     updateChrome();
   }
 
+  function refreshTestedUi() {
+    if (state.mode === "browse" && state.testedFilter !== "all") {
+      state.browseIndex = 0;
+      state.listPages = [];
+      render();
+      return;
+    }
+    syncTestedButtons();
+    updateChrome();
+  }
+
   function toggleFavorite(id) {
     if (!id) return;
     if (state.favoriteIds.has(id)) state.favoriteIds.delete(id);
     else state.favoriteIds.add(id);
     saveFavoritesLocal();
     refreshFavoriteUi();
+  }
+
+  function toggleTested(id) {
+    if (!id) return;
+    if (state.testedIds.has(id)) state.testedIds.delete(id);
+    else state.testedIds.add(id);
+    saveTestedLocal();
+    refreshTestedUi();
   }
 
   function toggleFavoritesFilter() {
@@ -378,6 +436,11 @@
     let recipes = state.recipes;
     if (state.favoritesOnly) {
       recipes = recipes.filter((recipe) => state.favoriteIds.has(recipe.id));
+    }
+    if (state.testedFilter === "tested") {
+      recipes = recipes.filter((recipe) => state.testedIds.has(recipe.id));
+    } else if (state.testedFilter === "untested") {
+      recipes = recipes.filter((recipe) => !state.testedIds.has(recipe.id));
     }
     if (state.categoryFilters.length) {
       const allowed = new Set(state.categoryFilters);
@@ -396,10 +459,16 @@
 
   function emptyBrowseHtml() {
     const narrowed =
-      state.favoritesOnly || state.categoryFilters.length > 0 || state.searchQuery.trim();
+      state.favoritesOnly ||
+      state.testedFilter !== "all" ||
+      state.categoryFilters.length > 0 ||
+      state.searchQuery.trim();
     if (state.recipes.length && narrowed) {
       if (state.favoritesOnly && !state.favoriteIds.size) {
         return `<div class="empty">Nenhuma receita favorita ainda. Toque no coração em uma receita para guardar.</div>`;
+      }
+      if (state.testedFilter === "tested" && !state.testedIds.size) {
+        return `<div class="empty">Nenhuma receita testada ainda. Toque na panela ao lado do nome para marcar.</div>`;
       }
       return `<div class="empty empty--with-action">
         <p>Nenhuma receita corresponde a estes filtros.</p>
@@ -1350,24 +1419,39 @@
           </button>
           ${favoriteBtnHtml(recipe.id, "book-preview__favorite")}
         </div>
-        <button type="button" class="book-preview__text" data-open-recipe="${id}">
-          <p class="book-preview__category">${escapeHtml(categoryName(recipe.categoryId))}</p>
-          <h2 class="book-preview__title">${title}</h2>
-        </button>
+        <div class="book-preview__text">
+          <button type="button" class="book-preview__open" data-open-recipe="${id}">
+            <p class="book-preview__category">${escapeHtml(categoryName(recipe.categoryId))}</p>
+          </button>
+          <div class="book-preview__title-row">
+            <button type="button" class="book-preview__title-btn" data-open-recipe="${id}">
+              <h2 class="book-preview__title">${title}</h2>
+            </button>
+            ${testedBtnHtml(recipe.id, "book-preview__tested")}
+          </div>
+        </div>
       </div>`;
   }
 
   function listRowHtml(recipe) {
     const id = escapeHtml(recipe.id);
+    const title = escapeHtml(recipe.title);
     return `
       <div class="book-list__row">
-        <button type="button" class="book-list__open" data-open-recipe="${id}">
+        <button type="button" class="book-list__thumb-btn" data-open-recipe="${id}" aria-label="Abrir ${title}">
           ${window.CookbookUI.thumbHtml(recipe.image, "book-list__thumb")}
-          <div class="book-list__meta">
-            <p class="book-list__category">${escapeHtml(categoryName(recipe.categoryId))}</p>
-            <h3 class="book-list__title">${escapeHtml(recipe.title)}</h3>
-          </div>
         </button>
+        <div class="book-list__meta">
+          <button type="button" class="book-list__text-btn" data-open-recipe="${id}">
+            <p class="book-list__category">${escapeHtml(categoryName(recipe.categoryId))}</p>
+          </button>
+          <div class="book-list__title-row">
+            <button type="button" class="book-list__title-btn" data-open-recipe="${id}">
+              <h3 class="book-list__title">${title}</h3>
+            </button>
+            ${testedBtnHtml(recipe.id, "book-list__tested")}
+          </div>
+        </div>
         ${favoriteBtnHtml(recipe.id, "book-list__favorite")}
       </div>`;
   }
@@ -1396,7 +1480,11 @@
         <p class="book-read__eyebrow">${escapeHtml(category)}</p>
         ${favoriteBtnHtml(recipe.id, "book-read__favorite")}
       </div>`);
-    blocks.push(`<h1 class="book-read__title">${escapeHtml(recipe.title)}</h1>`);
+    blocks.push(`
+      <div class="book-read__title-row">
+        <h1 class="book-read__title">${escapeHtml(recipe.title)}</h1>
+        ${testedBtnHtml(recipe.id, "book-read__tested")}
+      </div>`);
     if (recipe.image) {
       blocks.push(
         `<img class="book-read__media" src="${escapeHtml(recipe.image)}" alt="" loading="lazy" decoding="async" />`
@@ -1568,7 +1656,7 @@
     });
 
     if (filterToggle) {
-      const filtered = state.categoryFilters.length > 0;
+      const filtered = state.categoryFilters.length > 0 || state.testedFilter !== "all";
       const filterOn = filtered || state.filterOpen;
       filterToggle.setAttribute("aria-pressed", filtered ? "true" : "false");
       filterToggle.setAttribute("aria-expanded", state.filterOpen ? "true" : "false");
@@ -1666,6 +1754,15 @@
     });
   }
 
+  function syncTestedFilterRadios(value = state.testedFilter) {
+    const status = qs("[data-filter-status]");
+    if (!status) return;
+    const next = value === "tested" || value === "untested" ? value : "all";
+    status.querySelectorAll('input[type="radio"][data-tested-filter]').forEach((input) => {
+      input.checked = input.value === next;
+    });
+  }
+
   function renderFilterList() {
     const list = qs("[data-filter-list]");
     if (!list) return;
@@ -1699,6 +1796,7 @@
   function openFilterPanel() {
     const panel = qs("[data-filter-panel]");
     if (!panel) return;
+    syncTestedFilterRadios();
     renderFilterList();
     state.filterOpen = true;
     panel.hidden = false;
@@ -1728,7 +1826,12 @@
           input.getAttribute("data-category-id")
         )
       : [];
+    const status = qs("[data-filter-status]");
+    const checkedStatus = status?.querySelector('input[type="radio"][data-tested-filter]:checked');
+    const nextStatus = checkedStatus?.value;
     state.categoryFilters = next;
+    state.testedFilter =
+      nextStatus === "tested" || nextStatus === "untested" ? nextStatus : "all";
     state.browseIndex = 0;
     state.listPages = [];
     closeFilterPanel();
@@ -1737,8 +1840,10 @@
 
   function resetFilters() {
     state.categoryFilters = [];
+    state.testedFilter = "all";
     state.browseIndex = 0;
     state.listPages = [];
+    syncTestedFilterRadios("all");
     syncFilterCheckboxes();
     closeFilterPanel();
     render();
@@ -2357,6 +2462,13 @@
   }
 
   function onFavoriteClick(e) {
+    const tested = e.target.closest("[data-tested-toggle]");
+    if (tested) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      void toggleTested(tested.getAttribute("data-tested-toggle"));
+      return;
+    }
     const fav = e.target.closest("[data-favorite-toggle]");
     if (!fav) return;
     e.preventDefault();
@@ -2366,7 +2478,11 @@
 
   function onFlipSlotEdgeTap(e) {
     if (coverIsInteractive() || !usesFlipBook() || !pageFlip || state.flipping) return;
-    if (e.target.closest("button, a, input, label, [data-open-recipe], [data-favorite-toggle]")) {
+    if (
+      e.target.closest(
+        "button, a, input, label, [data-open-recipe], [data-favorite-toggle], [data-tested-toggle]"
+      )
+    ) {
       return;
     }
     const slot = qs("[data-flip-slot]");
@@ -2480,12 +2596,14 @@
       if (e.target.closest("[data-clear-browse-filters]")) {
         e.preventDefault();
         state.categoryFilters = [];
+        state.testedFilter = "all";
         state.favoritesOnly = false;
         state.searchQuery = "";
         const search = qs("[data-recipe-search]");
         if (search) search.value = "";
         state.browseIndex = 0;
         state.listPages = [];
+        syncTestedFilterRadios("all");
         syncFilterCheckboxes();
         closeFilterPanel();
         render();
@@ -2582,6 +2700,7 @@
       /* ignore */
     }
     await loadFavorites();
+    loadTested();
 
     try {
       [state.measures, state.ingredients] = await Promise.all([
