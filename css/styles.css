@@ -824,10 +824,11 @@ textarea.field-control {
   width: 100%;
 }
 
+.category-tags__header {
+  margin: 0 0 0.15rem;
+}
+
 .category-tags {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
   width: 100%;
   min-width: 0;
 }
@@ -836,10 +837,12 @@ textarea.field-control {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
+  margin-top: 0.45rem;
 }
 
 .category-tags__list:empty {
   display: none;
+  margin-top: 0;
 }
 
 .category-tag {
@@ -881,10 +884,6 @@ textarea.field-control {
 .category-tag__remove:focus-visible {
   color: var(--ink);
   background: rgba(0, 0, 0, 0.06);
-}
-
-.category-tags__add {
-  width: 100%;
 }
 
 .ingredient-picker__trigger {

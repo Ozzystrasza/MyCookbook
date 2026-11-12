@@ -61,13 +61,14 @@
               <input id="title" name="title" required />
             </label>
             <div class="field">
-              <span>Categorias</span>
+              <div class="toolbar toolbar--compact category-tags__header">
+                <span class="toolbar__label">Categorias</span>
+                <button type="button" class="icon-btn" data-category-trigger aria-haspopup="dialog" aria-label="Adicionar categoria" title="Adicionar categoria">
+                  ${plusIcon()}
+                </button>
+              </div>
               <div class="category-tags" data-category-tags>
                 <div class="category-tags__list" data-category-chips></div>
-                <button type="button" class="ingredient-picker__trigger category-tags__add" data-category-trigger aria-haspopup="dialog">
-                  <span class="ingredient-picker__value">Adicionar…</span>
-                  ${chevronIcon()}
-                </button>
               </div>
             </div>
           </div>

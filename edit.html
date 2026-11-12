@@ -29,13 +29,16 @@
               <input id="title" name="title" required />
             </label>
             <div class="field">
-              <span>Categorias</span>
+              <div class="toolbar toolbar--compact category-tags__header">
+                <span class="toolbar__label">Categorias</span>
+                <button type="button" class="icon-btn" data-category-trigger aria-haspopup="dialog" aria-label="Adicionar categoria" title="Adicionar categoria">
+                  <svg width="20" height="20" viewBox="0 -960 960 960" aria-hidden="true">
+                    <path fill="currentColor" d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
+                  </svg>
+                </button>
+              </div>
               <div class="category-tags" data-category-tags>
                 <div class="category-tags__list" data-category-chips></div>
-                <button type="button" class="ingredient-picker__trigger category-tags__add" data-category-trigger aria-haspopup="dialog">
-                  <span class="ingredient-picker__value">Adicionar…</span>
-                  <svg class="ingredient-picker__chevron" width="16" height="16" viewBox="0 -960 960 960" aria-hidden="true"><path fill="currentColor" d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"/></svg>
-                </button>
               </div>
             </div>
           </div>

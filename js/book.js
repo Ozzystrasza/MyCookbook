@@ -247,9 +247,12 @@
     return state.categories.find((c) => c.id === id)?.name || id || "";
   }
 
-  function recipeCategoriesLabel(recipe) {
+  function recipeCategoriesLabel(recipe, { all = false } = {}) {
     const ids = window.CookbookData.recipeCategoryIds(recipe);
     if (!ids.length) return "Sem categoria";
+    if (!all) {
+      return categoryName(ids[0]) || ids[0] || "Sem categoria";
+    }
     return ids.map((id) => categoryName(id) || id).filter(Boolean).join(" · ") || "Sem categoria";
   }
 
@@ -1470,7 +1473,7 @@
   function buildReadingBlocks(recipe) {
     const measures = measureMap();
     const ingredients = ingredientMap();
-    const category = recipeCategoriesLabel(recipe);
+    const category = recipeCategoriesLabel(recipe, { all: true });
     const blocks = [];
 
     blocks.push(`
