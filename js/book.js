@@ -447,12 +447,11 @@
         return state.categoryFilters.every((id) => ids.includes(id));
       });
     }
-    const query = state.searchQuery.trim().toLowerCase();
+    const normalize = window.CookbookData.normalizeName;
+    const query = normalize(state.searchQuery);
     if (query) {
       recipes = recipes.filter((recipe) =>
-        String(recipe.title || "")
-          .toLowerCase()
-          .includes(query)
+        normalize(recipe.title || "").includes(query)
       );
     }
     return recipes;

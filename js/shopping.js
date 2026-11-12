@@ -627,10 +627,11 @@
   async function renderCatalogList() {
     const { ingredients } = await ensureData();
     const listRoot = catalogEl.querySelector("[data-catalog-list]");
-    const query = (catalogEl.querySelector("[data-catalog-search]")?.value || "").trim().toLowerCase();
+    const normalize = window.CookbookData.normalizeName;
+    const query = normalize(catalogEl.querySelector("[data-catalog-search]")?.value || "");
     const items = window.CookbookData.sortByName(
       Object.values(ingredients).filter(
-        (ing) => !query || String(ing.name || "").toLowerCase().includes(query)
+        (ing) => !query || normalize(ing.name || "").includes(query)
       )
     );
     const rows = items.length

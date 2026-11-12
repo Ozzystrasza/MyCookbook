@@ -507,7 +507,8 @@
 
   function renderPickList() {
     const list = pickModal.querySelector("[data-pick-list]");
-    const query = (pickModal.querySelector("[data-pick-search]")?.value || "").trim().toLowerCase();
+    const normalize = window.CookbookData.normalizeName;
+    const query = normalize(pickModal.querySelector("[data-pick-search]")?.value || "");
     const meta = PICK_META[pickKind] || PICK_META.ingredient;
     const items = catalogItems(pickKind);
     const selected = pickKind === "category" ? new Set(selectedCategoryIds) : null;
@@ -515,8 +516,8 @@
       .filter((item) => {
         if (selected?.has(item.id)) return false;
         if (!query) return true;
-        const name = String(item.name || "").toLowerCase();
-        const abbrev = String(item.abbrev || "").toLowerCase();
+        const name = normalize(item.name || "");
+        const abbrev = normalize(item.abbrev || "");
         return name.includes(query) || abbrev.includes(query);
       })
       .slice()
