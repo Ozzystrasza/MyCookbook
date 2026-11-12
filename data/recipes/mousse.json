@@ -1,8 +1,8 @@
 {
   "id": "mousse",
   "title": "Mousse",
-  "categoryIds": ["doces"],
-  "image": "",
+  "categoryId": "doces",
+  "image": "data/images/recipes/mousse.png",
   "groups": [
     {
       "id": "group-1",
@@ -10,7 +10,7 @@
       "ingredients": [
         {
           "ingredientId": "suco",
-          "measureId": "cup",
+          "measureId": "copo",
           "quantity": "1"
         },
         {
@@ -40,5 +40,5 @@
       ]
     }
   ],
-  "updatedAt": "2026-11-10T21:48:04.541Z"
+  "updatedAt": "2026-11-11T06:43:34.908Z"
 }

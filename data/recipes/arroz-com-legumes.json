@@ -1,0 +1,57 @@
+{
+  "id": "arroz-com-legumes",
+  "title": "Arroz com legumes",
+  "categoryId": "vegetariano",
+  "image": "data/images/recipes/arroz-com-legumes.png",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "",
+      "ingredients": [
+        {
+          "ingredientId": "arroz",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "eggs",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "piment-o",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "cenoura",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "azeite",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Cozinhar o arroz (pode usar arroz já cozido previamente)"
+        },
+        {
+          "description": "Picar os legumes crus em pedaços pequenos"
+        },
+        {
+          "description": "Frite os ovos mexidos"
+        },
+        {
+          "description": "Quando os ovos tiverem fritos adicione o arroz e um pouco de azeite, misture"
+        },
+        {
+          "description": "Adicione os legumes e misture novamente"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-11T23:21:24.747Z"
+}

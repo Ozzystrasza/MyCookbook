@@ -10,6 +10,21 @@
     "image": "data/images/ingredients/amido-de-milho.png"
   },
   {
+    "id": "arroz",
+    "name": "Arroz",
+    "image": "data/images/ingredients/arroz.png"
+  },
+  {
+    "id": "azeite",
+    "name": "Azeite",
+    "image": "data/images/ingredients/azeite.png"
+  },
+  {
+    "id": "cenoura",
+    "name": "Cenoura",
+    "image": "data/images/ingredients/cenoura.png"
+  },
+  {
     "id": "chocolate",
     "name": "Chocolate em pó",
     "image": "data/images/ingredients/chocolate.png"
@@ -17,7 +32,7 @@
   {
     "id": "creme-de-leite",
     "name": "Creme de leite",
-    "image": ""
+    "image": "data/images/ingredients/creme-de-leite.png"
   },
   {
     "id": "flour",
@@ -40,6 +55,11 @@
     "image": "data/images/ingredients/leite-condensado.png"
   },
   {
+    "id": "mandioca",
+    "name": "Mandioca",
+    "image": ""
+  },
+  {
     "id": "butter",
     "name": "Manteiga",
     "image": "data/images/ingredients/butter.png"
@@ -57,7 +77,12 @@
   {
     "id": "p-o",
     "name": "Pão",
-    "image": ""
+    "image": "data/images/ingredients/p-o.png"
+  },
+  {
+    "id": "piment-o",
+    "name": "Pimentão",
+    "image": "data/images/ingredients/piment-o.png"
   },
   {
     "id": "salt",

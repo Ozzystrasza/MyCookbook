@@ -1,6 +1,18 @@
 [
   {
+    "id": "almo-o",
+    "name": "Almoço"
+  },
+  {
     "id": "doces",
     "name": "Doces"
+  },
+  {
+    "id": "petiscos",
+    "name": "Petiscos"
+  },
+  {
+    "id": "vegetariano",
+    "name": "Vegetariano"
   }
 ]

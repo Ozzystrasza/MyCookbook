@@ -1,14 +1,22 @@
 [
   {
+    "id": "arroz-com-legumes",
+    "title": "Arroz com legumes",
+    "categoryId": "vegetariano",
+    "image": "data/images/recipes/arroz-com-legumes.png"
+  },
+  {
     "id": "bolo",
     "title": "Bolo",
-    "categoryIds": ["doces"],
+    "categoryIds": [
+      "doces"
+    ],
     "image": "data/images/recipes/bolo.png"
   },
   {
     "id": "mousse",
     "title": "Mousse",
-    "categoryIds": ["doces"],
-    "image": ""
+    "categoryId": "doces",
+    "image": "data/images/recipes/mousse.png"
   }
 ]
