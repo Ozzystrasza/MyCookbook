@@ -1,0 +1,66 @@
+{
+  "id": "torta-de-amendoim",
+  "title": "Torta de amendoim",
+  "categoryIds": [
+    "sobremesas",
+    "doces"
+  ],
+  "image": "data/images/recipes/torta-de-amendoim.webp",
+  "groups": [
+    {
+      "id": "creme",
+      "name": "Creme",
+      "ingredients": [
+        {
+          "ingredientId": "leite-condensado",
+          "measureId": "caixa",
+          "quantity": "2"
+        },
+        {
+          "ingredientId": "creme-de-leite",
+          "measureId": "caixa",
+          "quantity": "2"
+        },
+        {
+          "ingredientId": "amendoim-torrado-e-mo-do",
+          "measureId": "g",
+          "quantity": "500"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Em uma bacia, adicione todos os ingredientes e misture bem até virar um creme homogêneo, reserve. Não use todo o amendoim, reserve um pouco para finalizar a montagem"
+        }
+      ]
+    },
+    {
+      "id": "montagem",
+      "name": "Montagem",
+      "ingredients": [
+        {
+          "ingredientId": "biscoito",
+          "measureId": "pacote",
+          "quantity": "2"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Encha as caixas vazias de leite condensado com água. Será usado para molhar o biscoito"
+        },
+        {
+          "description": "Molhe o biscoito e coloque no tabuleiro formando uma camada, cubra com parte do creme"
+        },
+        {
+          "description": "Repita o passo anterior até formar várias camadas de biscoito e creme"
+        },
+        {
+          "description": "Faça a última camada de creme, e polvilhe o restante do amendoim por cima"
+        },
+        {
+          "description": "Leve a geladeira e deixe por algumas horas antes de servir"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-13T13:52:10.451Z"
+}

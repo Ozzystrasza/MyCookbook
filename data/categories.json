@@ -8,8 +8,16 @@
     "name": "Doces"
   },
   {
+    "id": "lanches",
+    "name": "Lanches"
+  },
+  {
     "id": "petiscos",
     "name": "Petiscos"
+  },
+  {
+    "id": "sobremesas",
+    "name": "Sobremesas"
   },
   {
     "id": "vegetariano",

@@ -5,6 +5,16 @@
     "image": "data/images/ingredients/sugar.png"
   },
   {
+    "id": "gua",
+    "name": "Água",
+    "image": "data/images/ingredients/gua.png"
+  },
+  {
+    "id": "amendoim-torrado-e-mo-do",
+    "name": "Amendoim torrado e moído",
+    "image": ""
+  },
+  {
     "id": "amido-de-milho",
     "name": "Amido de milho",
     "image": "data/images/ingredients/amido-de-milho.png"
@@ -18,6 +28,11 @@
     "id": "azeite",
     "name": "Azeite",
     "image": "data/images/ingredients/azeite.png"
+  },
+  {
+    "id": "biscoito",
+    "name": "Biscoito",
+    "image": ""
   },
   {
     "id": "cenoura",
@@ -57,12 +72,17 @@
   {
     "id": "mandioca",
     "name": "Mandioca",
-    "image": ""
+    "image": "data/images/ingredients/mandioca.png"
   },
   {
     "id": "butter",
     "name": "Manteiga",
     "image": "data/images/ingredients/butter.png"
+  },
+  {
+    "id": "milho-de-pipoca",
+    "name": "Milho de pipoca",
+    "image": "data/images/ingredients/milho-de-pipoca.png"
   },
   {
     "id": "leo",
@@ -85,6 +105,11 @@
     "image": "data/images/ingredients/piment-o.png"
   },
   {
+    "id": "queijo-parmes-o",
+    "name": "Queijo parmesão",
+    "image": "data/images/ingredients/queijo-parmes-o.png"
+  },
+  {
     "id": "salt",
     "name": "Sal",
     "image": "data/images/ingredients/salt.png"
@@ -93,5 +118,10 @@
     "id": "suco",
     "name": "Suco",
     "image": "data/images/ingredients/suco.png"
+  },
+  {
+    "id": "temperos",
+    "name": "Temperos",
+    "image": "data/images/ingredients/temperos.png"
   }
 ]

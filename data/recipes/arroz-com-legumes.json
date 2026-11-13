@@ -1,7 +1,10 @@
 {
   "id": "arroz-com-legumes",
   "title": "Arroz com legumes",
-  "categoryId": "vegetariano",
+  "categoryIds": [
+    "vegetariano",
+    "almo-o"
+  ],
   "image": "data/images/recipes/arroz-com-legumes.png",
   "groups": [
     {
@@ -53,5 +56,5 @@
       ]
     }
   ],
-  "updatedAt": "2026-11-11T23:21:24.747Z"
+  "updatedAt": "2026-11-12T13:51:50.701Z"
 }

@@ -1,0 +1,67 @@
+{
+  "id": "bolinho-frito-bolinho-de-chuva",
+  "title": "Bolinho frito (Bolinho de chuva)",
+  "categoryIds": [
+    "lanches",
+    "doces"
+  ],
+  "image": "data/images/recipes/bolinho-frito-bolinho-de-chuva.jpg",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "",
+      "ingredients": [
+        {
+          "ingredientId": "eggs",
+          "measureId": "piece",
+          "quantity": "2"
+        },
+        {
+          "ingredientId": "sugar",
+          "measureId": "cup",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "butter",
+          "measureId": "colher",
+          "quantity": "2"
+        },
+        {
+          "ingredientId": "gua",
+          "measureId": "cup",
+          "quantity": "1/2"
+        },
+        {
+          "ingredientId": "salt",
+          "measureId": "pinch",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "fermento",
+          "measureId": "colher",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "flour",
+          "measureId": "g",
+          "quantity": "500"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Misture todos os ingredientes em uma bacia"
+        },
+        {
+          "description": "Amasse bem até virar uma massa homogênea"
+        },
+        {
+          "description": "Faça bolinhas com a massa (não muito grandes para não ficar cru no meio)"
+        },
+        {
+          "description": "Frite em óleo quente (ou air fryer)"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-13T10:35:49.041Z"
+}

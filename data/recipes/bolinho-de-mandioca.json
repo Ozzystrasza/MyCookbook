@@ -1,0 +1,65 @@
+{
+  "id": "bolinho-de-mandioca",
+  "title": "Bolinho de mandioca",
+  "categoryIds": [
+    "petiscos",
+    "vegetariano"
+  ],
+  "image": "data/images/recipes/bolinho-de-mandioca.png",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "",
+      "ingredients": [
+        {
+          "ingredientId": "mandioca",
+          "measureId": "cup",
+          "quantity": "6"
+        },
+        {
+          "ingredientId": "creme-de-leite",
+          "measureId": "caixa",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "queijo-parmes-o",
+          "measureId": "cup",
+          "quantity": "1/2"
+        },
+        {
+          "ingredientId": "flour",
+          "measureId": "cup",
+          "quantity": "1/2"
+        },
+        {
+          "ingredientId": "temperos",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "butter",
+          "measureId": "colher",
+          "quantity": "1"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Cozinhe a mandioca com sal"
+        },
+        {
+          "description": "Amasse bem, ainda quente"
+        },
+        {
+          "description": "Adicione os outros ingredientes e misture bem"
+        },
+        {
+          "description": "Forme bolinhas com a massa"
+        },
+        {
+          "description": "Frite em óleo quente, ou na air fryer"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-13T00:59:09.527Z"
+}

@@ -2,21 +2,64 @@
   {
     "id": "arroz-com-legumes",
     "title": "Arroz com legumes",
-    "categoryId": "vegetariano",
+    "categoryIds": [
+      "vegetariano",
+      "almo-o"
+    ],
     "image": "data/images/recipes/arroz-com-legumes.png"
+  },
+  {
+    "id": "bolinho-de-mandioca",
+    "title": "Bolinho de mandioca",
+    "categoryIds": [
+      "petiscos",
+      "vegetariano"
+    ],
+    "image": "data/images/recipes/bolinho-de-mandioca.png"
+  },
+  {
+    "id": "bolinho-frito-bolinho-de-chuva",
+    "title": "Bolinho frito (Bolinho de chuva)",
+    "categoryIds": [
+      "lanches",
+      "doces"
+    ],
+    "image": "data/images/recipes/bolinho-frito-bolinho-de-chuva.jpg"
   },
   {
     "id": "bolo",
     "title": "Bolo",
     "categoryIds": [
-      "doces"
+      "doces",
+      "lanches"
     ],
     "image": "data/images/recipes/bolo.png"
   },
   {
     "id": "mousse",
     "title": "Mousse",
-    "categoryId": "doces",
+    "categoryIds": [
+      "doces",
+      "sobremesas"
+    ],
     "image": "data/images/recipes/mousse.png"
+  },
+  {
+    "id": "pipoca",
+    "title": "Pipoca",
+    "categoryIds": [
+      "petiscos",
+      "lanches"
+    ],
+    "image": "data/images/recipes/pipoca.png"
+  },
+  {
+    "id": "torta-de-amendoim",
+    "title": "Torta de amendoim",
+    "categoryIds": [
+      "sobremesas",
+      "doces"
+    ],
+    "image": "data/images/recipes/torta-de-amendoim.webp"
   }
 ]

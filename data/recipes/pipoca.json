@@ -1,0 +1,58 @@
+{
+  "id": "pipoca",
+  "title": "Pipoca",
+  "categoryIds": [
+    "petiscos",
+    "lanches"
+  ],
+  "image": "data/images/recipes/pipoca.png",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "",
+      "ingredients": [
+        {
+          "ingredientId": "milho-de-pipoca",
+          "measureId": "cup",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "leo",
+          "measureId": "cup",
+          "quantity": "1/3"
+        },
+        {
+          "ingredientId": "salt",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "temperos",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Coloque a panela no fogo alto e adicione o óleo"
+        },
+        {
+          "description": "Adicione o milho e o sal, e misture bem"
+        },
+        {
+          "description": "Tampe e deixe no fogo até começar a estourar"
+        },
+        {
+          "description": "Quando começar a estourar balance o milho dentro da panela periodicamente (se for uma pipoqueira, mexa sem parar, não precisa ser rápido)"
+        },
+        {
+          "description": "Quando os estouros estiverem mais escassos, diminua o fogo e continue mexendo"
+        },
+        {
+          "description": "Quando parar de estourar está pronto"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-13T10:33:06.421Z"
+}

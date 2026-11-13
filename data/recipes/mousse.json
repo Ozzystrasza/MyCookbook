@@ -1,7 +1,10 @@
 {
   "id": "mousse",
   "title": "Mousse",
-  "categoryId": "doces",
+  "categoryIds": [
+    "doces",
+    "sobremesas"
+  ],
   "image": "data/images/recipes/mousse.png",
   "groups": [
     {
@@ -40,5 +43,5 @@
       ]
     }
   ],
-  "updatedAt": "2026-11-11T06:43:34.908Z"
+  "updatedAt": "2026-11-12T16:02:14.320Z"
 }
