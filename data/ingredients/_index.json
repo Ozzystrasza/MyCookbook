@@ -12,7 +12,7 @@
   {
     "id": "amendoim-torrado-e-mo-do",
     "name": "Amendoim torrado e moído",
-    "image": ""
+    "image": "data/images/ingredients/amendoim-torrado-e-mo-do.png"
   },
   {
     "id": "amido-de-milho",
@@ -32,7 +32,7 @@
   {
     "id": "biscoito",
     "name": "Biscoito",
-    "image": ""
+    "image": "data/images/ingredients/biscoito.png"
   },
   {
     "id": "cenoura",
