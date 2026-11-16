@@ -30,6 +30,11 @@
     "image": "data/images/ingredients/azeite.png"
   },
   {
+    "id": "batata",
+    "name": "Batata",
+    "image": ""
+  },
+  {
     "id": "biscoito",
     "name": "Biscoito",
     "image": "data/images/ingredients/biscoito.png"
