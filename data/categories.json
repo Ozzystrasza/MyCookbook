@@ -4,6 +4,10 @@
     "name": "Almoço"
   },
   {
+    "id": "caf-da-manh",
+    "name": "Café da manhã"
+  },
+  {
     "id": "doces",
     "name": "Doces"
   },
@@ -12,8 +16,16 @@
     "name": "Lanches"
   },
   {
+    "id": "massas",
+    "name": "Massas"
+  },
+  {
     "id": "petiscos",
     "name": "Petiscos"
+  },
+  {
+    "id": "pizza",
+    "name": "Pizza"
   },
   {
     "id": "sobremesas",

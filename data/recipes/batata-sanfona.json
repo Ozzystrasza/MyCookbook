@@ -1,0 +1,50 @@
+{
+  "id": "batata-sanfona",
+  "title": "Batata sanfona",
+  "categoryIds": [
+    "petiscos",
+    "vegetariano"
+  ],
+  "image": "data/images/recipes/batata-sanfona.jpg",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "",
+      "ingredients": [
+        {
+          "ingredientId": "batata",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "temperos",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "azeite",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Corte as laterais da batata para que vc consiga deitar ela reta em uma superfície."
+        },
+        {
+          "description": "Apoie a batata deitada em em dois utensílios de sua preferência (isso serve para que a faca não corte até o final). Faça cortes paralelos na batata até o final."
+        },
+        {
+          "description": "Vire a batata do outro lado e corte novamente, porém dessa vez corte diagonalmente."
+        },
+        {
+          "description": "Misture os temperos com o azeite e passe sobre a batata dos dois lados"
+        },
+        {
+          "description": "Leve para assar na air fryer por 10-15 min a 180° (vire a batata na medate do tempo)"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-16T11:27:08.443Z"
+}

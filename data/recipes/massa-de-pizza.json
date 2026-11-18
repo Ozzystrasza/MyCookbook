@@ -1,0 +1,71 @@
+{
+  "id": "massa-de-pizza",
+  "title": "Massa de Pizza",
+  "categoryIds": [
+    "pizza",
+    "massas"
+  ],
+  "image": "data/images/recipes/massa-de-pizza.png",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "",
+      "ingredients": [
+        {
+          "ingredientId": "flour",
+          "measureId": "g",
+          "quantity": "375"
+        },
+        {
+          "ingredientId": "gua",
+          "measureId": "g",
+          "quantity": "200"
+        },
+        {
+          "ingredientId": "azeite",
+          "measureId": "g",
+          "quantity": "22"
+        },
+        {
+          "ingredientId": "sugar",
+          "measureId": "g",
+          "quantity": "5"
+        },
+        {
+          "ingredientId": "salt",
+          "measureId": "g",
+          "quantity": "5"
+        },
+        {
+          "ingredientId": "fermento-biol-gico-seco",
+          "measureId": "g",
+          "quantity": "2"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Coloque os ingredientes secos em uma bacia (não juntar diretamente o sal e o fermento), e misture"
+        },
+        {
+          "description": "Vá adicionando água aos poucos até ficar no ponto correto"
+        },
+        {
+          "description": "Sove a massa até chegar no ponto de véu."
+        },
+        {
+          "description": "Adicione o azeite e misture bem para incorporar"
+        },
+        {
+          "description": "Corte a massa do tamanho desejado e modele em formato de bolas, e guarde as bolas em uma superfície untada com farinha. As bolas também precisa ficar cobertas para não ressecar."
+        },
+        {
+          "description": "Deixe descansar por 15 minutos, e está pronto para abrir a massa."
+        },
+        {
+          "description": "Essa receita rende aproximadamente 2 pizzas de 30 cm"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-17T10:14:51.731Z"
+}

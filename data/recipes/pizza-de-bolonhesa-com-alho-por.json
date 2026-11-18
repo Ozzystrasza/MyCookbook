@@ -1,0 +1,95 @@
+{
+  "id": "pizza-de-bolonhesa-com-alho-por",
+  "title": "Pizza de bolonhesa com alho poró",
+  "categoryIds": [
+    "pizza",
+    "lanches"
+  ],
+  "image": "",
+  "groups": [
+    {
+      "id": "molho",
+      "name": "Molho",
+      "ingredients": [
+        {
+          "ingredientId": "carne-mo-da",
+          "measureId": "g",
+          "quantity": "200"
+        },
+        {
+          "ingredientId": "temperos",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "molho-de-tomate",
+          "measureId": "pacote",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "alho",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Refogar o alho em uma panela"
+        },
+        {
+          "description": "Adicionar a carne moída e refogar até ficar homogêneo"
+        },
+        {
+          "description": "Adicionar o molho de tomate, misturar bem"
+        },
+        {
+          "description": "Adicionar os temperos, e deixar cozinhar até o molho engrossar um pouco, mas não demais"
+        }
+      ]
+    },
+    {
+      "id": "montagem",
+      "name": "Montagem",
+      "ingredients": [
+        {
+          "ingredientId": "alho-por",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "queijo-mussarela",
+          "measureId": "g",
+          "quantity": "150"
+        },
+        {
+          "ingredientId": "or-gano",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "azeite",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Despeje o molho sobre a massa de pizza (previamente preparada em outra receita), de forma que cubra todo o disco, deixando apenas as bordas"
+        },
+        {
+          "description": "Cubra o molho com queijo mussarela ralado"
+        },
+        {
+          "description": "Adicione o alho poró cortado a gosto"
+        },
+        {
+          "description": "Por fim polvilhe orégano sobre a pizza e um fio de azeite"
+        },
+        {
+          "description": "Leve para assar. O tempo depende da temperatura do forno, mas observe a parte de baixo da massa, ela precisa estar bem dourada."
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-17T10:31:10.240Z"
+}

@@ -10,6 +10,16 @@
     "image": "data/images/ingredients/gua.png"
   },
   {
+    "id": "alho",
+    "name": "Alho",
+    "image": ""
+  },
+  {
+    "id": "alho-por",
+    "name": "Alho poró",
+    "image": ""
+  },
+  {
     "id": "amendoim-torrado-e-mo-do",
     "name": "Amendoim torrado e moído",
     "image": "data/images/ingredients/amendoim-torrado-e-mo-do.png"
@@ -32,12 +42,17 @@
   {
     "id": "batata",
     "name": "Batata",
-    "image": ""
+    "image": "data/images/ingredients/batata.png"
   },
   {
     "id": "biscoito",
     "name": "Biscoito",
     "image": "data/images/ingredients/biscoito.png"
+  },
+  {
+    "id": "carne-mo-da",
+    "name": "Carne moída",
+    "image": ""
   },
   {
     "id": "cenoura",
@@ -65,6 +80,11 @@
     "image": "data/images/ingredients/fermento.png"
   },
   {
+    "id": "fermento-biol-gico-seco",
+    "name": "Fermento biológico seco",
+    "image": "data/images/ingredients/fermento-biol-gico-seco.png"
+  },
+  {
     "id": "milk",
     "name": "Leite",
     "image": "data/images/ingredients/milk.png"
@@ -90,9 +110,19 @@
     "image": "data/images/ingredients/milho-de-pipoca.png"
   },
   {
+    "id": "molho-de-tomate",
+    "name": "Molho de tomate",
+    "image": ""
+  },
+  {
     "id": "leo",
     "name": "Óleo",
     "image": "data/images/ingredients/leo.png"
+  },
+  {
+    "id": "or-gano",
+    "name": "Orégano",
+    "image": ""
   },
   {
     "id": "eggs",
@@ -108,6 +138,11 @@
     "id": "piment-o",
     "name": "Pimentão",
     "image": "data/images/ingredients/piment-o.png"
+  },
+  {
+    "id": "queijo-mussarela",
+    "name": "Queijo mussarela",
+    "image": ""
   },
   {
     "id": "queijo-parmes-o",

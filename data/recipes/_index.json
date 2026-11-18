@@ -9,6 +9,15 @@
     "image": "data/images/recipes/arroz-com-legumes.png"
   },
   {
+    "id": "batata-sanfona",
+    "title": "Batata sanfona",
+    "categoryIds": [
+      "petiscos",
+      "vegetariano"
+    ],
+    "image": "data/images/recipes/batata-sanfona.jpg"
+  },
+  {
     "id": "bolinho-de-mandioca",
     "title": "Bolinho de mandioca",
     "categoryIds": [
@@ -36,6 +45,15 @@
     "image": "data/images/recipes/bolo.png"
   },
   {
+    "id": "massa-de-pizza",
+    "title": "Massa de Pizza",
+    "categoryIds": [
+      "pizza",
+      "massas"
+    ],
+    "image": "data/images/recipes/massa-de-pizza.png"
+  },
+  {
     "id": "mousse",
     "title": "Mousse",
     "categoryIds": [
@@ -45,6 +63,14 @@
     "image": "data/images/recipes/mousse.png"
   },
   {
+    "id": "panquecas",
+    "title": "Panquecas",
+    "categoryIds": [
+      "caf-da-manh"
+    ],
+    "image": "data/images/recipes/panquecas.png"
+  },
+  {
     "id": "pipoca",
     "title": "Pipoca",
     "categoryIds": [
@@ -52,6 +78,15 @@
       "lanches"
     ],
     "image": "data/images/recipes/pipoca.png"
+  },
+  {
+    "id": "pizza-de-bolonhesa-com-alho-por",
+    "title": "Pizza de bolonhesa com alho poró",
+    "categoryIds": [
+      "pizza",
+      "lanches"
+    ],
+    "image": ""
   },
   {
     "id": "torta-de-amendoim",

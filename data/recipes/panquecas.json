@@ -1,0 +1,58 @@
+{
+  "id": "panquecas",
+  "title": "Panquecas",
+  "categoryIds": [
+    "caf-da-manh"
+  ],
+  "image": "data/images/recipes/panquecas.png",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "",
+      "ingredients": [
+        {
+          "ingredientId": "flour",
+          "measureId": "cup",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "sugar",
+          "measureId": "colher",
+          "quantity": "1/2"
+        },
+        {
+          "ingredientId": "salt",
+          "measureId": "colher",
+          "quantity": "1/2"
+        },
+        {
+          "ingredientId": "eggs",
+          "measureId": "piece",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "gua",
+          "measureId": "cup",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "fermento",
+          "measureId": "colher",
+          "quantity": "1/2"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Coloque os ingredientes em uma vasilha, adicione a farinha por último. Misture até ficar homogêneo."
+        },
+        {
+          "description": "Despeje porções da mistura em uma frigideira pré-aquecida. Deixe dourar dos dois lados"
+        },
+        {
+          "description": "A panqueca pode ser recheada com o recheio de sua preferência, doce ou salgado."
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-17T10:13:00.732Z"
+}
