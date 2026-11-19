@@ -612,7 +612,8 @@
     return (
       (state.mode === "shopping" && isDesktop()) ||
       (state.mode === "reading" && isDesktop()) ||
-      (state.mode === "browse" && state.viewMode === "book")
+      (state.mode === "browse" && state.viewMode === "book") ||
+      (state.mode === "browse" && state.viewMode === "list" && isDesktop())
     );
   }
 
@@ -1869,21 +1870,22 @@
   function renderBrowseList() {
     const left = qs('[data-page="left"]');
     const right = qs('[data-page="right"]');
+    setPage(left, "", { blank: true });
+    setPage(right, listRowsHtml(visibleRecipes()), { scrollable: true });
+    bindOpenHandlers(right);
+  }
 
-    if (!isDesktop()) {
-      setPage(left, "", { blank: true });
-      setPage(right, listRowsHtml(visibleRecipes()), { scrollable: true });
-      bindOpenHandlers(right);
-      return;
+  function renderBrowseListFlip() {
+    if (!state.listPages.length) {
+      const measureTarget = createMeasurePageEl();
+      try {
+        packListPages(measureTarget);
+      } finally {
+        measureTarget.remove();
+      }
     }
-
-    packListPages(left);
     clampBrowseIndex();
-    const leftHtml = state.listPages[state.browseIndex] || "";
-    const rightHtml = state.listPages[state.browseIndex + 1] || "";
-    setPage(left, leftHtml, { blank: !leftHtml });
-    setPage(right, rightHtml, { blank: !rightHtml });
-    bindOpenHandlers(qs("[data-spread]"));
+    refreshFlipBook(state.listPages, state.browseIndex, { showCover: false });
   }
 
   function renderReadingPhone() {
@@ -2064,8 +2066,12 @@
         renderReadingPhone();
       }
     } else if (state.viewMode === "list") {
-      teardownFlipBook();
-      renderBrowseList();
+      if (isDesktop()) {
+        renderBrowseListFlip();
+      } else {
+        teardownFlipBook();
+        renderBrowseList();
+      }
     } else {
       renderBrowseBook();
     }

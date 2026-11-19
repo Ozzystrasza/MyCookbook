@@ -1,0 +1,14 @@
+---
+description: Open localhost preview after implementations so the user can test before GitHub commits
+alwaysApply: true
+---
+
+# Local Preview Before Commit
+
+After finishing an implementation that changes the site:
+
+1. Serve locally from the repo root with `npx --yes serve .` if a preview server is not already running
+2. Open the printed local URL in the browser (usually `http://localhost:3000`) so the user can test
+3. Do not commit or push to GitHub unless the user explicitly asks after testing
+
+Never open `file://` URLs — JSON fetches break that way.
