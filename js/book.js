@@ -42,6 +42,7 @@
   let pageFlip = null;
   let flipSyncing = false;
   let lastFlipSize = null;
+  let lastListPackSize = null;
   let flipHtmlPages = [];
   let flipHasCover = false;
   let resizeTimer = null;
@@ -909,8 +910,43 @@
     };
   }
 
-  function createMeasurePageEl() {
-    const size = measureFlipSize();
+  function liveFlipPageEl() {
+    const pages = document.querySelectorAll("[data-flip-root] .stf-page");
+    for (const page of pages) {
+      if (page.clientWidth > 0 && page.clientHeight > 0) return page;
+    }
+    return null;
+  }
+
+  function measureListPackPageSize() {
+    const live = liveFlipPageEl();
+    if (live) {
+      return { width: live.clientWidth, height: live.clientHeight };
+    }
+    if (pageFlip && typeof pageFlip.getBoundsRect === "function") {
+      const rect = pageFlip.getBoundsRect();
+      const width = Math.round(rect?.pageWidth || 0);
+      const height = Math.round(rect?.pageHeight || 0);
+      if (width > 0 && height > 0) return { width, height };
+    }
+    const base = measureFlipSize();
+    const slot = qs("[data-flip-slot]");
+    const stage = qs(".book__stage");
+    const slotW = slot?.clientWidth || stage?.clientWidth || 0;
+    const slotH = slot?.clientHeight || 0;
+    if (isDesktop()) {
+      const width = Math.max(base.width, slotW > 0 ? Math.floor(slotW / 2) : 0);
+      const height = Math.max(base.height, slotH);
+      return { width, height };
+    }
+    return {
+      width: Math.max(base.width, slotW),
+      height: Math.max(base.height, slotH),
+    };
+  }
+
+  function createMeasurePageEl(sizeOverride) {
+    const size = sizeOverride || measureFlipSize();
     const el = document.createElement("div");
     el.className = "book__page stf-page";
     el.style.cssText = `position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none;width:${size.width}px;height:${size.height}px;`;
@@ -1875,17 +1911,38 @@
     bindOpenHandlers(right);
   }
 
+  function packBrowseListPages(size) {
+    const measureTarget = createMeasurePageEl(size);
+    try {
+      packListPages(measureTarget);
+      lastListPackSize = { width: size.width, height: size.height };
+    } finally {
+      measureTarget.remove();
+    }
+  }
+
   function renderBrowseListFlip() {
-    if (!state.listPages.length) {
-      const measureTarget = createMeasurePageEl();
-      try {
-        packListPages(measureTarget);
-      } finally {
-        measureTarget.remove();
-      }
+    let packSize = measureListPackPageSize();
+    const sizeGrew =
+      lastListPackSize &&
+      (packSize.width > lastListPackSize.width + 8 ||
+        packSize.height > lastListPackSize.height + 8);
+    if (!state.listPages.length || !lastListPackSize || sizeGrew) {
+      packBrowseListPages(packSize);
     }
     clampBrowseIndex();
     refreshFlipBook(state.listPages, state.browseIndex, { showCover: false });
+
+    const live = liveFlipPageEl();
+    if (
+      live &&
+      (live.clientWidth > packSize.width + 8 || live.clientHeight > packSize.height + 8)
+    ) {
+      packSize = { width: live.clientWidth, height: live.clientHeight };
+      packBrowseListPages(packSize);
+      clampBrowseIndex();
+      refreshFlipBook(state.listPages, state.browseIndex, { showCover: false });
+    }
   }
 
   function renderReadingPhone() {
