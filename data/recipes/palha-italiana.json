@@ -1,0 +1,78 @@
+{
+  "id": "palha-italiana",
+  "title": "Palha italiana",
+  "categoryIds": [
+    "doces"
+  ],
+  "image": "data/images/recipes/palha-italiana.webp",
+  "groups": [
+    {
+      "id": "tradicional",
+      "name": "Tradicional",
+      "ingredients": [
+        {
+          "ingredientId": "leite-condensado",
+          "measureId": "caixa",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "butter",
+          "measureId": "colher",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "chocolate",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "biscoito",
+          "measureId": "pacote",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "a-car-de-confeiteiro",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Quebre o biscoito em pedaços pequenos (não pode triturar, tem que ser pedaços)"
+        },
+        {
+          "description": "Adicione a manteiga, o leite condensado e o chocolate (a quantidade de chocolate varia dependendo de qual está sendo usado, adicione aos poucos e misture até chegar na cor/sabor desejado) em uma panela. Mexa bem até ferver"
+        },
+        {
+          "description": "Quando começar a desgrudar da panela, adicione o biscoito e misture bem (o pacote inteiro pode ser muito, vá adicionando aos poucos e misturando até ficar uma quantidade boa)"
+        },
+        {
+          "description": "Deixe no fogo mais um pouquinho e depois transfira para um outro recipiente"
+        },
+        {
+          "description": "Deixe esfriar por um tempo depois corte em pedaços do tamanho desejado"
+        },
+        {
+          "description": "(Opcional, mas recomendado) Coloque um tanto de açúcar de confeiteiro em uma vasilha separada, e coloque os pedaços um por um para cobrir com açúcar, de todos os lados"
+        }
+      ]
+    },
+    {
+      "id": "vers-o-de-amendoim",
+      "name": "Versão de amendoim",
+      "ingredients": [
+        {
+          "ingredientId": "amendoim-torrado-e-mo-do",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Substitua o chocolate em pó pelo amendoim torrado e moído. O resto da receita é o mesmo"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-19T03:48:31.601Z"
+}

@@ -45,6 +45,14 @@
     "image": "data/images/recipes/bolo.png"
   },
   {
+    "id": "doce-de-manga",
+    "title": "Doce de manga",
+    "categoryIds": [
+      "doces"
+    ],
+    "image": "data/images/recipes/doce-de-manga.webp"
+  },
+  {
     "id": "massa-de-pizza",
     "title": "Massa de Pizza",
     "categoryIds": [
@@ -61,6 +69,14 @@
       "sobremesas"
     ],
     "image": "data/images/recipes/mousse.png"
+  },
+  {
+    "id": "palha-italiana",
+    "title": "Palha italiana",
+    "categoryIds": [
+      "doces"
+    ],
+    "image": "data/images/recipes/palha-italiana.webp"
   },
   {
     "id": "panquecas",
@@ -86,7 +102,7 @@
       "pizza",
       "lanches"
     ],
-    "image": ""
+    "image": "data/images/recipes/pizza-de-bolonhesa-com-alho-por.png"
   },
   {
     "id": "torta-de-amendoim",
@@ -96,5 +112,14 @@
       "doces"
     ],
     "image": "data/images/recipes/torta-de-amendoim.webp"
+  },
+  {
+    "id": "torta-de-carne-mo-da",
+    "title": "Torta de carne moída",
+    "categoryIds": [
+      "massas",
+      "almo-o"
+    ],
+    "image": "data/images/recipes/torta-de-carne-mo-da.jpg"
   }
 ]

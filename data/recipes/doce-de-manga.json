@@ -1,0 +1,49 @@
+{
+  "id": "doce-de-manga",
+  "title": "Doce de manga",
+  "categoryIds": [
+    "doces"
+  ],
+  "image": "data/images/recipes/doce-de-manga.webp",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "",
+      "ingredients": [
+        {
+          "ingredientId": "manga",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "sugar",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "gua",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Pique as mangas em pedaços pequenos (utilize muitas mangas pois elas reduzem muito, e como demora muito tempo no fogo, não compensa fazer quantidades pequenas)"
+        },
+        {
+          "description": "Coloque as mangas em uma panela grande e adicione um pouquinho de água no início apenas para não grudar no fundo e ajudar a cozinhar."
+        },
+        {
+          "description": "Deixe cozinhando sem tampa e mexendo para não grudar no fundo. O tempo de cozimento é bem grande, demora bastante para pegar o ponto"
+        },
+        {
+          "description": "Adicione o açucar durante o cozimento, e vá experimentando até achar a quantidade ideal para o tanto de manga que estiver usando"
+        },
+        {
+          "description": "O ponto certo é quando as mangas tiverem derretido completamente formando uma \"massa\" uniforme, e tiver reduzido a água o suficiente para ficar em um ponto entre pastoso e grosso"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-19T03:27:59.519Z"
+}

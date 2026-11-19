@@ -5,6 +5,11 @@
     "image": "data/images/ingredients/sugar.png"
   },
   {
+    "id": "a-car-de-confeiteiro",
+    "name": "Açúcar de confeiteiro",
+    "image": "data/images/ingredients/a-car-de-confeiteiro.png"
+  },
+  {
     "id": "gua",
     "name": "Água",
     "image": "data/images/ingredients/gua.png"
@@ -12,12 +17,12 @@
   {
     "id": "alho",
     "name": "Alho",
-    "image": ""
+    "image": "data/images/ingredients/alho.png"
   },
   {
     "id": "alho-por",
     "name": "Alho poró",
-    "image": ""
+    "image": "data/images/ingredients/alho-por.png"
   },
   {
     "id": "amendoim-torrado-e-mo-do",
@@ -52,7 +57,7 @@
   {
     "id": "carne-mo-da",
     "name": "Carne moída",
-    "image": ""
+    "image": "data/images/ingredients/carne-mo-da.png"
   },
   {
     "id": "cenoura",
@@ -100,6 +105,11 @@
     "image": "data/images/ingredients/mandioca.png"
   },
   {
+    "id": "manga",
+    "name": "Manga",
+    "image": "data/images/ingredients/manga.png"
+  },
+  {
     "id": "butter",
     "name": "Manteiga",
     "image": "data/images/ingredients/butter.png"
@@ -112,7 +122,7 @@
   {
     "id": "molho-de-tomate",
     "name": "Molho de tomate",
-    "image": ""
+    "image": "data/images/ingredients/molho-de-tomate.png"
   },
   {
     "id": "leo",
@@ -122,7 +132,7 @@
   {
     "id": "or-gano",
     "name": "Orégano",
-    "image": ""
+    "image": "data/images/ingredients/or-gano.png"
   },
   {
     "id": "eggs",
@@ -142,7 +152,7 @@
   {
     "id": "queijo-mussarela",
     "name": "Queijo mussarela",
-    "image": ""
+    "image": "data/images/ingredients/queijo-mussarela.webp"
   },
   {
     "id": "queijo-parmes-o",

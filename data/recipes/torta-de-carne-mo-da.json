@@ -1,0 +1,100 @@
+{
+  "id": "torta-de-carne-mo-da",
+  "title": "Torta de carne moída",
+  "categoryIds": [
+    "massas",
+    "almo-o"
+  ],
+  "image": "data/images/recipes/torta-de-carne-mo-da.jpg",
+  "groups": [
+    {
+      "id": "molho",
+      "name": "Molho",
+      "ingredients": [
+        {
+          "ingredientId": "alho",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "molho-de-tomate",
+          "measureId": "sach",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "temperos",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "carne-mo-da",
+          "measureId": "g",
+          "quantity": "300"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Refogue o alho, e adicione a carne para refogar até ficar homogênea."
+        },
+        {
+          "description": "Adicione o molho de tomate e os temperos, e deixe cozinhar até engrossar um pouco"
+        }
+      ]
+    },
+    {
+      "id": "massa",
+      "name": "Massa",
+      "ingredients": [
+        {
+          "ingredientId": "leo",
+          "measureId": "copo",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "gua",
+          "measureId": "copo",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "flour",
+          "measureId": "colher",
+          "quantity": "12"
+        },
+        {
+          "ingredientId": "fermento",
+          "measureId": "colher",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "eggs",
+          "measureId": "piece",
+          "quantity": "4"
+        },
+        {
+          "ingredientId": "temperos",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Adicione todos os ingredientes no liquidificador, a farinha e o fermento vão por último adicionando aos poucos. Bata até ficar homogêneo"
+        }
+      ]
+    },
+    {
+      "id": "montagem",
+      "name": "Montagem",
+      "ingredients": [],
+      "steps": [
+        {
+          "description": "Em uma forma grande, despeje toda a massa e em seguida espalhe o molho por cima"
+        },
+        {
+          "description": "Asse em fogo baixo por aproximadamente 30-35 minutos"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-18T08:13:54.785Z"
+}

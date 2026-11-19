@@ -46,7 +46,7 @@
   },
   {
     "id": "pacote",
-    "name": "Pacote",
+    "name": "pacote",
     "abbrev": "pct"
   },
   {
@@ -58,6 +58,11 @@
     "id": "kg",
     "name": "quilograma",
     "abbrev": "kg"
+  },
+  {
+    "id": "sach",
+    "name": "sachê",
+    "abbrev": "sachê"
   },
   {
     "id": "piece",
