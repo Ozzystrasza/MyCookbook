@@ -103,6 +103,17 @@
     }
     root.style.setProperty("--vv-height", `${vv.height}px`);
     root.classList.toggle("is-vv-keyboard", window.innerHeight - vv.height > 120);
+    if (document.querySelector(".shopping-modal:not([hidden])")) {
+      if (root.scrollTop) root.scrollTop = 0;
+      if (document.body.scrollTop) document.body.scrollTop = 0;
+      if (vv.offsetTop || vv.offsetLeft) {
+        try {
+          vv.scrollTo(0, 0);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
   }
 
   (function installVisualViewportVars() {
