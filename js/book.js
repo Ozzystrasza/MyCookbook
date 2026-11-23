@@ -56,6 +56,7 @@
   let coverSlideAnim = null;
   let pageFlipAudio = null;
   let searchDebounceTimer = null;
+  let phoneListScroll = null;
   let coverImageUrl = "";
   let coverAssetsReady = false;
   let coverShownAt = 0;
@@ -2249,12 +2250,35 @@
 
   let recipeLoadGen = 0;
 
+  function jumpPhoneScroll(top) {
+    if (isDesktop()) return;
+    const page = qs('[data-page="right"]');
+    if (page) page.scrollTop = top;
+    const root = document.documentElement;
+    const prev = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    window.scrollTo(0, top);
+    root.scrollTop = top;
+    document.body.scrollTop = top;
+    root.style.scrollBehavior = prev;
+  }
+
+  function scrollPhoneTo(top) {
+    if (isDesktop()) return;
+    jumpPhoneScroll(top);
+    requestAnimationFrame(() => jumpPhoneScroll(top));
+  }
+
   async function openRecipe(id) {
     if (!id) return;
     const gen = ++recipeLoadGen;
     const stage = qs(".book__stage");
     stage?.setAttribute("aria-busy", "true");
     try {
+      if (!isDesktop() && state.mode === "browse") {
+        phoneListScroll = window.scrollY || document.documentElement.scrollTop || 0;
+      }
+      scrollPhoneTo(0);
       if (state.mode === "editing") {
         window.CookbookEditRecipe?.unmountFromBook?.();
         state.editRecipeId = null;
@@ -2290,6 +2314,7 @@
       state.readingPages = [];
       syncUrl("push");
       render();
+      scrollPhoneTo(0);
       repackReadingSoon();
     } catch (err) {
       if (gen !== recipeLoadGen) return;
@@ -2303,6 +2328,8 @@
   }
 
   function closeReading() {
+    const restoreScroll = phoneListScroll;
+    phoneListScroll = null;
     state.mode = "browse";
     state.readingId = null;
     state.readingRecipe = null;
@@ -2310,6 +2337,7 @@
     state.readingPageIndex = 0;
     syncUrl("replace");
     render();
+    if (restoreScroll != null) scrollPhoneTo(restoreScroll);
   }
 
   async function shoppingDestPages() {
