@@ -45,9 +45,19 @@
     "image": "data/images/ingredients/azeite.png"
   },
   {
+    "id": "bacon",
+    "name": "Bacon",
+    "image": "data/images/ingredients/bacon.png"
+  },
+  {
     "id": "batata",
     "name": "Batata",
     "image": "data/images/ingredients/batata.png"
+  },
+  {
+    "id": "batata-palha",
+    "name": "Batata palha",
+    "image": "data/images/ingredients/batata-palha.avif"
   },
   {
     "id": "biscoito",
@@ -60,6 +70,11 @@
     "image": "data/images/ingredients/carne-mo-da.png"
   },
   {
+    "id": "cebola",
+    "name": "Cebola",
+    "image": "data/images/ingredients/cebola.webp"
+  },
+  {
     "id": "cenoura",
     "name": "Cenoura",
     "image": "data/images/ingredients/cenoura.png"
@@ -70,9 +85,24 @@
     "image": "data/images/ingredients/chocolate.png"
   },
   {
+    "id": "coco-ralado",
+    "name": "Coco ralado",
+    "image": "data/images/ingredients/coco-ralado.png"
+  },
+  {
+    "id": "cream-cheese",
+    "name": "Cream cheese",
+    "image": "data/images/ingredients/cream-cheese.png"
+  },
+  {
     "id": "creme-de-leite",
     "name": "Creme de leite",
     "image": "data/images/ingredients/creme-de-leite.png"
+  },
+  {
+    "id": "farinha-de-mandioca",
+    "name": "Farinha de mandioca",
+    "image": "data/images/ingredients/farinha-de-mandioca.png"
   },
   {
     "id": "flour",
@@ -90,6 +120,16 @@
     "image": "data/images/ingredients/fermento-biol-gico-seco.png"
   },
   {
+    "id": "goiabada",
+    "name": "Goiabada",
+    "image": "data/images/ingredients/goiabada.png"
+  },
+  {
+    "id": "ketchup",
+    "name": "Ketchup",
+    "image": "data/images/ingredients/ketchup.png"
+  },
+  {
     "id": "milk",
     "name": "Leite",
     "image": "data/images/ingredients/milk.png"
@@ -98,6 +138,16 @@
     "id": "leite-condensado",
     "name": "Leite condensado",
     "image": "data/images/ingredients/leite-condensado.png"
+  },
+  {
+    "id": "leite-de-coco",
+    "name": "Leite de coco",
+    "image": "data/images/ingredients/leite-de-coco.avif"
+  },
+  {
+    "id": "lim-o",
+    "name": "Limão",
+    "image": "data/images/ingredients/lim-o.png"
   },
   {
     "id": "mandioca",
@@ -115,6 +165,11 @@
     "image": "data/images/ingredients/butter.png"
   },
   {
+    "id": "maracuj",
+    "name": "Maracujá",
+    "image": "data/images/ingredients/maracuj.png"
+  },
+  {
     "id": "milho-de-pipoca",
     "name": "Milho de pipoca",
     "image": "data/images/ingredients/milho-de-pipoca.png"
@@ -123,6 +178,16 @@
     "id": "molho-de-tomate",
     "name": "Molho de tomate",
     "image": "data/images/ingredients/molho-de-tomate.png"
+  },
+  {
+    "id": "morango",
+    "name": "Morango",
+    "image": "data/images/ingredients/morango.png"
+  },
+  {
+    "id": "mostarda",
+    "name": "Mostarda",
+    "image": "data/images/ingredients/mostarda.png"
   },
   {
     "id": "leo",
@@ -163,6 +228,11 @@
     "id": "salt",
     "name": "Sal",
     "image": "data/images/ingredients/salt.png"
+  },
+  {
+    "id": "salsicha",
+    "name": "Salsicha",
+    "image": "data/images/ingredients/salsicha.png"
   },
   {
     "id": "suco",

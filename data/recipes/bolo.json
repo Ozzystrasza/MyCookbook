@@ -2,6 +2,8 @@
   "id": "bolo",
   "title": "Bolo",
   "categoryIds": [
+    "bolos",
+    "caf-da-manh",
     "doces",
     "lanches"
   ],
@@ -139,5 +141,5 @@
       ]
     }
   ],
-  "updatedAt": "2026-11-12T16:01:58.900Z"
+  "updatedAt": "2026-11-19T10:48:52.956Z"
 }

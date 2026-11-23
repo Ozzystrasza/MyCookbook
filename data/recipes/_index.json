@@ -39,10 +39,40 @@
     "id": "bolo",
     "title": "Bolo",
     "categoryIds": [
+      "bolos",
+      "caf-da-manh",
       "doces",
       "lanches"
     ],
     "image": "data/images/recipes/bolo.png"
+  },
+  {
+    "id": "bolo-gelado-de-coco",
+    "title": "Bolo gelado de coco",
+    "categoryIds": [
+      "bolos",
+      "doces",
+      "lanches",
+      "caf-da-manh"
+    ],
+    "image": "data/images/recipes/bolo-gelado-de-coco.webp"
+  },
+  {
+    "id": "cachorro-quente",
+    "title": "Cachorro quente",
+    "categoryIds": [
+      "lanches"
+    ],
+    "image": "data/images/recipes/cachorro-quente.webp"
+  },
+  {
+    "id": "cheesecake",
+    "title": "Cheesecake",
+    "categoryIds": [
+      "doces",
+      "sobremesas"
+    ],
+    "image": "data/images/recipes/cheesecake.png"
   },
   {
     "id": "doce-de-manga",

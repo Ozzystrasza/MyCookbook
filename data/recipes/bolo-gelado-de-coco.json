@@ -1,0 +1,176 @@
+{
+  "id": "bolo-gelado-de-coco",
+  "title": "Bolo gelado de coco",
+  "categoryIds": [
+    "bolos",
+    "doces",
+    "lanches",
+    "caf-da-manh"
+  ],
+  "image": "data/images/recipes/bolo-gelado-de-coco.webp",
+  "groups": [
+    {
+      "id": "massa",
+      "name": "Massa",
+      "ingredients": [
+        {
+          "ingredientId": "eggs",
+          "measureId": "piece",
+          "quantity": "5"
+        },
+        {
+          "ingredientId": "leo",
+          "measureId": "cup",
+          "quantity": "1/2"
+        },
+        {
+          "ingredientId": "gua",
+          "measureId": "cup",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "salt",
+          "measureId": "pinch",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "sugar",
+          "measureId": "cup",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "flour",
+          "measureId": "cup",
+          "quantity": "2"
+        },
+        {
+          "ingredientId": "fermento",
+          "measureId": "colher",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "butter",
+          "measureId": "untar",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Bata todos os ingredientes no liquidificador (exceto farinha, fermento e manteiga)"
+        },
+        {
+          "description": "Adicione a farinha aos poucos (se ficar muito grosso, adicione um pouco de água para ajudar a bater, sem exagerar)"
+        },
+        {
+          "description": "Adicione o fermento por último"
+        },
+        {
+          "description": "Assim que terminar de bater, ligue o forno para pré-aquecer a 180°-205° (depende do forno)"
+        },
+        {
+          "description": "Unte a forma com manteiga e farinha, e despeje toda a massa de maneira uniforme"
+        },
+        {
+          "description": "Asse por 40-45 minutos"
+        },
+        {
+          "description": "Espere esfriar e desenforme"
+        }
+      ]
+    },
+    {
+      "id": "recheio-e-cobertura",
+      "name": "Recheio e cobertura",
+      "ingredients": [
+        {
+          "ingredientId": "leite-condensado",
+          "measureId": "caixa",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "coco-ralado",
+          "measureId": "g",
+          "quantity": "100"
+        },
+        {
+          "ingredientId": "leite-de-coco",
+          "measureId": "ml",
+          "quantity": "200"
+        },
+        {
+          "ingredientId": "amido-de-milho",
+          "measureId": "colher",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "butter",
+          "measureId": "colher",
+          "quantity": "2"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Adicione todos os ingredientes em uma panela e deixe cozinhar até engrossar, sempre misturando bem"
+        }
+      ]
+    },
+    {
+      "id": "calda",
+      "name": "Calda",
+      "ingredients": [
+        {
+          "ingredientId": "leite-de-coco",
+          "measureId": "ml",
+          "quantity": "200"
+        },
+        {
+          "ingredientId": "gua",
+          "measureId": "cup",
+          "quantity": "1/2"
+        },
+        {
+          "ingredientId": "sugar",
+          "measureId": "colher",
+          "quantity": "4"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Misture bem os ingredientes e reserve"
+        }
+      ]
+    },
+    {
+      "id": "montagem",
+      "name": "Montagem",
+      "ingredients": [
+        {
+          "ingredientId": "coco-ralado",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Pegue o bolo já desenformado e corte no meio para que fique uma parte de baixo e uma parte de cima"
+        },
+        {
+          "description": "Regue a parte de baixo com metade da calda e cubra com metade do recheio/cobertura"
+        },
+        {
+          "description": "Cubra com a parte de cima e regue com o restante da calda e cubra com o restante do recheio/cobertura"
+        },
+        {
+          "description": "Povilhe coco ralado por cima"
+        },
+        {
+          "description": "Corte em pedaços e enrole com papel alumínio"
+        },
+        {
+          "description": "Deixe na geladeira por algumas horas antes de servir"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-19T11:24:53.516Z"
+}
