@@ -616,6 +616,10 @@
   }
 
   function close() {
+    if (window.CookbookBook?.handleBack) {
+      window.CookbookBook.handleBack();
+      return;
+    }
     if (window.CookbookBook?.closeShopping) {
       window.CookbookBook.closeShopping();
       return;
@@ -752,6 +756,22 @@
     );
   }
 
+  function closeTopModal() {
+    if (createModal && !createModal.hidden) {
+      closeCreateModal();
+      return true;
+    }
+    if (recipeEl && !recipeEl.hidden) {
+      closeRecipePicker();
+      return true;
+    }
+    if (catalogEl && !catalogEl.hidden) {
+      closeCatalogPicker();
+      return true;
+    }
+    return false;
+  }
+
   function bindHeaderToggle(root = document) {
     const btn = root.querySelector("[data-shopping-toggle]");
     if (!btn || btn.dataset.shoppingBound === "1") return;
@@ -786,5 +806,6 @@
     bindChrome,
     bindListActions,
     hasOpenModal,
+    closeTopModal,
   };
 })();

@@ -61,6 +61,9 @@
   let coverShownAt = 0;
   let coverReadyPromise = null;
   let coverOpenPending = false;
+  let historyStep = 0;
+  let isNavigatingFromHistory = false;
+  let leaveTriggeredByPopState = false;
 
   function playPageFlipSound() {
     try {
@@ -1424,23 +1427,28 @@
     state.pendingDeepLink = null;
     if (!pending) return;
     state.skipModeBridge = true;
-    if (pending.shopping) {
-      void openShopping({ animate: false });
-      return;
-    }
-    if (pending.edit != null) {
-      const id = pending.edit === "1" || pending.edit === true ? null : pending.edit;
-      void openEdit({ id, animate: false });
-      return;
-    }
-    if (pending.manage) {
-      void openManage({ animate: false });
-      return;
-    }
-    if (pending.recipeId) {
-      void openRecipe(pending.recipeId);
-    } else {
-      state.skipModeBridge = false;
+    isNavigatingFromHistory = true;
+    try {
+      if (pending.shopping) {
+        void openShopping({ animate: false });
+        return;
+      }
+      if (pending.edit != null) {
+        const id = pending.edit === "1" || pending.edit === true ? null : pending.edit;
+        void openEdit({ id, animate: false });
+        return;
+      }
+      if (pending.manage) {
+        void openManage({ animate: false });
+        return;
+      }
+      if (pending.recipeId) {
+        void openRecipe(pending.recipeId);
+      } else {
+        state.skipModeBridge = false;
+      }
+    } finally {
+      isNavigatingFromHistory = false;
     }
   }
 
@@ -2066,7 +2074,14 @@
     void window.CookbookEditRecipe?.mountInBook?.(right, {
       id: state.editRecipeId,
       from: state.editRecipeFrom,
-      onClose: () => closeEdit({ animate: true }),
+      onClose: () => {
+        if (leaveTriggeredByPopState) {
+          leaveTriggeredByPopState = false;
+          closeEdit({ animate: true });
+        } else {
+          handleBack();
+        }
+      },
     });
   }
 
@@ -2078,7 +2093,7 @@
     setPage(left, "", { blank: true });
     setPage(right, html, { scrollable: true });
     void window.CookbookManage?.mountInBook?.(right, {
-      onClose: () => closeManage({ animate: true }),
+      onClose: () => handleBack(),
     });
   }
 
@@ -2161,8 +2176,8 @@
     render();
   }
 
-  function syncUrl() {
-    const url = new URL(window.location.href);
+  function syncUrl(action = "replace") {
+    const url = new URL(window.location.href, window.location.origin || "http://localhost");
     url.searchParams.delete("home");
     url.searchParams.delete("edit");
     url.searchParams.delete("manage");
@@ -2178,7 +2193,36 @@
     } else if (state.mode === "reading" && state.readingId) {
       url.searchParams.set("recipe", state.readingId);
     }
-    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+    const fullUrl = `${url.pathname}${url.search}${url.hash}`;
+    if (action === "push" && !isNavigatingFromHistory) {
+      historyStep++;
+      window.history.pushState(
+        {
+          app: "mycookbook",
+          step: historyStep,
+          mode: state.mode,
+          readingId: state.readingId,
+          editRecipeId: state.editRecipeId,
+          editRecipeFrom: state.editRecipeFrom,
+        },
+        "",
+        fullUrl
+      );
+    } else {
+      window.history.replaceState(
+        {
+          ...(window.history.state || {}),
+          app: "mycookbook",
+          step: historyStep,
+          mode: state.mode,
+          readingId: state.readingId,
+          editRecipeId: state.editRecipeId,
+          editRecipeFrom: state.editRecipeFrom,
+        },
+        "",
+        fullUrl
+      );
+    }
   }
 
   function repackReadingSoon() {
@@ -2244,7 +2288,7 @@
       state.readingRecipe = recipe;
       state.readingPageIndex = 0;
       state.readingPages = [];
-      syncUrl();
+      syncUrl("push");
       render();
       repackReadingSoon();
     } catch (err) {
@@ -2264,7 +2308,7 @@
     state.readingRecipe = null;
     state.readingPages = [];
     state.readingPageIndex = 0;
-    syncUrl();
+    syncUrl("replace");
     render();
   }
 
@@ -2293,7 +2337,7 @@
     state.mode = "shopping";
     state.shoppingPageIndex = 0;
     state.shoppingPages = [];
-    syncUrl();
+    syncUrl("push");
     window.CookbookShopping?.ensureModals?.();
     window.CookbookShopping?.bindChrome?.();
     window.CookbookShopping?.bindListActions?.();
@@ -2323,7 +2367,7 @@
     state.mode = "browse";
     state.shoppingPages = [];
     state.shoppingPageIndex = 0;
-    syncUrl();
+    syncUrl("replace");
 
     if (!animate) {
       render();
@@ -2372,7 +2416,7 @@
     state.mode = "editing";
     state.editRecipeId = options.id || null;
     state.editRecipeFrom = state.editRecipeId ? null : options.from || null;
-    syncUrl();
+    syncUrl("push");
     window.CookbookUI?.mountShell?.({ active: "home" });
 
     const incoming = [window.CookbookEditRecipe?.formShellHtml?.() || BLANK_PAGE];
@@ -2397,7 +2441,7 @@
     state.mode = "browse";
     state.editRecipeId = null;
     state.editRecipeFrom = null;
-    syncUrl();
+    syncUrl("replace");
     if (!animate) {
       render();
       return;
@@ -2433,7 +2477,7 @@
 
     const outgoing = animate ? snapshotOutgoingPages() : null;
     state.mode = "managing";
-    syncUrl();
+    syncUrl("push");
     window.CookbookUI?.mountShell?.({ active: "home" });
 
     const incoming = [window.CookbookManage?.formShellHtml?.() || BLANK_PAGE];
@@ -2469,7 +2513,7 @@
     const outgoing = animate ? snapshotOutgoingPages() : null;
     window.CookbookManage?.unmountFromBook?.();
     state.mode = "browse";
-    syncUrl();
+    syncUrl("replace");
     void refreshCatalog().then(() => {
       if (!animate) {
         render();
@@ -2505,9 +2549,57 @@
       clearReadingState();
       state.mode = "browse";
     }
-    syncUrl();
+    syncUrl("replace");
     render();
     return true;
+  }
+
+  function closeAnyOpenOverlay() {
+    if (window.CookbookShopping?.hasOpenModal?.()) {
+      if (window.CookbookShopping.closeTopModal?.()) return true;
+    }
+    if (window.CookbookEditRecipe?.hasOpenModal?.()) {
+      if (window.CookbookEditRecipe.closeTopModal?.()) return true;
+    }
+    if (window.CookbookUI?.hasOpenModal?.()) {
+      if (window.CookbookUI.closeTopModal?.()) return true;
+    }
+    if (state.filterOpen) {
+      closeFilterPanel();
+      updateChrome();
+      return true;
+    }
+    if (window.CookbookAuth?.isTokenStep?.()) {
+      window.CookbookAuth.showChoiceStep();
+      return true;
+    }
+    return false;
+  }
+
+  function handleBack() {
+    if (closeAnyOpenOverlay()) return;
+
+    if (state.mode === "editing" && window.CookbookEditRecipe?.isDirty?.()) {
+      window.CookbookEditRecipe.attemptClose({
+        onStay: () => {},
+      });
+      return;
+    }
+
+    if (historyStep > 0) {
+      window.history.back();
+      return;
+    }
+
+    if (state.mode === "shopping") {
+      closeShopping({ animate: true });
+    } else if (state.mode === "editing") {
+      closeEdit({ animate: true });
+    } else if (state.mode === "managing") {
+      closeManage({ animate: true });
+    } else if (state.mode === "reading") {
+      closeReading();
+    }
   }
 
   function setViewMode(mode) {
@@ -2602,15 +2694,9 @@
     });
     qs("[data-prev]")?.addEventListener("click", () => flip("prev"));
     qs("[data-next]")?.addEventListener("click", () => flip("next"));
-    qs("[data-back]")?.addEventListener("click", closeReading);
-    qs("[data-edit-back]")?.addEventListener("click", () => {
-      if (window.CookbookEditRecipe?.attemptClose) {
-        window.CookbookEditRecipe.attemptClose();
-        return;
-      }
-      closeEdit({ animate: true });
-    });
-    qs("[data-manage-back]")?.addEventListener("click", () => closeManage({ animate: true }));
+    qs("[data-back]")?.addEventListener("click", () => handleBack());
+    qs("[data-edit-back]")?.addEventListener("click", () => handleBack());
+    qs("[data-manage-back]")?.addEventListener("click", () => handleBack());
     qs("[data-edit]")?.addEventListener("click", (e) => {
       if (isDesktop() || !state.readingId) return;
       e.preventDefault();
@@ -2693,33 +2779,8 @@
 
     window.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
-        if (window.CookbookShopping?.hasOpenModal?.()) return;
-        if (document.querySelector(".shopping-modal:not([hidden])")) return;
-        if (state.filterOpen) {
-          closeFilterPanel();
-          updateChrome();
-          return;
-        }
-        if (state.mode === "shopping") {
-          closeShopping({ animate: true });
-          return;
-        }
-        if (state.mode === "editing") {
-          if (window.CookbookEditRecipe?.attemptClose) {
-            window.CookbookEditRecipe.attemptClose();
-          } else {
-            closeEdit({ animate: true });
-          }
-          return;
-        }
-        if (state.mode === "managing") {
-          closeManage({ animate: true });
-          return;
-        }
-        if (state.mode === "reading") {
-          closeReading();
-          return;
-        }
+        handleBack();
+        return;
       }
       if (coverIsInteractive() || modeBridge || state.mode === "editing" || state.mode === "managing") {
         return;
@@ -2750,6 +2811,74 @@
         if (usesFlipBook()) lastFlipSize = null;
         render();
       }, 120);
+    });
+
+    window.addEventListener("popstate", async (event) => {
+      if (closeAnyOpenOverlay()) {
+        syncUrl("push");
+        return;
+      }
+
+      if (state.mode === "editing" && window.CookbookEditRecipe?.isDirty?.()) {
+        leaveTriggeredByPopState = true;
+        window.CookbookEditRecipe.attemptClose({
+          onStay: () => {
+            leaveTriggeredByPopState = false;
+            syncUrl("push");
+          },
+        });
+        return;
+      }
+
+      isNavigatingFromHistory = true;
+      try {
+        const targetState = event.state || {};
+        const targetMode = targetState.mode || "browse";
+        if (historyStep > 0) historyStep--;
+
+        if (targetMode === "browse") {
+          if (state.mode === "shopping") {
+            closeShopping({ animate: true });
+          } else if (state.mode === "editing") {
+            closeEdit({ animate: true });
+          } else if (state.mode === "managing") {
+            closeManage({ animate: true });
+          } else if (state.mode === "reading") {
+            closeReading();
+          }
+        } else if (targetMode === "reading" && targetState.readingId) {
+          if (state.mode === "shopping") closeShopping({ animate: false });
+          if (state.mode === "editing") closeEdit({ animate: false });
+          if (state.mode === "managing") closeManage({ animate: false });
+          if (state.mode !== "reading" || state.readingId !== targetState.readingId) {
+            await openRecipe(targetState.readingId);
+          }
+        } else if (targetMode === "shopping") {
+          if (state.mode === "editing") closeEdit({ animate: false });
+          if (state.mode === "managing") closeManage({ animate: false });
+          if (state.mode !== "shopping") {
+            await openShopping({ animate: true });
+          }
+        } else if (targetMode === "editing") {
+          if (state.mode === "shopping") closeShopping({ animate: false });
+          if (state.mode === "managing") closeManage({ animate: false });
+          if (state.mode !== "editing") {
+            await openEdit({
+              id: targetState.editRecipeId,
+              from: targetState.editRecipeFrom,
+              animate: true,
+            });
+          }
+        } else if (targetMode === "managing") {
+          if (state.mode === "shopping") closeShopping({ animate: false });
+          if (state.mode === "editing") closeEdit({ animate: false });
+          if (state.mode !== "managing") {
+            await openManage({ animate: true });
+          }
+        }
+      } finally {
+        isNavigatingFromHistory = false;
+      }
     });
   }
 
@@ -2788,6 +2917,50 @@
       manage: params.get("manage") === "1",
     };
 
+    const hasDeepLink = Boolean(
+      state.pendingDeepLink.recipeId ||
+      state.pendingDeepLink.shopping ||
+      state.pendingDeepLink.edit != null ||
+      state.pendingDeepLink.manage
+    );
+
+    const baseOrigin = window.location.origin || "http://localhost";
+    const rootUrl = new URL(window.location.href, baseOrigin);
+    rootUrl.searchParams.delete("recipe");
+    rootUrl.searchParams.delete("shopping");
+    rootUrl.searchParams.delete("edit");
+    rootUrl.searchParams.delete("manage");
+    rootUrl.searchParams.delete("home");
+    const cleanRoot = `${rootUrl.pathname}${rootUrl.search}${rootUrl.hash}`;
+    const initialUrl = new URL(window.location.href, baseOrigin);
+    const initialFullUrl = `${initialUrl.pathname}${initialUrl.search}${initialUrl.hash}`;
+
+    if (hasDeepLink) {
+      window.history.replaceState({ app: "mycookbook", step: 0, mode: "browse" }, "", cleanRoot);
+      historyStep = 1;
+      const deepLinkMode = state.pendingDeepLink.shopping
+        ? "shopping"
+        : state.pendingDeepLink.edit != null
+        ? "editing"
+        : state.pendingDeepLink.manage
+        ? "managing"
+        : "reading";
+      window.history.pushState(
+        {
+          app: "mycookbook",
+          step: 1,
+          mode: deepLinkMode,
+          readingId: state.pendingDeepLink.recipeId,
+          editRecipeId: editParam && editParam !== "1" ? editParam : null,
+        },
+        "",
+        initialFullUrl
+      );
+    } else {
+      historyStep = 0;
+      window.history.replaceState({ app: "mycookbook", step: 0, mode: "browse" }, "", initialFullUrl);
+    }
+
     if (skipCover) {
       enterOpenedHome();
       return;
@@ -2819,5 +2992,6 @@
     goHome,
     closeToCover,
     openFromCover,
+    handleBack,
   };
 })();

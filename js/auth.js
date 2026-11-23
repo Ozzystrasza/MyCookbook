@@ -308,5 +308,8 @@
     coverFaceHtml,
     bindCoverGate,
     restoreGateStep,
+    isTokenStep: () => gateStep === "token",
+    showChoiceStep,
+    showTokenStep,
   };
 })();

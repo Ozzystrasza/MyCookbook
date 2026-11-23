@@ -17,6 +17,7 @@
   let dirty = false;
   let allowLeave = false;
   let pendingLeaveHref = "";
+  let pendingLeaveOnStay = null;
   let pickerTargetInput = null;
   let pickKind = "ingredient";
   let createTargetInput = null;
@@ -254,6 +255,7 @@
     leaveModal.querySelector("[data-leave-discard]").addEventListener("click", () => {
       allowLeave = true;
       clearDirty();
+      pendingLeaveOnStay = null;
       const href = pendingLeaveHref || "";
       pendingLeaveHref = "";
       closeLeaveModal();
@@ -416,11 +418,17 @@
     window.CookbookUI.deactivateModalFocus?.(leaveModal);
     leaveModal.hidden = true;
     pendingLeaveHref = "";
+    const onStay = pendingLeaveOnStay;
+    pendingLeaveOnStay = null;
+    if (typeof onStay === "function") {
+      onStay();
+    }
   }
 
-  function openLeaveModal(href) {
+  function openLeaveModal(href, { onStay } = {}) {
     ensureModals();
     pendingLeaveHref = href;
+    pendingLeaveOnStay = onStay || null;
     leaveModal.hidden = false;
     window.CookbookUI.activateModalFocus?.(leaveModal, "[data-leave-stay]");
   }
@@ -1149,12 +1157,36 @@
     bindLeaveGuard();
   }
 
-  function attemptClose() {
+  function attemptClose(options = {}) {
     if (dirty && !allowLeave) {
-      openLeaveModal(inBookMode ? "__close__" : "index.html?home=1");
+      openLeaveModal(inBookMode ? "__close__" : "index.html?home=1", options);
       return;
     }
     requestClose();
+  }
+
+  function hasOpenModal() {
+    return Boolean(
+      (leaveModal && !leaveModal.hidden) ||
+      activeCreateModal() ||
+      (pickModal && !pickModal.hidden)
+    );
+  }
+
+  function closeTopModal() {
+    if (leaveModal && !leaveModal.hidden) {
+      closeLeaveModal();
+      return true;
+    }
+    if (activeCreateModal()) {
+      closeCreateModals();
+      return true;
+    }
+    if (pickModal && !pickModal.hidden) {
+      closePickModal();
+      return true;
+    }
+    return false;
   }
 
   function decorateRecipeActionIcons() {
@@ -1243,6 +1275,9 @@
     mountInBook,
     unmountFromBook,
     attemptClose,
+    isDirty: () => dirty && !allowLeave,
+    hasOpenModal,
+    closeTopModal,
   };
 
   window.addEventListener("cookbook:ready", () => {

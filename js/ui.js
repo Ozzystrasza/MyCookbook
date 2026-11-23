@@ -747,6 +747,33 @@
     await loadScript("js/manage.js");
   }
 
+  function closeTopModal() {
+    const conflict = document.querySelector("[data-sync-conflict]:not([hidden])");
+    if (conflict) {
+      conflict.querySelector("[data-sync-conflict-cancel]")?.click();
+      return true;
+    }
+    const similar = document.querySelector("[data-similar-confirm]:not([hidden])");
+    if (similar) {
+      similar.querySelector("[data-similar-cancel]")?.click();
+      return true;
+    }
+    const menu = qs("[data-nav-menu].is-open");
+    if (menu) {
+      closeOpenNavMenu();
+      return true;
+    }
+    return false;
+  }
+
+  function hasOpenModal() {
+    return Boolean(
+      document.querySelector("[data-sync-conflict]:not([hidden])") ||
+      document.querySelector("[data-similar-confirm]:not([hidden])") ||
+      document.querySelector("[data-nav-menu].is-open")
+    );
+  }
+
   window.CookbookUI = {
     qs,
     qsa,
@@ -765,5 +792,8 @@
     deactivateModalFocus,
     loadScript,
     ensureCookEditors,
+    closeOpenNavMenu,
+    closeTopModal,
+    hasOpenModal,
   };
 })();
