@@ -4,6 +4,10 @@
     "name": "Almoço"
   },
   {
+    "id": "bolos",
+    "name": "Bolos"
+  },
+  {
     "id": "caf-da-manh",
     "name": "Café da manhã"
   },

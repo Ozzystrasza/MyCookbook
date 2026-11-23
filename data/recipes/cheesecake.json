@@ -1,0 +1,206 @@
+{
+  "id": "cheesecake",
+  "title": "Cheesecake",
+  "categoryIds": [
+    "doces",
+    "sobremesas"
+  ],
+  "image": "data/images/recipes/cheesecake.png",
+  "groups": [
+    {
+      "id": "massa",
+      "name": "Massa",
+      "ingredients": [
+        {
+          "ingredientId": "biscoito",
+          "measureId": "pacote",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "butter",
+          "measureId": "colher",
+          "quantity": "3"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Triture o biscoito e adicione a manteiga. Misture bem até formar uma massa"
+        },
+        {
+          "description": "Forre o fundo da forma com a massa sem deixar grosso demais (normalmente um pacote inteiro de biscoito sobra um pouco)"
+        }
+      ]
+    },
+    {
+      "id": "recheio",
+      "name": "Recheio",
+      "ingredients": [
+        {
+          "ingredientId": "eggs",
+          "measureId": "piece",
+          "quantity": "3"
+        },
+        {
+          "ingredientId": "cream-cheese",
+          "measureId": "g",
+          "quantity": "450"
+        },
+        {
+          "ingredientId": "leite-condensado",
+          "measureId": "caixa",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "lim-o",
+          "measureId": "piece",
+          "quantity": "1/2"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Exprema a metade do limão e adicione junto com todos os outros ingredientes no liquidificador e bata até misturar bem"
+        },
+        {
+          "description": "Despeje sobre a forma e leve para assar por aproximadamente 45 minutos a 180°"
+        }
+      ]
+    },
+    {
+      "id": "cobertura-de-goiabada-1-op-o",
+      "name": "Cobertura de goiabada (1ª opção)",
+      "ingredients": [
+        {
+          "ingredientId": "goiabada",
+          "measureId": "g",
+          "quantity": "300"
+        },
+        {
+          "ingredientId": "gua",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Pique a goiabada em pedaços pequenos e leve a panela com fogo baixo"
+        },
+        {
+          "description": "Adicione um pouco de água e mexa bem até derreter toda a goiabada"
+        },
+        {
+          "description": "Adicione a cobertura sobre o cheesecake e deixe na geladeira por um tempo antes de desenformar"
+        }
+      ]
+    },
+    {
+      "id": "cobertura-de-morango-2-op-o",
+      "name": "Cobertura de morango (2ª opção)",
+      "ingredients": [
+        {
+          "ingredientId": "morango",
+          "measureId": "g",
+          "quantity": "400"
+        },
+        {
+          "ingredientId": "a-car-de-confeiteiro",
+          "measureId": "colher",
+          "quantity": "1"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Pique os morangos em pedaços pequenos e leve ao fogo baixo, com um pouco de água"
+        },
+        {
+          "description": "Adicione o açucar e mexa bem até o morango derreter e virar uma geleia"
+        },
+        {
+          "description": "Adicione a cobertura sobre o cheesecake e deixe na geladeira por um tempo antes de desenformar"
+        }
+      ]
+    },
+    {
+      "id": "cobertura-de-maracuj-3-op-o",
+      "name": "Cobertura de maracujá (3ª opção)",
+      "ingredients": [
+        {
+          "ingredientId": "maracuj",
+          "measureId": "copo",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "maracuj",
+          "measureId": "piece",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "leite-condensado",
+          "measureId": "caixa",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "creme-de-leite",
+          "measureId": "caixa",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "a-car-de-confeiteiro",
+          "measureId": "colher",
+          "quantity": "2"
+        },
+        {
+          "ingredientId": "gua",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "No liquidificador, adicione um copo de suco de maracujá, o leite condensado e o creme de leite e bata até misturar bem"
+        },
+        {
+          "description": "Adicione a cobertura sobre o cheesecake e deixe na geladeira por um tempo antes de desenformar"
+        },
+        {
+          "description": "Adicione o maracujá com sementes numa panela com o açúcar e um pouquinho de água"
+        },
+        {
+          "description": "Mexa sempre até pegar um ponto de calda, e adicione sobre o cheesecake"
+        }
+      ]
+    },
+    {
+      "id": "cobertura-de-amendoim-4-op-o-n-o-testada",
+      "name": "Cobertura de amendoim (4ª opção, não testada)",
+      "ingredients": [
+        {
+          "ingredientId": "amendoim-torrado-e-mo-do",
+          "measureId": "g",
+          "quantity": "250"
+        },
+        {
+          "ingredientId": "leite-condensado",
+          "measureId": "caixa",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "creme-de-leite",
+          "measureId": "caixa",
+          "quantity": "1"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Adicione os ingredientes em uma bacia, e mexa bem até ficar bem misturado"
+        },
+        {
+          "description": "Adicione a cobertura sobre o cheesecake e deixe na geladeira por um tempo antes de desenformar"
+        },
+        {
+          "description": "Adicione um pouco de amendoim moído puro por cima, para enfeitar"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-21T09:36:20.006Z"
+}

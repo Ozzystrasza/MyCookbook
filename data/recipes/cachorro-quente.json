@@ -1,0 +1,113 @@
+{
+  "id": "cachorro-quente",
+  "title": "Cachorro quente",
+  "categoryIds": [
+    "lanches"
+  ],
+  "image": "data/images/recipes/cachorro-quente.webp",
+  "groups": [
+    {
+      "id": "molho",
+      "name": "Molho",
+      "ingredients": [
+        {
+          "ingredientId": "salsicha",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "ketchup",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "mostarda",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "temperos",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "molho-de-tomate",
+          "measureId": "sach",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "alho",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "cebola",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "bacon",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Frite o bacon, a cebola, e o alho"
+        },
+        {
+          "description": "Adicione o molho de tomate, as salsichas (as salsichas podem ser inteiras ou picadas para render mais) e os temperos, misture bem"
+        },
+        {
+          "description": "Deixe cozinhar um pouco para engrossar o molho"
+        }
+      ]
+    },
+    {
+      "id": "montagem",
+      "name": "Montagem",
+      "ingredients": [
+        {
+          "ingredientId": "p-o",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "batata-palha",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Abra o pão e coloque o molho e por cima a batata palha"
+        }
+      ]
+    },
+    {
+      "id": "opcionais",
+      "name": "Opcionais",
+      "ingredients": [
+        {
+          "ingredientId": "carne-mo-da",
+          "measureId": "g",
+          "quantity": "200"
+        },
+        {
+          "ingredientId": "queijo-mussarela",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Opcionalmente pode adicionar carne moída ao molho"
+        },
+        {
+          "description": "Opcionalmente pode adicionar queijo fatiado ou ralado na montagem. Caso seja fatiado, adicione diretamente ao pão antes do molho. Se for ralado, adicione por cima do olho antes da batata palha"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-19T10:12:32.301Z"
+}
