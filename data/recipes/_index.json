@@ -75,6 +75,14 @@
     "image": "data/images/recipes/cheesecake.png"
   },
   {
+    "id": "chevette",
+    "title": "Chevette",
+    "categoryIds": [
+      "drinks"
+    ],
+    "image": "data/images/recipes/chevette.webp"
+  },
+  {
     "id": "doce-de-manga",
     "title": "Doce de manga",
     "categoryIds": [

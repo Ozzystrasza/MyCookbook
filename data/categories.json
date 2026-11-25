@@ -16,6 +16,10 @@
     "name": "Doces"
   },
   {
+    "id": "drinks",
+    "name": "Drinks"
+  },
+  {
     "id": "lanches",
     "name": "Lanches"
   },
