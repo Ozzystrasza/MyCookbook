@@ -1,0 +1,74 @@
+{
+  "id": "farofa",
+  "title": "Farofa",
+  "categoryIds": [
+    "pratos-especiais"
+  ],
+  "image": "data/images/recipes/farofa.jpg",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "",
+      "ingredients": [
+        {
+          "ingredientId": "bacon",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "lingui-a-calabresa",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "eggs",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "cebola",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "alho",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "temperos",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "farinha-de-mandioca",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "butter",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Frite a linguiça e reserve"
+        },
+        {
+          "description": "Frite o bacon, e adicione a cebola e o alho até dourar (o alho doura mais rápido então deixe por último). Separe o bacon e a cebola e reserve (deixe a gordura do bacon na panela)"
+        },
+        {
+          "description": "Frite os ovos na gordura do bacon, depois adicione a linguiça e o bacon reservados e misture tudo"
+        },
+        {
+          "description": "Adicione os temperos a gosto (páprica pimenta e pimenta calabresa), e depois de misturar adicoine a farinha"
+        },
+        {
+          "description": "Misture bem, e se estiver muito seco adicione um tanto de manteiga no fundo da panela, e misture novamente depois que a manteiga derreter"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-27T12:48:16.115Z"
+}

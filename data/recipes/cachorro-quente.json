@@ -56,7 +56,7 @@
           "description": "Frite o bacon, a cebola, e o alho"
         },
         {
-          "description": "Adicione o molho de tomate, as salsichas (as salsichas podem ser inteiras ou picadas para render mais) e os temperos, misture bem"
+          "description": "Adicione o molho de tomate, as salsichas (as salsichas podem ser inteiras ou picadas para render mais) e os temperos (ketchup, mostarda, curry, páprica, pimenta calabresa), misture bem"
         },
         {
           "description": "Deixe cozinhar um pouco para engrossar o molho"
@@ -109,5 +109,5 @@
       ]
     }
   ],
-  "updatedAt": "2026-11-19T10:12:32.301Z"
+  "updatedAt": "2026-11-27T12:51:35.267Z"
 }

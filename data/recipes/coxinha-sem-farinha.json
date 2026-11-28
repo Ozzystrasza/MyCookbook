@@ -1,0 +1,94 @@
+{
+  "id": "coxinha-sem-farinha",
+  "title": "Coxinha (sem farinha)",
+  "categoryIds": [
+    "lanches"
+  ],
+  "image": "data/images/recipes/coxinha-sem-farinha.jpg",
+  "groups": [
+    {
+      "id": "massa",
+      "name": "Massa",
+      "ingredients": [
+        {
+          "ingredientId": "batata",
+          "measureId": "g",
+          "quantity": "400"
+        },
+        {
+          "ingredientId": "frango",
+          "measureId": "g",
+          "quantity": "300"
+        },
+        {
+          "ingredientId": "salt",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "temperos",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "requeij-o",
+          "measureId": "colher",
+          "quantity": "1"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Cozinhe as batatas, descasque e amasse bem até formar um purê (sem adicionar água ou leite)"
+        },
+        {
+          "description": "Cozinhe o frango e desfie"
+        },
+        {
+          "description": "Em uma tigela, misture o o purê de batatas, o frango desfiado, o requeijão, o sal e os temperos (páprica). Misture bem até virar uma massa (se estiver grudando leve a geladeira por 30 min)"
+        }
+      ]
+    },
+    {
+      "id": "montagem",
+      "name": "Montagem",
+      "ingredients": [
+        {
+          "ingredientId": "queijo-mussarela",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "eggs",
+          "measureId": "piece",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "farinha-pan",
+          "measureId": "empanar",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Corte o queijo em cubos (1 cubo para cada coxinha)"
+        },
+        {
+          "description": "Bata o ovo e reserve"
+        },
+        {
+          "description": "Pegue porções da massa, abra e recheio com o cubo de queijo. Feche e faça o formato de coxinha"
+        },
+        {
+          "description": "Passe a coxinha no ovo e depois na farinha panko"
+        },
+        {
+          "description": "Se for congelar, coloque as coxinhas em uma assadeira untada, e leve ao congelador por 2 horas. Depois por de retirar da assadeira e armazenar como preferir"
+        },
+        {
+          "description": "Frite no óleo ou na aifryer"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-27T12:52:23.494Z"
+}

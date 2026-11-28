@@ -12,6 +12,10 @@
     "name": "Café da manhã"
   },
   {
+    "id": "caseiros",
+    "name": "Caseiros"
+  },
+  {
     "id": "doces",
     "name": "Doces"
   },
@@ -28,12 +32,20 @@
     "name": "Massas"
   },
   {
+    "id": "pastas",
+    "name": "Pastas"
+  },
+  {
     "id": "petiscos",
     "name": "Petiscos"
   },
   {
     "id": "pizza",
     "name": "Pizza"
+  },
+  {
+    "id": "pratos-especiais",
+    "name": "Pratos especiais"
   },
   {
     "id": "sobremesas",

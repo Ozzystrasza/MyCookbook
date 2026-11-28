@@ -1,0 +1,131 @@
+{
+  "id": "curry",
+  "title": "Curry",
+  "categoryIds": [
+    "pratos-especiais"
+  ],
+  "image": "data/images/recipes/curry.png",
+  "groups": [
+    {
+      "id": "cozido",
+      "name": "Cozido",
+      "ingredients": [
+        {
+          "ingredientId": "carne-em-peda-os-ch-de-dentro",
+          "measureId": "g",
+          "quantity": "500"
+        },
+        {
+          "ingredientId": "batata",
+          "measureId": "piece",
+          "quantity": "2"
+        },
+        {
+          "ingredientId": "cenoura",
+          "measureId": "piece",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "cebola",
+          "measureId": "piece",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "gua",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "alho",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Pique a batata (crua), a cenoura (crua), a cebola e o alho"
+        },
+        {
+          "description": "Coloque um pouco de óleo em uma panela, adicione o alho, a cebola e a carne. Deixe a carne dourar até selar de todos os lados"
+        },
+        {
+          "description": "Adicione a batata e a cenoura e misture bem"
+        },
+        {
+          "description": "Adicione água e deixe cozinhar até os legumes ficarem macios (20-30 minutos)"
+        },
+        {
+          "description": "Enquanto espera cozinhar, prepare o molho roux"
+        }
+      ]
+    },
+    {
+      "id": "molho-de-curry-roux",
+      "name": "Molho de curry (roux)",
+      "ingredients": [
+        {
+          "ingredientId": "butter",
+          "measureId": "colher",
+          "quantity": "2"
+        },
+        {
+          "ingredientId": "flour",
+          "measureId": "colher",
+          "quantity": "2"
+        },
+        {
+          "ingredientId": "curry-em-p",
+          "measureId": "colher",
+          "quantity": "1"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Em uma outra panela, derreta a manteiga"
+        },
+        {
+          "description": "Adicione a farinha e misture bem até virar uma pasta dourada"
+        },
+        {
+          "description": "Adicione o curry em pó e mexa por mais 1-2 minutos"
+        }
+      ]
+    },
+    {
+      "id": "prepara-o-final",
+      "name": "Preparação final",
+      "ingredients": [
+        {
+          "ingredientId": "mostarda",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "ketchup",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "temperos",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Pegue um pouco do caldo do cozido e adicione ao molho e mexa para dissolver bem"
+        },
+        {
+          "description": "Despeje todo o molho na panela do cozido, e adicione a mostarda, ketchup e temperos (páprica e pimenta calabresa)"
+        },
+        {
+          "description": "Misture bem e deixe cozinhar mais um pouco, sempre mexendo, até dar uma engrossada no caldo"
+        },
+        {
+          "description": "Sirva com arroz"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-27T12:54:31.704Z"
+}

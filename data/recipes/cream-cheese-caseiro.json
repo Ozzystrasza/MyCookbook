@@ -1,0 +1,60 @@
+{
+  "id": "cream-cheese-caseiro",
+  "title": "Cream cheese caseiro",
+  "categoryIds": [
+    "caseiros",
+    "pastas"
+  ],
+  "image": "data/images/recipes/cream-cheese-caseiro.webp",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "",
+      "ingredients": [
+        {
+          "ingredientId": "milk",
+          "measureId": "l",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "vinagre-de-lcool",
+          "measureId": "cup",
+          "quantity": "1/2"
+        },
+        {
+          "ingredientId": "butter",
+          "measureId": "colher",
+          "quantity": "2"
+        },
+        {
+          "ingredientId": "salt",
+          "measureId": "pinch",
+          "quantity": "1"
+        },
+        {
+          "ingredientId": "creme-de-leite",
+          "measureId": "caixa",
+          "quantity": "1"
+        }
+      ],
+      "steps": [
+        {
+          "description": "Coloque o leite em uma panela e leve ao fogo. Desligue o fogo quando ferver"
+        },
+        {
+          "description": "Adicione o vinagre e misture bem. Deixe descansar um pouco até talhar o leite"
+        },
+        {
+          "description": "Com o leite talhado, passe em um coador para separar o soro"
+        },
+        {
+          "description": "Pegue a massa que ficou no coador, adicione a manteiga, o sal, e o creme de leite, e bata até ficar um creme liso"
+        },
+        {
+          "description": "Armazene onde preferir e leve para a geladeira"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-26T21:02:01.855Z"
+}

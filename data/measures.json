@@ -30,6 +30,11 @@
     "abbrev": "copo"
   },
   {
+    "id": "empanar",
+    "name": "empanar",
+    "abbrev": "empanar"
+  },
+  {
     "id": "g",
     "name": "grama",
     "abbrev": "g"

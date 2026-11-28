@@ -1,0 +1,90 @@
+{
+  "id": "farofa-vegetariana",
+  "title": "Farofa vegetariana",
+  "categoryIds": [
+    "vegetariano"
+  ],
+  "image": "data/images/recipes/farofa-vegetariana.png",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "",
+      "ingredients": [
+        {
+          "ingredientId": "eggs",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "cebola",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "alho",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "temperos",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "farinha-de-mandioca",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "butter",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "chuchu",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "abobrinha",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "cogumelo",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "couve",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Cozinhe o chuchu ao dente, reserve"
+        },
+        {
+          "description": "Rale a abobrinha e a cenoura e pique a couve, reserve"
+        },
+        {
+          "description": "Refogue os cogumelos, reserve"
+        },
+        {
+          "description": "Frite os ovos mexidos, reserve"
+        },
+        {
+          "description": "Refogue a cebola e o alho até dourar, adicione os ingredientes reservados e misture"
+        },
+        {
+          "description": "Adicione os temperos (páprica, pimenta calabresa, chimichuri) e misture"
+        },
+        {
+          "description": "Adicione a farinha e misture novamente, se ficar muito seco adicione um pouco de manteiga no fundo da panela e misture depois que derreter"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-27T13:17:04.666Z"
+}

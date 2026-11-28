@@ -1,5 +1,10 @@
 [
   {
+    "id": "abobrinha",
+    "name": "Abobrinha",
+    "image": "data/images/ingredients/abobrinha.jpg"
+  },
+  {
     "id": "sugar",
     "name": "Açúcar",
     "image": "data/images/ingredients/sugar.png"
@@ -70,6 +75,11 @@
     "image": "data/images/ingredients/biscoito.png"
   },
   {
+    "id": "carne-em-peda-os-ch-de-dentro",
+    "name": "Carne em pedaços (chã de dentro)",
+    "image": "data/images/ingredients/carne-em-peda-os-ch-de-dentro.png"
+  },
+  {
     "id": "carne-mo-da",
     "name": "Carne moída",
     "image": "data/images/ingredients/carne-mo-da.png"
@@ -90,14 +100,29 @@
     "image": "data/images/ingredients/chocolate.png"
   },
   {
+    "id": "chuchu",
+    "name": "Chuchu",
+    "image": "data/images/ingredients/chuchu.png"
+  },
+  {
     "id": "coco-ralado",
     "name": "Coco ralado",
     "image": "data/images/ingredients/coco-ralado.png"
   },
   {
+    "id": "cogumelo",
+    "name": "Cogumelo",
+    "image": "data/images/ingredients/cogumelo.png"
+  },
+  {
     "id": "corote-de-lim-o",
     "name": "Corote de limão",
     "image": "data/images/ingredients/corote-de-lim-o.png"
+  },
+  {
+    "id": "couve",
+    "name": "Couve",
+    "image": "data/images/ingredients/couve.png"
   },
   {
     "id": "cream-cheese",
@@ -110,6 +135,11 @@
     "image": "data/images/ingredients/creme-de-leite.png"
   },
   {
+    "id": "curry-em-p",
+    "name": "Curry em pó",
+    "image": "data/images/ingredients/curry-em-p.png"
+  },
+  {
     "id": "farinha-de-mandioca",
     "name": "Farinha de mandioca",
     "image": "data/images/ingredients/farinha-de-mandioca.png"
@@ -120,6 +150,11 @@
     "image": "data/images/ingredients/flour.png"
   },
   {
+    "id": "farinha-pan",
+    "name": "Farinha panko",
+    "image": "data/images/ingredients/farinha-pan.webp"
+  },
+  {
     "id": "fermento",
     "name": "Fermento",
     "image": "data/images/ingredients/fermento.png"
@@ -128,6 +163,11 @@
     "id": "fermento-biol-gico-seco",
     "name": "Fermento biológico seco",
     "image": "data/images/ingredients/fermento-biol-gico-seco.png"
+  },
+  {
+    "id": "frango",
+    "name": "Frango",
+    "image": "data/images/ingredients/frango.png"
   },
   {
     "id": "gelo",
@@ -163,6 +203,11 @@
     "id": "lim-o",
     "name": "Limão",
     "image": "data/images/ingredients/lim-o.png"
+  },
+  {
+    "id": "lingui-a-calabresa",
+    "name": "Linguiça calabresa",
+    "image": "data/images/ingredients/lingui-a-calabresa.webp"
   },
   {
     "id": "mandioca",
@@ -240,6 +285,11 @@
     "image": "data/images/ingredients/queijo-parmes-o.png"
   },
   {
+    "id": "requeij-o",
+    "name": "Requeijão",
+    "image": "data/images/ingredients/requeij-o.png"
+  },
+  {
     "id": "salt",
     "name": "Sal",
     "image": "data/images/ingredients/salt.png"
@@ -263,5 +313,10 @@
     "id": "temperos",
     "name": "Temperos",
     "image": "data/images/ingredients/temperos.png"
+  },
+  {
+    "id": "vinagre-de-lcool",
+    "name": "Vinagre (de álcool)",
+    "image": "data/images/ingredients/vinagre-de-lcool.png"
   }
 ]

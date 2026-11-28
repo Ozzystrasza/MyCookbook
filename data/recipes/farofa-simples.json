@@ -1,0 +1,49 @@
+{
+  "id": "farofa-simples",
+  "title": "Farofa simples",
+  "categoryIds": [
+    "almo-o",
+    "vegetariano"
+  ],
+  "image": "data/images/recipes/farofa-simples.png",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "",
+      "ingredients": [
+        {
+          "ingredientId": "eggs",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "farinha-de-mandioca",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "butter",
+          "measureId": "to-taste",
+          "quantity": ""
+        },
+        {
+          "ingredientId": "cenoura",
+          "measureId": "to-taste",
+          "quantity": ""
+        }
+      ],
+      "steps": [
+        {
+          "description": "Rale a cenoura"
+        },
+        {
+          "description": "Frite os ovos, depois adicione a cenoura e misture tudo"
+        },
+        {
+          "description": "Adicione a farinha e misture bem, e se estiver muito seco adicione um tanto de manteiga no fundo da panela, e misture novamente depois que a manteiga derreter"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-27T13:17:20.693Z"
+}
